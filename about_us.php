@@ -1,3 +1,7 @@
+<?php
+$userdetails = $_SESSION['userdata'];
+$resident_id = $userdetails['id_resident'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

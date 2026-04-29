@@ -14,8 +14,10 @@
             <th> Address </th>
             <th> Birth Date </th>
             <th> Birth Place </th>
+            <th> Contact Number </th>
             <th> Emergency Contact Person </th>
             <th> Emergency Contact Number </th>
+            <th>Relation</th>
         </tr>
     </thead>
 
@@ -42,8 +44,10 @@
                 <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
                 <td> <?= $view['bdate'];?> </td>
                 <td> <?= $view['bplace'];?> </td>
+                <td> <?= $view['contact'];?> </td>
                 <td> <?= $view['inc_lname'];?>, <?= $view['inc_fname'];?> </td>
                 <td> <?= $view['inc_contact'];?> </td>
+                <td> <?= $view['relation'];?> </td>
             </tr>
         <?php
         }
@@ -65,8 +69,10 @@
             <th> Address </th>
             <th> Birth Date </th>
             <th> Birth Place </th>
+            <th> Contact Number </th>
             <th> Emergency Contact Person </th>
             <th> Emergency Contact Number </th>
+            <th>Relation</th>
         </tr>
     </thead>
     
@@ -86,8 +92,10 @@
                 <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
                 <td> <?= $view['bdate'];?> </td>
                 <td> <?= $view['bplace'];?> </td>
+                <td> <?= $view['contact'];?> </td>
                 <td> <?= $view['inc_lname'];?>, <?= $view['inc_fname'];?> </td>
                 <td> <?= $view['inc_contact'];?> </td>
+                <td> <?= $view['relation'];?> </td>
                 </tr>
             <?php
                 }

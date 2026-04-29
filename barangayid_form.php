@@ -6,239 +6,145 @@ $resident = $residentbmis->get_single_brgyid($id_resident);
 
 include "classes/conn.php"; 
 
-// Set the correct time zone
 date_default_timezone_set('Asia/Manila');
-
-// Logic for automatic dates
-$date_issued = date('m/d/Y'); 
-$date_expires = date('m/d/Y', strtotime('+1 year')); 
-
-  ?>
+$date_issued = date('F j, Y'); 
+$date_expires = date('F j, Y', strtotime('+1 year')); 
+?>
 <!DOCTYPE html>
-<html id="clearance">
-<style>
-    @media print {
-        .noprint {
-        visibility: hidden;
-         }
-    }
-    @page { size: auto;  margin: 4mm; }
-    
-.card {
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-  width: 55%;
-  display: flex;
-  
-  
-}
-
-.card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-}
-
-.container {
-  padding: 2px 16px;
-
-}
-
-.photo img {
-			width: 180px;
-    
-flex-basis: 40%;
-position: absolute;
-  top: 47%;
-  left: 17%;
-  transform: translate(-50%, -50%);
-		}
-
-.text {
-  font-size: 20px;
-  padding-left: 20px;
-}
- /* Container holding the image and the text */
- .container {
-  position: relative;
-  text-align: left;
-  color: black;
-}
-
-/* Bottom left text */
-.bottom-left {
-  position: absolute;
-  bottom: 50px;
-  left: 80px;
-}
-
-.bbottom-left {
-  position: absolute;
-  bottom: 8px;
-  left: 80px;
-}
-
-/* Top left text */
-.top-left {
-  position: absolute;
-  top: 8px;
-  left: 16px;
-}
-
-/* Top right text */
-.top-right {
-  position: absolute;
-  top: 8px;
-  right: 16px;
-}
-
-/* Bottom right text */
-.bottom-right {
-  position: absolute;
-  bottom: 8px;
-  right: 16px;
-}
-
-/* Centered text */
-.centered {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-} 
-
-
-
-</style>
-
- <head>
+<html>
+<head>
     <meta charset="UTF-8">
-    <title><?= $resident['lname'];?>,     <?= $resident['fname'];?>    <?= $resident['mi'];?></title>
-    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
-    <!-- bootstrap 3.0.2 -->
-    <link href="../BarangaySystem/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <!-- font Awesome -->
-    <link href="../BarangaySystem/bootstrap/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
-    <!-- Ionicons -->
-    <link href="../BarangaySystem/bootstrap/css/ionicons.min.css" rel="stylesheet" type="text/css" />
-    <link href="../BarangaySystem/bootstrap/css/morris-0.4.3.min.css" rel="stylesheet" type="text/css" />
-    <!-- Theme style -->
-    <link href="../BarangaySystem/bootstrap/css/AdminLTE.css" rel="stylesheet" type="text/css" />
-    <link href="./BarangaySystem/bootstrap/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css" />
-    <link href="../BarangaySystem/bootstrap/css/select2.css" rel="stylesheet" type="text/css" />
-    <script src="../BarangaySystem/bootstrap/css/jquery-1.12.3.js" type="text/javascript"></script>  
-    
-    
-    
+    <title>ID Print - <?= $resident['lname'];?></title>
+    <style>
+        body { font-family: 'Helvetica', Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 10px; }
+        
+        /* Layout for Single Page Vertical Stack */
+        .print-container {
+            display: flex;
+            flex-direction: column; /* This stacks them top and bottom */
+            align-items: center;
+            gap: 15px; /* Space between front and back */
+            background: white;
+            padding: 20px;
+            width: fit-content;
+            margin: auto;
+            border-radius: 8px;
+        }
 
+        @media print {
+            body { background: white; padding: 0; }
+            .noprint { display: none; }
+            .print-container { padding: 0; width: 100%; border: none; }
+            .id-card { page-break-inside: avoid; } /* Prevents splitting a card across pages */
+        }
+
+        /* ID Card Dimensions */
+        .id-card {
+            width: 3.25in;
+            height: 4.75in;
+            border: 1.5px solid #000;
+            background-color: #fff;
+            position: relative;
+            box-sizing: border-box;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* Front Content Styling */
+        .header-text { font-size: 9px; line-height: 1.2; text-transform: uppercase; }
+        .header-title { font-weight: bold; font-size: 13px; margin: 4px 0; }
+        .office-title { color: #2c5e8c; font-weight: bold; font-size: 10px; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+
+        .photo-box {
+            width: 130px;
+            height: 130px;
+            border: 1px solid #000;
+            margin: 10px auto;
+            background: #f9f9f9;
+        }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .id-number { font-size: 16px; font-weight: bold; color: #000; margin-top: 5px; }
+        .data-label { font-size: 9px; text-transform: uppercase; border-top: 1px solid #000; width: 85%; margin: 2px auto 12px auto; padding-top: 2px; display: block; font-weight: normal; }
+        
+        .name-text { font-weight: bold; font-size: 14px; text-transform: uppercase; padding: 0 5px; }
+        .address-text { font-size: 12px; height: 35px; line-height: 1.2; }
+
+        .sig-name { font-weight: bold; font-size: 11px; text-transform: uppercase; margin-top: 25px; }
+        .sig-title { font-size: 9px; border-top: 1px solid #000; width: 60%; margin: 2px auto; padding-top: 2px; }
+
+        /* Back Content Styling */
+        .back-content { text-align: left; font-size: 11px; padding: 10px; margin-top: 5px; }
+        .back-row { margin-bottom: 20px; border-bottom: 1px solid #000; position: relative; padding-bottom: 2px; min-height: 15px; }
+        .back-row span { font-weight: bold; position: absolute; left: 80px; bottom: 2px; }
+        
+        .footer-note { 
+            font-size: 9px; 
+            font-style: italic; 
+            position: absolute; 
+            bottom: 15px; 
+            left: 15px; 
+            text-align: left; 
+            width: 90%;
+        }
+    </style>
 </head>
- <body class="skin-black" >
-     <!-- header logo: style can be found in header.less -->
-    
-    
-     <?php 
-     
-     include "classes/conn.php"; 
+<body>
 
-     ?> 
-                <div class="col-xs-12 col-sm-5 col-md-8" >`
-                
-                    
-                    <hr>
-                    <br>
-                    <div class="container" style="margin-left: 2em;" >
-                        <img src="icons/ID.jpg" alt="Snow" style="width:80%;">
-                        
-                        <div class="photo"></div>
-                        <div class="centered">
-                          <label style="position:relative; left:10px; bottom:50px; font-size:13px;color:black">  <?= $resident['lname'];?>,     <?= $resident['fname'];?>    <?= $resident['mi'];?>  </label>
-                          <label style="position:relative; left:-110px;  font-size:13px;color:black"> <?= $resident['houseno'];?> <?= $resident['street'];?> <?= $resident['brgy'];?>, <?= $resident['municipal'];?> </label>
-                        </div>
-                        <div class="bottom-left">
-                        <label style="position:relative; left:170px; bottom:30px; font-size:13px; color:black">  <b><?= $resident['bdate'];?></b> </label>
-                        <label style="position:relative; left:200px; bottom:30px; font-size:13px; color:black">  <b><?= $resident['bplace'];?></b> </label>
-                        <label style="position:relative; left:260px; bottom:30px; font-size:13px; color:black">  <b><?= $resident['id_resident'];?></b> </label>
-                        </div>
-                        <div class="bbottom-left">
-                        <label style="position:relative; left:30px; bottom:20px; font-size:15px; color:black">  <b><?= $resident['id_resident'];?></b> </label>
-                        </div>
-                      </div> 
-                      <br><br><br><br>
+    <div style="text-align:center; margin-bottom: 20px;">
+        <button type="button" class="noprint" onclick="window.print()" style="padding: 12px 40px; cursor:pointer; font-weight:bold; background:#28a745; color:white; border:none; border-radius:5px; font-size: 16px;">
+            PRINT BARANGAY ID
+        </button>
+    </div>
 
-                      <div class="container" style="margin-left: 2em;"  >
-                        <img src="icons/IDBACK.jpg" alt="Snow" style="width:80%;">
+    <div class="print-container">
+        
+        <div class="id-card">
+            <div class="header-text">Republic of the Philippines</div>
+            <div class="header-text">Province of Camarines Sur</div>
+            <div class="header-text">City of Iriga</div>
+            <div class="header-title">Barangay San Pedro</div>
+            <div class="office-title">OFFICE OF THE PUNONG BARANGAY</div>
 
-                        <div class="top-left">
-                          <label style="position:relative; left:160px; top:30px; font-size:12px;color:black">  <?= $resident['inc_lname'];?>, <?= $resident['inc_fname'];?> <?= $resident['inc_mi'];?>  </label>
-                          <label style="position:relative; left:60px; top:50px; font-size:12px;color:black">  <b><?= $resident['inc_houseno'];?> <?= $resident['inc_street'];?> <?= $resident['inc_brgy'];?> </b> </label>
-                          <label style="position:relative; left:-20px; top:70px; font-size:12px;color:black">  <b><?= $resident['inc_contact'];?></b> </label>
-                        </div>
-                      
-    <label style="position:absolute; left:50px; bottom:40px; font-size:15px; color:black;">
-        <?= $date_issued; ?></b>
-    </label>
-    
-    <label style="position:absolute; left:280px; bottom:40px; font-size:15px; color:black;">
-        <b><?= $date_expires; ?></b>
-    </label>
-</div>
-                        </div>
-                      </div> 
- 
-
-                   
-                    
-                
-                
-                <div class="col-xs-offset-8 col-xs-5 col-md-offset-8 col-md-4 "  >
-                
-                </div>
-
-                
-                
+            <div class="photo-box">
                 
             </div>
+
+            <div class="id-number"><?= $resident['bdate'];?>-<?= $resident['id_resident'];?></div>
+            <span class="data-label">ID NO.</span>
+
+            <div class="name-text"><?= $resident['fname'];?> <?= $resident['mi'];?> <?= $resident['lname'];?></div>
+            <span class="data-label">NAME</span>
+
+            <div class="address-text">Zone <?= $resident['houseno'];?>, San Pedro, Iriga City</div>
+            <span class="data-label">ADDRESS</span>
+
+            <div class="sig-name">JOSEPH B. BEBONIA</div>
+            <div class="sig-title">Punong Barangay</div>
         </div>
-</div>
-    <button 
-        type="button" 
-        class="btn btn-success noprint" 
-        id="printpagebutton" 
-        style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px;" 
-        onclick="PrintElem('#BRGYID')">
-        Print Barangay ID
-    </button>
-    </body>
-    <?php
-    
-    ?>
 
+        <div class="id-card">
+            <div class="back-content">
+              <br><br>
+                <div class="back-row">Contact No.: <span><?= $resident['contact'];?></span></div>
+                
+                <div style="font-weight:bold; margin-bottom:15px; text-decoration: underline;">In case of Emergency:</div>
+                <div class="back-row">Name: <span><?= $resident['inc_fname'];?> <?= $resident['inc_lname'];?></span></div>
+                <div class="back-row">Relation: <span><?= $resident['relation'];?></span></div>
+                <div class="back-row">Contact No: <span><?= $resident['inc_contact'];?></span></div>
 
-    <script>
-         function PrintElem(elem)
-    {
-        window.print();
-    }
+                <div style="margin-top: 60px; text-align:center; font-size: 12px;">
+                    Issued this <strong><?= $date_issued; ?></strong>
+                </div>
+            </div>
 
-    function Popup(data) 
-    {
-        var mywindow = window.open('', 'my div', 'height=400,width=1000');
-        //mywindow.document.write('<html><head><title>my div</title>');
-        /*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
-        //mywindow.document.write('</head><body class="skin-black" >');
-         var printButton = document.getElementById("printpagebutton");
-        //Set the print button visibility to 'hidden' 
-        printButton.style.visibility = 'hidden';
-        mywindow.document.write(data);
-        //mywindow.document.write('</body></html>');
+            <div class="footer-note">
+                <strong>Note:</strong><br>
+                This ID is valid for 1 year only upon the issuance.
+            </div>
+        </div>
 
-        mywindow.document.close(); // necessary for IE >= 10
-        mywindow.focus(); // necessary for IE >= 10
+    </div>
 
-        mywindow.print();
-
-        printButton.style.visibility = 'visible';
-        mywindow.close();
-
-        return true;
-    }
-    </script>
+</body>
 </html>

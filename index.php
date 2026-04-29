@@ -29,6 +29,7 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
     <style>
         :root {
@@ -309,7 +310,9 @@
                         <input type="checkbox" class="form-check-input" id="showCheck" onclick="togglePass()">
                         <label class="form-check-label" for="showCheck" style="font-size: 0.85rem; color: #555;">Show Password</label>
                     </div>
-
+                    <div class="d-flex justify-content-center mb-3">
+    <div class="g-recaptcha" data-sitekey="6Ldeb9AsAAAAABRC_DlywqU84wD6KOI3onvl-XmX"></div>
+</div>
                     <button type="submit" name="login" class="btn btn-primary btn-signin w-100">SIGN IN</button>
                 </form>
 

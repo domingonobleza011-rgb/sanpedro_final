@@ -258,7 +258,7 @@
 
     <div class="row">
         <div class="col-12">
-            <h4><i class="bi bi-megaphone-fill me-2 text-danger"></i> Resident Complaints</h4>
+            <h4>Resident Complaints</h4>
         </div>
     </div>
 
@@ -278,7 +278,7 @@
                             <a href="admn_complaints.php">View All</a>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-megaphone-fill fa-2x text-danger" style="font-size:2rem;"></i>
+                            <i class="bi bi-megaphone-fill" style="font-size:2rem;"></i>
                         </div>
                     </div>
                 </div>
@@ -299,7 +299,7 @@
                             <a href="admn_complaints.php?status=pending" class="text-warning fw-semibold">Review Now</a>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-clock-history text-warning" style="font-size:2rem;"></i>
+                            <i class="bi bi-clock-history" style="font-size:2rem;"></i>
                         </div>
                     </div>
                 </div>
@@ -320,7 +320,7 @@
                             <a href="admn_complaints.php?status=resolved" class="text-success">View Resolved</a>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-check-circle-fill text-success" style="font-size:2rem;"></i>
+                            <i class="bi bi-check-circle-fill" style="font-size:2rem;"></i>
                         </div>
                     </div>
                 </div>

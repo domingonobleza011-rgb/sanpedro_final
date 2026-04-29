@@ -10,7 +10,7 @@ if (!isset($_SESSION['userdata']['id_resident'])) {
 
 $userdetails = $_SESSION['userdata'];
 $resident_id = $userdetails['id_resident']; 
-$is_verified = isset($userdetails['is_verified']) && $userdetails['is_verified'] == 1;
+$is_verified = $bmis->isResidentVerified($userdetails['id_resident']);
 
 // ---- Handle: Send message to admin ----
 if (isset($_POST['send_to_admin'])) {
@@ -106,57 +106,53 @@ $auto_open_upload = isset($_GET['upload_id']) && $_GET['upload_id'] == 1;
 </head>
 <body style="background-color: #f8f9fa;">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-primary sticky-top">
-        <a class="navbar-brand" href="resident_homepage.php" style="margin-left: 20px;">Barangay San Pedro Management System</a>
-        <div class="dropdown ms-auto" style="margin-right: 20px;">
-            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <?php echo $userdetails['surname'] . ", " . $userdetails['firstname']; ?>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="resident_profile.php?id_resident=<?php echo $userdetails['id_resident'];?>"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="resident_homepage.php">Barangay San Pedro Management System</a>
+        
+        <div class="d-flex align-items-center ms-auto">
+            <a href="resident_homepage.php" class="btn btn-primary me-3">
+                <i class="fa fa-home fa-lg"></i> Home
+            </a>
+            
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle me-1"></i>
+                    <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                    <li><a class="btn" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user"></i> &nbsp; Profile</a></li>
+                    <li><a class="btn" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock"></i> &nbsp; Password</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="btn text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> &nbsp; Logout</a></li>
+                </ul>
+            </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <div class="container mt-4 mb-5">
 
-        <!-- VERIFICATION STATUS -->
-        <?php if (!$is_verified): ?>
-<div class="card border-0 shadow-sm rounded-4 mb-4" style="border-left: 6px solid #ffc107 !important;">
-    <div class="card-body p-4">
-        <div class="d-flex align-items-start gap-3 flex-wrap">
-            <div style="font-size: 2.5rem;">&#x1F512;</div>
-            <div class="flex-grow-1">
-                <?php if ($has_pending): ?>
-                    <p class="mb-0">&#x23F3; Your ID is currently <strong>under review</strong> by the admin. Please wait for approval.</p>
-                <?php elseif ($has_approved): ?>
-                    <p class="mb-0 text-success">&#x2705; Your ID was approved. Your account should be verified shortly.</p>
-                <?php else: ?>
-                    <p class="mb-1">Upload a valid government-issued ID below to unlock all barangay certificate services.</p>
-                    <small class="text-muted">Accepted: PhilSys ID, Driver's License, Passport, Voter's ID, Senior Citizen ID, SSS/GSIS ID, PRC ID</small>
-                <?php endif; ?>
-            </div>
-            
-            <?php if (!$has_pending && !$has_approved): ?>
-            <button type="button" class="btn btn-warning fw-bold rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#uploadIDModal">
-                <i class="bi bi-upload me-2"></i> Upload Valid ID
-            </button>
-            <?php elseif ($has_pending): ?>
-            <span class="badge rounded-pill px-3 py-2 status-pending" style="font-size:0.85rem;">
-                <i class="bi bi-hourglass-split me-1"></i> Pending Review
-            </span>
-            <?php endif; ?>
+<?php if (!$is_verified): ?>
+<!-- VERIFICATION NOTICE BANNER -->
+<div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 p-4" role="alert" style="border-left: 6px solid #ffc107 !important;">
+    <div class="d-flex align-items-start gap-3">
+        <div style="font-size: 2rem;">&#x1F512;</div>
+        <div>
+            <h5 class="fw-bold mb-1">Account Not Yet Verified</h5>
+            <p class="mb-2">To request barangay certificates and access other services, you must first verify your identity.</p>
+            <p class="mb-3"><strong>How to get verified:</strong> Go to <strong>Messages</strong>, then upload a clear photo of your valid government-issued ID (e.g., PhilSys ID, Driver's License, Passport, Voter's ID). The admin will review and approve your account.</p>
+            <a href="resident_messages.php?id_resident=<?= $userdetails['id_resident'];?>&upload_id=1" class="btn btn-warning fw-bold rounded-pill px-4">
+                <i class="bi bi-upload me-2"></i> Upload Valid ID Now
+            </a>
         </div>
     </div>
 </div>
-
-        <?php else: ?>
-        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 py-2 px-4">
-            <i class="bi bi-patch-check-fill me-2"></i> <strong>Account Verified</strong> — You have full access to all services.
-        </div>
-        <?php endif; ?>
+<?php else: ?>
+<div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 py-2 px-4" role="alert">
+    <i class="bi bi-patch-check-fill me-2"></i> <strong>Account Verified</strong> &mdash; You have full access to all barangay services.
+</div>
+<?php endif; ?>
 
         <!-- ID UPLOAD HISTORY -->
         <?php if (!empty($id_uploads)): ?>

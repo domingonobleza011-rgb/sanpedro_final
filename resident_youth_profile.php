@@ -377,32 +377,36 @@
 
         <!-- Eto yung navbar -->
 
-        <nav class="navbar navbar-dark bg-primary sticky-top">
-            <a class="navbar-brand" href="resident_homepage.php">Barangay San pedro  Management System</a>
-            <a href="resident_homepage.php" data-toggle="tooltip" title="Home" class="btn1 bg-primary"><i class="fa fa-home fa-lg"></i> home</a>
-           
-            <div class="dropdown ml-auto">
-                <button title="Your Account" class="btn btn-primary dropdown-toggle" style="margin-right: 2px;" type="button" data-toggle="dropdown"><?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
-                    <span class="caret" style="margin-left: 2px;"></span>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="resident_homepage.php">Barangay San Pedro Management System</a>
+        
+        <div class="d-flex align-items-center ms-auto">
+            <a href="resident_homepage.php" class="btn btn-primary me-3">
+                <i class="fa fa-home fa-lg"></i> Home
+            </a>
+            
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle me-1"></i>
+                    <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
                 </button>
-                <ul class="dropdown-menu" style="width: 175px;" >
-                    <a class="btn" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"> <i class="fas fa-user"> &nbsp; </i>Personal Profile  </a>
-                    <a class="btn" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"> <i class="fas fa-lock" >&nbsp;</i> Change Password  </a>
-                    <a class="btn" href="logout.php"> <i class="fas fa-sign-out-alt">&nbsp;</i> Logout  </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                    <li><a class="btn" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user"></i> &nbsp; Profile</a></li>
+                    <li><a class="btn" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock"></i> &nbsp; Password</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="btn text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> &nbsp; Logout</a></li>
                 </ul>
             </div>
-        </nav>
+        </div>
+    </div>
+</nav>
 
         <div class="container-fluid container1"> 
             <div class="row"> 
                 <div class="col"> 
                     <div class="header">
                         <h1 class="text1">Youth Profiling </h1>
-                        <h5> "The future belongs to those who believe in the beauty of their dreams." 
-                            <br>— Eleanor Roosevelt</h5>
-                            <br>
-                        <h5> "Start where you are. Use what you have. Do what you can."
-                            <br>— Arthur Ashe</h5>
                     </div>
 
                     <br>
@@ -424,384 +428,126 @@
         <br>
         <br>
 
-        <div class="container text-center">
-            <div class="row">
-                <div class="col">
-                    <h1>Procedure</h1>
-                    <hr style="background-color: black;">
-                </div>
-            </div>
-
-            <br>
-
-            <div class="row">
-                <div class="col">
-                    <i class="fas fa-laptop fa-7x"></i>
-
-                    <br>
-                    <br>
-
-                    <h3>Step 1: Fill-Up</h3>
-                    <p>First step is to Fill-Up the entire form in our system.</p>
-                </div>
-
-                <div class="col">
-                    <i class="fas fa-user-check fa-7x"></i>
-
-                    <br>
-                    <br>
-
-                    <h3>Step 2: Assessment</h3>
-                    <p>Second step is to verify all of the information you've been given
-                    in our system </p>
-                </div>
-
-                <div class="col">
-                    <i class="fas fa-file fa-7x"></i>
-
-                    <br>
-                    <br>
-
-                    <h3>Step 3: Release</h3>
-                    <p>Verified</p>
-                </div>
-            </div>
-
-            <div id="down2"></div>
-
-            <br>
-            <br>
-            <br>
-
-            <div class="row">
-                <div class="col">
-                    <h1>Benefits</h1>
-                    <hr style="background-color: black;">
-                </div>
-            </div>
-
-            <br> 
-
-            <div class="row text2">
-                <div class="col">
-                    <div class="card bg-primary card1">
-                        <div class="card-header">
-                            <h5> Skill Development <br><br> <i class="fas fa-user-check fa-2x"></i>  </h5>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: left; font-size: 16px;">
-                                <p class="card-text">
-                                    <li> Beyond the classroom, youth gain "real-world" skills such as leadership, critical thinking, conflict resolution, project management, and teamwork. </li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card bg-primary card2">
-                        <div class="card-header">
-                            <h5> Personal Growth & Confidence <br><br> <i class="fas fa-clipboard-check fa-2x"></i>  </h5>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: left; font-size: 16px;">
-                                <p class="card-text">
-                                    <li> Taking on responsibilities helps young people understand their own strengths, fosters a sense of agency, and boosts self-esteem as they see their direct contributions lead to tangible results.</li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card bg-primary card3">
-                        <div class="card-header">
-                            <h5> Building Networks <br><br> <i class="fas fa-coins fa-2x"></i>  </h5>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: justify;">
-                                <p class="card-text">
-                                    <li>Engagement connects youth with mentors, peers, and professionals, creating a support system that is invaluable for future career paths and personal well-being. </li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card bg-primary card4">
-                        <div class="card-header">
-                            <h5 style="font-size: 19.4px;"> Mental Health & Belonging <br><br> <i class="fas fa-clock fa-2x"></i>  </h5>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: justify;">
-                                <p class="card-text">
-                                    <li> Being part of a group working toward a common goal combats isolation. It provides a sense of belonging, which is proven to be a protective factor for mental health.</li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="down1"></div>
-
-        <br>
-        <br>
-        <br>
-
-        <!-- Button trigger modal -->
-
-        <div class="container">
-
+      
+<div class="container">
             <h1 class="text-center">Registration</h1>
             <hr style="background-color:black;">
 
-            <div class="col">   
-                <button type="button" class="btn btn-primary applybutton" data-toggle="modal" data-target="#exampleModalCenter">
-                    Youth Profiling
-                </button>
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Youth Profiling Form</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="was-validated" enctype="multipart/form-data">
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="lname">Last Name:</label>
+                                    <input name="lname" type="text" class="form-control" placeholder="Last Name" value="<?= isset($userdetails['lname']) ? htmlspecialchars($userdetails['lname']) : '' ?>" required>
+                                    <div class="invalid-feedback">Required.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="fname">First Name:</label>
+                                    <input name="fname" type="text" class="form-control" placeholder="First Name" value="<?= isset($userdetails['fname']) ? htmlspecialchars($userdetails['fname']) : '' ?>" required>
+                                    <div class="invalid-feedback">Required.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="mi">M.I.:</label>
+                                    <input name="mi" type="text" class="form-control" placeholder="M.I." value="<?= isset($userdetails['mi']) ? htmlspecialchars($userdetails['mi']) : '' ?>" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="age">Age:</label>
+                                    <input name="age" type="text" class="form-control" value="<?= isset($userdetails['age']) ? htmlspecialchars($userdetails['age']) : ''; ?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Sex:</label>
+                                    <select name="sex" class="form-control" required>
+                                        <option value="Male" <?= (isset($userdetails['sex']) && $userdetails['sex'] == 'Male') ? 'selected' : '' ?>>Male</option>
+                                        <option value="Female" <?= (isset($userdetails['sex']) && $userdetails['sex'] == 'Female') ? 'selected' : '' ?>>Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Civil Status:</label>
+                                    <select name="civil_status" class="form-control" required>
+                                        <option value="Single">Single</option>
+                                        <option value="Married">Married</option>
+                                        <option value="Solo Parent">Solo Parent</option>
+                                        <option value="Widowed">Widowed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Contact Number:</label>
+                                    <input type="text" class="form-control" name="contact_number" placeholder="09xxxxxxxxx" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Email Address:</label>
+                                    <input type="email" class="form-control" name="email_address" placeholder="example@email.com" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Educational Attainment:</label>
+                                    <input type="text" class="form-control" name="educ_attain" placeholder="e.g. College Graduate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Employment Status:</label>
+                                    <select name="emp_status" class="form-control" required>
+                                        <option value="Employed">Employed</option>
+                                        <option value="Unemployed">Unemployed</option>
+                                        <option value="Self-Employed">Self-Employed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label>Skills:</label>
+                                    <input type="text" class="form-control" name="skill_name" placeholder="List your skills" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-right mt-3">
+                            <input name="id_youth" type="hidden" value="<?= isset($userdetails['id_resident']) ? $userdetails['id_resident'] : ''; ?>">
+                            <button name="create_youth" type="submit" class="btn btn-primary btn-lg px-5">Submit Request</button>
+                        </div>
+
+                    </form>
+                </div>
             </div>
-
-
-            <!-- Modal -->
-
-            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <form method="post" class="was-validated" enctype="multipart/form-data">
-                
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Form</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="lname">Last Name:</label>
-                                <input name="lname" type="text" class="form-control" placeholder="Last Name" value="<?= isset($userdetails['lname']) ? htmlspecialchars($userdetails['lname']) : '' ?>" required>
-                                <div class="invalid-feedback">Required.</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="fname">First Name:</label>
-                                <input name="fname" type="text" class="form-control" placeholder="First Name" value="<?= isset($userdetails['fname']) ? htmlspecialchars($userdetails['fname']) : '' ?>" required>
-                                <div class="invalid-feedback">Required.</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="mi">M.I.:</label>
-                                <input name="mi" type="text" class="form-control" placeholder="M.I." value="<?= isset($userdetails['mi']) ? htmlspecialchars($userdetails['mi']) : '' ?>" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="age">Age:</label>
-                                <input name="age" type="text" class="form-control" value="<?= isset($userdetails['age']) ? htmlspecialchars($userdetails['age']) : ''; ?>" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Sex:</label>
-                                <select name="sex" class="form-control" required>
-                                    <option value="Male" <?= (isset($userdetails['sex']) && $userdetails['sex'] == 'Male') ? 'selected' : '' ?>>Male</option>
-                                    <option value="Female" <?= (isset($userdetails['sex']) && $userdetails['sex'] == 'Female') ? 'selected' : '' ?>>Female</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Civil Status:</label>
-                                <select name="civil_status" class="form-control" required>
-                                    <option value="Single">Single</option>
-                                    <option value="Married">Married</option>
-                                    <option value="Solo Parent">Solo Parent</option>
-                                    <option value="Widowed">Widowed</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Contact Number:</label>
-                                <input type="text" class="form-control" name="contact_number" placeholder="09xxxxxxxxx" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Email Address:</label>
-                                <input type="email" class="form-control" name="email_address" placeholder="example@email.com" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Educational Attainment:</label>
-                                <input type="text" class="form-control" name="educ_attain" placeholder="e.g. College Graduate" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Employment Status:</label>
-                                <select name="emp_status" class="form-control" required>
-                                    <option value="Employed">Employed</option>
-                                    <option value="Unemployed">Unemployed</option>
-                                    <option value="Self-Employed">Self-Employed</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="form-group">
-                                <label>Skills:</label>
-                                <input type="text" class="form-control" name="skill_name" placeholder="List your skills" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <input name="id_youth" type="hidden" value="<?= isset($userdetails['id_resident']) ? $userdetails['id_resident'] : ''; ?>">
-                    <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
-                    <button name="create_youth" type="submit" class="btn btn-primary">Submit Request</button>
-                </div>
-
-            </form>
         </div>
-    </div>
-</div>
         
 
         <br>
-        <br>
-        <br>
-
-        <!-- Footer -->
-
-        <footer id="footer" class="bg-primary text-white d-flex-column text-center">
-            <hr class="mt-0">
-
-            <div class="text-center">
-                <h1>Services</h1>
-                <ul class="list-unstyled list-inline">
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Documents">
-                    <i class="fas fa-file fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Card">
-                    <i class="fas fa-id-card fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Friend">
-                    <i class="fas fa-user-friends fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Blotter">
-                    <i class="fas fa-user-shield fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Contact">
-                    <i class="fas fa-phone fa-2x"></i>
-                    </a>
-                </li>
-                </ul>
-            </div>
-
-            <hr class="mb-0">
-
-            <!--Footer Links-->
-
-            <div class="container text-left text-md-center">
-                <div class="row">
-
-                    <!--First column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Documentation</h5>
-                        <div class="d-md-none title" data-target="#Documentation" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Documentation
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <ul class="list-unstyled collapse" id="Documentation">
-                            <li><a href="services_certofres.php">Certificate of Residency</a></li>
-                            <li><a href="services_brgyclearance.php">Barangay Clearance</a></li>
-                            <li><a href="services_certofindigency.php">Certificate of Indigency</a></li>
-                            <li><a href="services_business.php">Business Permit</a></li>
-                            <li><a href="services_brgyid.php">Barangay ID</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.First column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
-
-                    <!--Third column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Other Services</h5>
-                        <div class="d-md-none title" data-target="#OtherServices" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Other Services
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="list-unstyled collapse" id="OtherServices">
-                            <li><a href="services_blotter.php">Peace and Order</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.Third column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
- 
-
-                </div>
-            </div>
-
-            <!--/.Footer Links-->
-
-            <hr class="mb-0">
-        </footer>
+<br><br><br>
 
         <script>
             // Add the following code if you want the name of the file appear on select
@@ -860,6 +606,7 @@
             });
             });
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

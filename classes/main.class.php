@@ -154,6 +154,7 @@ class BMISClass {
             "houseno" => $array['houseno'],
             "street" => $array['street'],
             "brgy" => $array['brgy'],
+            "relation" => $array['relation'],
             "municipal" => $array['municipal']
         );
         return $_SESSION['userdata'];
@@ -1101,6 +1102,8 @@ public function get_single_youth($id_resident){
             $municipal = $_POST['municipal'];
             $bplace = $_POST['bplace'];
             $bdate = $_POST['bdate'];
+            $contact = $_POST['contact'];
+
             
 
             $inc_lname = $_POST['inc_lname']; 
@@ -1110,16 +1113,19 @@ public function get_single_youth($id_resident){
             $inc_houseno = $_POST['municipal'];
             $inc_street = $_POST['bplace'];
             $inc_brgy = $_POST['bdate'];
+            $relation = $_POST['relation'];
             $inc_municipal = $_FILES['res_photo'];
+            
+
 
             $connection = $this->openConn();
             $stmt = $connection->prepare("INSERT INTO tbl_brgyid (`id_brgyid`, `id_resident`, `lname`, `fname`, `mi`,
-            `houseno`, `street`,`brgy`, `municipal`, `bplace`, `bdate`, `inc_lname`,
+            `houseno`, `street`,`brgy`, `municipal`, `bplace`, `bdate`, `contact`, `relation`, `inc_lname`,
             `inc_fname`, `inc_mi`, `inc_contact`, `inc_houseno`, `inc_street`, `inc_brgy`, `inc_municipal`)
-            VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             $stmt->execute([$id_brgyid, $id_resident, $lname, $fname, $mi, $houseno,  $street, $brgy, $municipal, 
-            $bplace, $bdate, $inc_lname, $inc_fname, $inc_mi, $inc_contact, $inc_houseno, 
+            $bplace, $bdate, $contact, $relation, $inc_lname, $inc_fname, $inc_mi, $inc_contact, $inc_houseno, 
             $inc_street, $inc_brgy, $inc_municipal ]);
 
             $message2 = "Application Applied, you will receive our text message for further details";

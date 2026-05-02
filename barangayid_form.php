@@ -1,8 +1,8 @@
 <?php
 require('classes/resident.class.php');
 $userdetails = $residentbmis->get_userdata();
-$id_resident = $_GET['id_resident'];
-$resident = $residentbmis->get_single_brgyid($id_resident);
+$id_brgyid = $_GET['id_brgyid'];
+$resident = $residentbmis->get_single_brgyid($id_brgyid);
 
 include "classes/conn.php"; 
 

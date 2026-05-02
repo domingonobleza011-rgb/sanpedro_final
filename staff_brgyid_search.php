@@ -35,7 +35,7 @@
 			<tr>
                 <td>    
                     <form action="" method="post">
-                        <a class="btn btn-primary" target="blank" style="width: 90px; font-size: 17px; border-radius:30px;"  href="barangayid_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
+                        <a class="btn btn-primary" target="blank" style="width: 90px; font-size: 17px; border-radius:30px;"  href="barangayid_form.php?id_brgyid=<?= $view['id_brgyid'];?>">Generate</a> 
                         <input type="hidden" name="id_rescert" value="<?= $view['id_rescert'];?>">
                     </form>
                 </td>
@@ -83,7 +83,7 @@
 			<tr>
                 <td>    
                     <form action="" method="post">
-                        <a class="btn btn-primary" target="blank" style="width: 90px; font-size: 17px; border-radius:30px;" href="barangayid_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
+                        <a class="btn btn-primary" target="blank" style="width: 90px; font-size: 17px; border-radius:30px;" href="barangayid_form.php?id_brgyid=<?= $view['id_brgyid'];?>">Generate</a> 
                         <input type="hidden" name="id_rescert" value="<?= $view['id_rescert'];?>">
                     </form>
                 </td>

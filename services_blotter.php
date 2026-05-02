@@ -29,7 +29,12 @@
         <style>
 
             /* Back-to-Top */
-
+/* Navbar Customization */
+        .navbar { padding: 0.8rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .dropdown-menu { border-radius: 10px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .dropdown-menu .btn { text-align: left; width: 100%; padding: 10px 20px; font-size: 0.9rem; }
+        .dropdown-menu .btn:hover { background: #f8f9fa; }
             .top-link {
             transition: all 0.25s ease-in-out;
             position: fixed;

@@ -261,9 +261,7 @@ $auto_open_upload = isset($_GET['upload_id']) && $_GET['upload_id'] == 1;
                         </div>
                     </div>
                 </div>
-                <div class="text-center mt-4">
-                    <a href="resident_homepage.php" class="btn btn-light rounded-pill px-4 shadow-sm border">Back to Home</a>
-                </div>
+                
             </div>
         </div>
 

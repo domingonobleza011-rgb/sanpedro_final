@@ -25,7 +25,12 @@
         <style>
 
             /* Navbar Buttons */
-
+/* Navbar Customization */
+        .navbar { padding: 0.8rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .dropdown-menu { border-radius: 10px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .dropdown-menu .btn { text-align: left; width: 100%; padding: 10px 20px; font-size: 0.9rem; }
+        .dropdown-menu .btn:hover { background: #f8f9fa; }
             .btn1 {
             border-radius: 20px;
             border: none; /* Remove borders */
@@ -818,19 +823,17 @@
         <br>
         <br>
 
-        <!-- Footer -->
-
         <footer id="footer" class="bg-primary text-white d-flex-column text-center">
             <hr class="mt-0">
 
             <div class="text-center">
-                <h1>Services</h1>
+                <h1 class="text-white">Services</h1>
                 <ul class="list-unstyled list-inline">
 
                 &nbsp;
 
                 <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Documents">
+                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Documents">
                     <i class="fas fa-file fa-2x"></i>
                     </a>
                 </li>
@@ -838,15 +841,16 @@
                 &nbsp;
 
                 <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Card">
+                    <a href="#!" class="footerlinks sbtn btn-large mx-1" title="Card">
                     <i class="fas fa-id-card fa-2x"></i>
                     </a>
+                    
                 </li>
 
                 &nbsp;
 
                 <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Friend">
+                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Friends">
                     <i class="fas fa-user-friends fa-2x"></i>
                     </a>
                 </li>
@@ -854,7 +858,7 @@
                 &nbsp;
 
                 <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Blotter">
+                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Blotter">
                     <i class="fas fa-user-shield fa-2x"></i>
                     </a>
                 </li>
@@ -862,7 +866,7 @@
                 &nbsp;
 
                 <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Contact">
+                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Contact">
                     <i class="fas fa-phone fa-2x"></i>
                     </a>
                 </li>
@@ -889,11 +893,11 @@
                             </div>
                         </div>
                         <ul class="list-unstyled collapse" id="Documentation">
-                            <li><a href="services_certofres.php">Certificate of Residency</a></li>
-                            <li><a href="services_brgyclearance.php">Barangay Clearance</a></li>
-                            <li><a href="services_certofindigency.php">Certificate of Indigency</a></li>
-                            <li><a href="services_business.php">Business Permit</a></li>
-                            <li><a href="services_brgyid.php">Barangay ID</a></li>
+                            <li><a class="footerlinks" href="services_certofres.php">Certificate of Residency</a></li>
+                            <li><a class="footerlinks" href="services_brgyclearance.php">Barangay Clearance</a></li>
+                            <li><a class="footerlinks" href="services_certofindigency.php">Certificate of Indigency</a></li>
+                            <li><a class="footerlinks" href="services_business.php">Business Permit</a></li>
+                            <li><a class="footerlinks" href="services_brgyid.php">Barangay ID</a></li>
                         </ul>
                     </div>
 
@@ -915,7 +919,7 @@
                         </div>
 
                         <ul class="list-unstyled collapse" id="OtherServices">
-                            <li><a href="services_blotter.php">Peace and Order</a></li>
+                            <li><a class="footerlinks" href="services_blotter.php">Peace and Order</a></li>
                         </ul>
                     </div>
 
@@ -923,14 +927,11 @@
 
                     <hr class="clearfix w-100 d-md-none mb-0">
  
+     
 
                 </div>
             </div>
-
-            <!--/.Footer Links-->
-
-            <hr class="mb-0">
-        </footer>
+</footer>
 
         <script>
             // Add the following code if you want the name of the file appear on select

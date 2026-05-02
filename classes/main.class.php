@@ -11,7 +11,6 @@ class BMISClass {
     protected $con;
 
 
-
     public function show_404()
     {
         http_response_code(404);
@@ -294,6 +293,12 @@ public function create_announcement() {
         echo "<script type='text/javascript'>alert('Announcement Added');</script>";
         header('refresh:0');
     }
+}
+public function get_single_announcement($id_announcement) {
+    $connection = $this->openConn();
+    $stmt = $connection->prepare("SELECT * FROM tbl_announcement WHERE id_announcement = ?");
+    $stmt->execute([$id_announcement]);
+    return $stmt->fetch();
 }
    public function view_announcement(){
     $connection = $this->openConn();
@@ -1088,10 +1093,9 @@ public function get_single_youth($id_resident){
     }
     
 
-    public function create_brgyid() {
+   public function create_brgyid() {
 
         if(isset($_POST['create_brgyid'])) {
-            $id_brgyid = $_POST['id_brgyid'];
             $id_resident = $_POST['id_resident'];
             $lname = $_POST['lname'];
             $fname = $_POST['fname'];
@@ -1104,29 +1108,25 @@ public function get_single_youth($id_resident){
             $bdate = $_POST['bdate'];
             $contact = $_POST['contact'];
 
-            
-
             $inc_lname = $_POST['inc_lname']; 
             $inc_fname = $_POST['inc_fname'];
             $inc_mi = $_POST['inc_mi'];
             $inc_contact = $_POST['inc_contact'];
-            $inc_houseno = $_POST['municipal'];
-            $inc_street = $_POST['bplace'];
-            $inc_brgy = $_POST['bdate'];
+            $inc_houseno = $_POST['inc_houseno'];
+            $inc_street = $_POST['inc_street'];
+            $inc_brgy = $_POST['inc_brgy'];
             $relation = $_POST['relation'];
-            $inc_municipal = $_FILES['res_photo'];
-            
-
+            $inc_municipal = $_POST['inc_municipal'];
 
             $connection = $this->openConn();
-            $stmt = $connection->prepare("INSERT INTO tbl_brgyid (`id_brgyid`, `id_resident`, `lname`, `fname`, `mi`,
-            `houseno`, `street`,`brgy`, `municipal`, `bplace`, `bdate`, `contact`, `relation`, `inc_lname`,
+            $stmt = $connection->prepare("INSERT INTO tbl_brgyid (`id_resident`, `lname`, `fname`, `mi`,
+            `houseno`, `street`, `brgy`, `municipal`, `bplace`, `bdate`, `contact`, `relation`, `inc_lname`,
             `inc_fname`, `inc_mi`, `inc_contact`, `inc_houseno`, `inc_street`, `inc_brgy`, `inc_municipal`)
-            VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-            $stmt->execute([$id_brgyid, $id_resident, $lname, $fname, $mi, $houseno,  $street, $brgy, $municipal, 
-            $bplace, $bdate, $contact, $relation, $inc_lname, $inc_fname, $inc_mi, $inc_contact, $inc_houseno, 
-            $inc_street, $inc_brgy, $inc_municipal ]);
+            $stmt->execute([$id_resident, $lname, $fname, $mi, $houseno, $street, $brgy, $municipal,
+            $bplace, $bdate, $contact, $relation, $inc_lname, $inc_fname, $inc_mi, $inc_contact, $inc_houseno,
+            $inc_street, $inc_brgy, $inc_municipal]);
 
             $message2 = "Application Applied, you will receive our text message for further details";
             echo "<script type='text/javascript'>alert('$message2');</script>";
@@ -1134,20 +1134,18 @@ public function get_single_youth($id_resident){
         }  
     }
 
-    public function get_single_brgyid($id_resident){
+    public function get_single_brgyid($id_brgyid){
 
-        $id_resident = $_GET['id_resident'];
+        $id_brgyid = isset($_GET['id_brgyid']) ? $_GET['id_brgyid'] : $id_brgyid;
         
         $connection = $this->openConn();
-        $stmt = $connection->prepare("SELECT * FROM tbl_brgyid where id_resident = ?");
-        $stmt->execute([$id_resident]);
-        $resident = $stmt->fetch();
-        $total = $stmt->rowCount();
+        $stmt = $connection->prepare("SELECT * FROM tbl_brgyid WHERE id_brgyid = ?");
+        $stmt->execute([$id_brgyid]);
+        $resident = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if($total > 0 )  {
+        if($resident) {
             return $resident;
-        }
-        else{
+        } else {
             return false;
         }
     }
@@ -1173,11 +1171,6 @@ public function get_single_youth($id_resident){
             header("Refresh:0");
         }
     }
-
-
-
-
-
 
 
      public function create_blotter() {
@@ -1264,332 +1257,94 @@ public function update_blotter() {
 
     
 
-// ========================= PROGRAMS & ACTIVITIES =========================
+// ─────────────────────────────────────────────────────────────────
+// ANNOUNCEMENT COMMENTS & REACTIONS
+// ─────────────────────────────────────────────────────────────────
 
-    public function create_program() {
-        if (isset($_POST['create_program'])) {
-            $title        = $_POST['title'];
-            $description  = $_POST['description'];
-            $category     = $_POST['category'];
-            $event_type   = $_POST['event_type'];
-            $start_date   = $_POST['start_date'];
-            $end_date     = $_POST['end_date'];
-            $reg_deadline = $_POST['registration_deadline'];
-            $venue        = $_POST['venue'];
-            $max_part     = !empty($_POST['max_participants']) ? (int)$_POST['max_participants'] : null;
-            $age_min      = (int)$_POST['target_age_min'];
-            $age_max      = (int)$_POST['target_age_max'];
-            $requirements = $_POST['requirements'];
-            $contact_p    = $_POST['contact_person'];
-            $contact_n    = $_POST['contact_number'];
-            $status       = $_POST['status'];
-            $created_by   = $_SESSION['userdata']['id_resident'] ?? $_SESSION['userdata']['id_user'] ?? 1;
-
-            $prefix = strtoupper(substr($category, 0, 3));
-            $year   = date('Y');
-            $rand   = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
-            $code   = $prefix . '-' . $year . '-' . $rand;
-
-            // Banner upload
-            $banner = null;
-            if (isset($_FILES['banner']) && $_FILES['banner']['error'] == 0) {
-                $ext    = pathinfo($_FILES['banner']['name'], PATHINFO_EXTENSION);
-                $fname  = 'banner_' . time() . '.' . $ext;
-                $dir    = 'uploads/program_banners/';
-                if (!file_exists($dir)) mkdir($dir, 0777, true);
-                if (move_uploaded_file($_FILES['banner']['tmp_name'], $dir . $fname)) {
-                    $banner = $dir . $fname;
-                }
-            }
-
-            $connection = $this->openConn();
-            $stmt = $connection->prepare("INSERT INTO tbl_programs
-                (program_code, title, description, category, event_type,
-                 start_date, end_date, registration_deadline, venue,
-                 max_participants, target_age_min, target_age_max,
-                 requirements, contact_person, contact_number,
-                 status, banner_image, created_by)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            $stmt->execute([
-                $code, $title, $description, $category, $event_type,
-                $start_date, $end_date, $reg_deadline, $venue,
-                $max_part, $age_min, $age_max,
-                $requirements, $contact_p, $contact_n,
-                $status, $banner, $created_by
-            ]);
-            echo "<script>alert('Program created successfully!');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function update_program() {
-        if (isset($_POST['update_program'])) {
-            $id           = (int)$_POST['id_program'];
-            $title        = $_POST['title'];
-            $description  = $_POST['description'];
-            $category     = $_POST['category'];
-            $event_type   = $_POST['event_type'];
-            $start_date   = $_POST['start_date'];
-            $end_date     = $_POST['end_date'];
-            $reg_deadline = $_POST['registration_deadline'];
-            $venue        = $_POST['venue'];
-            $max_part     = !empty($_POST['max_participants']) ? (int)$_POST['max_participants'] : null;
-            $age_min      = (int)$_POST['target_age_min'];
-            $age_max      = (int)$_POST['target_age_max'];
-            $requirements = $_POST['requirements'];
-            $contact_p    = $_POST['contact_person'];
-            $contact_n    = $_POST['contact_number'];
-            $status       = $_POST['status'];
-
-            $connection = $this->openConn();
-
-            // Handle optional banner update
-            if (isset($_FILES['banner']) && $_FILES['banner']['error'] == 0) {
-                $ext   = pathinfo($_FILES['banner']['name'], PATHINFO_EXTENSION);
-                $fname = 'banner_' . time() . '.' . $ext;
-                $dir   = 'uploads/program_banners/';
-                if (!file_exists($dir)) mkdir($dir, 0777, true);
-                if (move_uploaded_file($_FILES['banner']['tmp_name'], $dir . $fname)) {
-                    $banner = $dir . $fname;
-                    $stmt = $connection->prepare("UPDATE tbl_programs SET banner_image=? WHERE id_program=?");
-                    $stmt->execute([$banner, $id]);
-                }
-            }
-
-            $stmt = $connection->prepare("UPDATE tbl_programs SET
-                title=?, description=?, category=?, event_type=?,
-                start_date=?, end_date=?, registration_deadline=?, venue=?,
-                max_participants=?, target_age_min=?, target_age_max=?,
-                requirements=?, contact_person=?, contact_number=?, status=?
-                WHERE id_program=?");
-            $stmt->execute([
-                $title, $description, $category, $event_type,
-                $start_date, $end_date, $reg_deadline, $venue,
-                $max_part, $age_min, $age_max,
-                $requirements, $contact_p, $contact_n, $status, $id
-            ]);
-            echo "<script>alert('Program updated successfully!');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function delete_program() {
-        if (isset($_POST['delete_program'])) {
-            $id = (int)$_POST['id_program'];
-            $connection = $this->openConn();
-            // Delete related registrations and attendance first
-            $connection->prepare("DELETE FROM tbl_program_attendance WHERE registration_id IN (SELECT id_registration FROM tbl_program_registrations WHERE program_id=?)")->execute([$id]);
-            $connection->prepare("DELETE FROM tbl_program_registrations WHERE program_id=?")->execute([$id]);
-            $connection->prepare("DELETE FROM tbl_program_gallery WHERE program_id=?")->execute([$id]);
-            $connection->prepare("DELETE FROM tbl_programs WHERE id_program=?")->execute([$id]);
-            echo "<script>alert('Program deleted.');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function view_programs($filters = []) {
+    public function add_comment($announcement_id, $user_id, $comment_text) {
         $connection = $this->openConn();
-        $sql = "SELECT p.*,
-                    COUNT(DISTINCT r.id_registration) as total_registrations,
-                    COUNT(DISTINCT CASE WHEN r.attended=1 THEN r.id_registration END) as total_attended
-                FROM tbl_programs p
-                LEFT JOIN tbl_program_registrations r ON p.id_program = r.program_id
-                WHERE 1=1";
-        $params = [];
-        if (!empty($filters['category'])) {
-            $sql .= " AND p.category = ?"; $params[] = $filters['category'];
-        }
-        if (!empty($filters['status'])) {
-            $sql .= " AND p.status = ?"; $params[] = $filters['status'];
-        }
-        if (!empty($filters['search'])) {
-            $sql .= " AND (p.title LIKE ? OR p.description LIKE ?)";
-            $params[] = '%' . $filters['search'] . '%';
-            $params[] = '%' . $filters['search'] . '%';
-        }
-        $sql .= " GROUP BY p.id_program ORDER BY p.start_date DESC";
-        $stmt = $connection->prepare($sql);
-        $stmt->execute($params);
+        $stmt = $connection->prepare(
+            "INSERT INTO tbl_announcement_comments (announcement_id, user_id, comment_text, created_at)
+             VALUES (?, ?, ?, NOW())"
+        );
+        $stmt->execute([$announcement_id, $user_id, $comment_text]);
+        return $connection->lastInsertId();
+    }
+
+    public function get_comments($announcement_id) {
+        $connection = $this->openConn();
+        $stmt = $connection->prepare(
+            "SELECT c.*, CONCAT(r.fname, ' ', r.lname) AS full_name
+             FROM tbl_announcement_comments c
+             JOIN tbl_resident r ON c.user_id = r.id_resident
+             WHERE c.announcement_id = ?
+             ORDER BY c.created_at ASC"
+        );
+        $stmt->execute([$announcement_id]);
         return $stmt->fetchAll();
     }
 
-    public function get_single_program($id_program) {
+    public function delete_comment($comment_id, $user_id) {
         $connection = $this->openConn();
-        $stmt = $connection->prepare("SELECT p.*,
-            COUNT(DISTINCT r.id_registration) as total_registrations,
-            COUNT(DISTINCT CASE WHEN r.status='Approved' THEN r.id_registration END) as approved_registrations,
-            COUNT(DISTINCT CASE WHEN r.attended=1 THEN r.id_registration END) as total_attended
-            FROM tbl_programs p
-            LEFT JOIN tbl_program_registrations r ON p.id_program = r.program_id
-            WHERE p.id_program = ?
-            GROUP BY p.id_program");
-        $stmt->execute([$id_program]);
-        return $stmt->fetch();
+        $stmt = $connection->prepare(
+            "DELETE FROM tbl_announcement_comments WHERE id_comment = ? AND user_id = ?"
+        );
+        $stmt->execute([$comment_id, $user_id]);
     }
 
-    // --- REGISTRATIONS ---
-    public function register_for_program() {
-        if (isset($_POST['register_program'])) {
-            $program_id = (int)$_POST['program_id'];
-            $user_id    = $_SESSION['userdata']['id_resident'];
-            $connection = $this->openConn();
-
-            // Check already registered
-            $chk = $connection->prepare("SELECT COUNT(*) FROM tbl_program_registrations WHERE program_id=? AND user_id=? AND status NOT IN ('Cancelled','Rejected')");
-            $chk->execute([$program_id, $user_id]);
-            if ($chk->fetchColumn() > 0) {
-                echo "<script>alert('You are already registered for this program.');</script>";
-                return;
-            }
-
-            // Check max participants
-            $prog = $connection->prepare("SELECT max_participants FROM tbl_programs WHERE id_program=?");
-            $prog->execute([$program_id]);
-            $progData = $prog->fetch();
-            $cnt = $connection->prepare("SELECT COUNT(*) FROM tbl_program_registrations WHERE program_id=? AND status='Approved'");
-            $cnt->execute([$program_id]);
-            $currentCount = $cnt->fetchColumn();
-
-            $status = 'Approved';
-            if ($progData['max_participants'] && $currentCount >= $progData['max_participants']) {
-                $status = 'Waitlisted';
-            }
-
-            $code = 'REG-' . $program_id . '-' . strtoupper(substr(md5(time() . rand()), 0, 8));
-            $stmt = $connection->prepare("INSERT INTO tbl_program_registrations (program_id, user_id, registration_code, status) VALUES (?,?,?,?)");
-            $stmt->execute([$program_id, $user_id, $code, $status]);
-            $msg = $status === 'Waitlisted' ? "Program is full. You have been added to the waitlist." : "Registration successful! Your code: $code";
-            echo "<script>alert('$msg');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function cancel_registration() {
-        if (isset($_POST['cancel_registration'])) {
-            $id      = (int)$_POST['id_registration'];
-            $user_id = $_SESSION['userdata']['id_resident'];
-            $connection = $this->openConn();
-            $stmt = $connection->prepare("UPDATE tbl_program_registrations SET status='Cancelled' WHERE id_registration=? AND user_id=?");
-            $stmt->execute([$id, $user_id]);
-            echo "<script>alert('Registration cancelled.');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function admin_update_registration_status() {
-        if (isset($_POST['update_reg_status'])) {
-            $id     = (int)$_POST['id_registration'];
-            $status = $_POST['reg_status'];
-            $connection = $this->openConn();
-            $connection->prepare("UPDATE tbl_program_registrations SET status=? WHERE id_registration=?")->execute([$status, $id]);
-            echo "<script>alert('Status updated.');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function get_program_registrations($program_id) {
+    public function toggle_reaction($announcement_id, $user_id, $reaction_type) {
         $connection = $this->openConn();
-        $stmt = $connection->prepare("SELECT r.*, res.firstname, res.surname, res.email, res.phone_number, res.age
-            FROM tbl_program_registrations r
-            JOIN tbl_resident res ON r.user_id = res.id_resident
-            WHERE r.program_id = ?
-            ORDER BY r.registration_date DESC");
-        $stmt->execute([$program_id]);
+        // Check if user already reacted with same type → remove it (toggle off)
+        $check = $connection->prepare(
+            "SELECT id_reaction FROM tbl_announcement_reactions
+             WHERE announcement_id = ? AND user_id = ? AND reaction_type = ?"
+        );
+        $check->execute([$announcement_id, $user_id, $reaction_type]);
+        $existing = $check->fetch();
+
+        if ($existing) {
+            $del = $connection->prepare(
+                "DELETE FROM tbl_announcement_reactions WHERE id_reaction = ?"
+            );
+            $del->execute([$existing['id_reaction']]);
+            return 'removed';
+        } else {
+            // Remove any previous different reaction first
+            $delOld = $connection->prepare(
+                "DELETE FROM tbl_announcement_reactions WHERE announcement_id = ? AND user_id = ?"
+            );
+            $delOld->execute([$announcement_id, $user_id]);
+            // Insert new reaction
+            $ins = $connection->prepare(
+                "INSERT INTO tbl_announcement_reactions (announcement_id, user_id, reaction_type, created_at)
+                 VALUES (?, ?, ?, NOW())"
+            );
+            $ins->execute([$announcement_id, $user_id, $reaction_type]);
+            return 'added';
+        }
+    }
+
+    public function get_reactions($announcement_id) {
+        $connection = $this->openConn();
+        $stmt = $connection->prepare(
+            "SELECT reaction_type, COUNT(*) as count
+             FROM tbl_announcement_reactions
+             WHERE announcement_id = ?
+             GROUP BY reaction_type"
+        );
+        $stmt->execute([$announcement_id]);
         return $stmt->fetchAll();
     }
 
-    public function get_resident_registrations($user_id) {
+    public function get_user_reaction($announcement_id, $user_id) {
         $connection = $this->openConn();
-        $stmt = $connection->prepare("SELECT r.*, p.title, p.start_date, p.end_date, p.venue, p.category, p.status as prog_status
-            FROM tbl_program_registrations r
-            JOIN tbl_programs p ON r.program_id = p.id_program
-            WHERE r.user_id = ?
-            ORDER BY p.start_date DESC");
-        $stmt->execute([$user_id]);
-        return $stmt->fetchAll();
-    }
-
-    // --- ATTENDANCE ---
-    public function mark_attendance() {
-        if (isset($_POST['mark_attendance'])) {
-            $reg_id      = (int)$_POST['registration_id'];
-            $attended    = isset($_POST['attended']) ? 1 : 0;
-            $marked_by   = $_SESSION['userdata']['id_resident'] ?? $_SESSION['userdata']['id_user'] ?? 1;
-            $connection  = $this->openConn();
-            $connection->prepare("UPDATE tbl_program_registrations SET attended=?, attendance_date=NOW() WHERE id_registration=?")->execute([$attended, $reg_id]);
-            $connection->prepare("INSERT INTO tbl_program_attendance (registration_id, scan_datetime, scan_type, scanned_by, ip_address) VALUES (?,NOW(),'Manual Entry',?,?)")->execute([$reg_id, $marked_by, $_SERVER['REMOTE_ADDR']]);
-            echo "<script>alert('Attendance updated.');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function get_attendance_report($program_id) {
-        $connection = $this->openConn();
-        $stmt = $connection->prepare("SELECT r.*, res.firstname, res.surname, res.email, res.phone_number
-            FROM tbl_program_registrations r
-            JOIN tbl_resident res ON r.user_id = res.id_resident
-            WHERE r.program_id = ? AND r.status = 'Approved'
-            ORDER BY res.surname ASC");
-        $stmt->execute([$program_id]);
-        return $stmt->fetchAll();
-    }
-
-    // --- GALLERY ---
-    public function upload_program_media() {
-        if (isset($_POST['upload_media'])) {
-            $program_id  = (int)$_POST['program_id'];
-            $captions    = $_POST['captions'] ?? [];
-            $uploaded_by = $_SESSION['userdata']['id_resident'] ?? $_SESSION['userdata']['id_user'] ?? 1;
-            $connection  = $this->openConn();
-            $uploadDir   = 'uploads/program_gallery/program_' . $program_id . '/';
-            if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
-
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'];
-            $count = 0;
-            if (!empty($_FILES['media_files']['name'][0])) {
-                foreach ($_FILES['media_files']['tmp_name'] as $k => $tmp) {
-                    if ($_FILES['media_files']['error'][$k] != 0) continue;
-                    $type = $_FILES['media_files']['type'][$k];
-                    if (!in_array($type, $allowedTypes)) continue;
-                    $ext   = pathinfo($_FILES['media_files']['name'][$k], PATHINFO_EXTENSION);
-                    $fname = 'media_' . time() . '_' . uniqid() . '.' . $ext;
-                    if (move_uploaded_file($tmp, $uploadDir . $fname)) {
-                        $mediaType = strpos($type, 'image') !== false ? 'Image' : 'Video';
-                        $caption   = $captions[$k] ?? '';
-                        $connection->prepare("INSERT INTO tbl_program_gallery (program_id, file_name, file_path, file_type, caption, uploaded_by) VALUES (?,?,?,?,?,?)")
-                            ->execute([$program_id, $_FILES['media_files']['name'][$k], $uploadDir . $fname, $mediaType, $caption, $uploaded_by]);
-                        $count++;
-                    }
-                }
-            }
-            echo "<script>alert('$count file(s) uploaded.');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function delete_program_media() {
-        if (isset($_POST['delete_media'])) {
-            $id = (int)$_POST['id_media'];
-            $connection = $this->openConn();
-            $row = $connection->prepare("SELECT file_path FROM tbl_program_gallery WHERE id_media=?");
-            $row->execute([$id]);
-            $media = $row->fetch();
-            if ($media && file_exists($media['file_path'])) unlink($media['file_path']);
-            $connection->prepare("DELETE FROM tbl_program_gallery WHERE id_media=?")->execute([$id]);
-            echo "<script>alert('Media deleted.');</script>";
-            header("Refresh:0");
-        }
-    }
-
-    public function get_program_gallery($program_id, $type = null) {
-        $connection = $this->openConn();
-        $sql = "SELECT * FROM tbl_program_gallery WHERE program_id=?";
-        $params = [$program_id];
-        if ($type) { $sql .= " AND file_type=?"; $params[] = $type; }
-        $sql .= " ORDER BY uploaded_at DESC";
-        $stmt = $connection->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll();
+        $stmt = $connection->prepare(
+            "SELECT reaction_type FROM tbl_announcement_reactions
+             WHERE announcement_id = ? AND user_id = ?"
+        );
+        $stmt->execute([$announcement_id, $user_id]);
+        $row = $stmt->fetch();
+        return $row ? $row['reaction_type'] : null;
     }
 
 }

@@ -162,15 +162,14 @@ header("refresh: 0");
 
     public function get_single_resident($id_resident){
 
-        $id_resident = $_GET['id_resident'];
+        $id_resident = isset($_GET['id_resident']) ? $_GET['id_resident'] : $id_resident;
         
         $connection = $this->openConn();
         $stmt = $connection->prepare("SELECT * FROM tbl_resident where id_resident = ?");
         $stmt->execute([$id_resident]);
-        $resident = $stmt->fetch();
-        $total = $stmt->rowCount();
+        $resident = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if($total > 0 )  {
+        if($resident)  {
             return $resident;
         }
         else{

@@ -261,45 +261,50 @@
             a{
                 color:white;
                 }
-            .shfooter .collapse {
-                display: inherit;
-            }
-                @media (max-width:767px) {
-            .shfooter ul {
-                    margin-bottom: 0;
-            }
+/* Footer Style */
+    
+    .footerlinks{
+        color:white;
+        }
+    .shfooter .collapse {
+        display: inherit;
+    }
+        @media (max-width:767px) {
+    .shfooter ul {
+            margin-bottom: 0;
+    }
 
-            .shfooter .collapse {
-                    display: none;
-            }
+    .shfooter .collapse {
+            display: none;
+    }
 
-            .shfooter .collapse.show {
-                    display: block;
-            }
+    .shfooter .collapse.show {
+            display: block;
+    }
 
-            .shfooter .title .fa-angle-up,
-            .shfooter .title[aria-expanded=true] .fa-angle-down {
-                    display: none;
-            }
+    .shfooter .title .fa-angle-up,
+    .shfooter .title[aria-expanded=true] .fa-angle-down {
+            display: none;
+    }
 
-            .shfooter .title[aria-expanded=true] .fa-angle-up {
-                    display: block;
-            }
+    .shfooter .title[aria-expanded=true] .fa-angle-up {
+            display: block;
+    }
 
-            .shfooter .navbar-toggler {
-                    display: inline-block;
-                    padding: 0;
-            }
+    .shfooter .navbar-toggler {
+            display: inline-block;
+            padding: 0;
+    }
 
-            }
+    }
 
-            .resize {
-                text-align: center;
-            }
-            .resize {
-                margin-top: 3rem;
-                font-size: 1.25rem;
-            }
+    .resize {
+        text-align: center;
+    }
+    .resize {
+        margin-top: 3rem;
+        font-size: 1.25rem;
+    }
             /*RESIZESCREEN ANIMATION*/
             .fa-angle-double-right {
                 animation: rightanime 1s linear infinite;
@@ -358,7 +363,12 @@
             -webkit-transform: scale(1.4); /* Safari 3-8 */
             transform: scale(1.4); 
             }
-
+/* Navbar Customization */
+        .navbar { padding: 0.8rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .dropdown-menu { border-radius: 10px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .dropdown-menu .btn { text-align: left; width: 100%; padding: 10px 20px; font-size: 0.9rem; }
+        .dropdown-menu .btn:hover { background: #f8f9fa; }
         </style>
   </head>
 

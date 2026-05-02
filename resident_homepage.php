@@ -282,83 +282,242 @@
 
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="resident_homepage.php">Barangay San Pedro Management System</a>
-        
-        <div class="d-flex align-items-center ms-auto">
-            <a href="resident_homepage.php" class="btn btn-primary me-3">
-                <i class="fa fa-home fa-lg"></i> Home
-            </a>
-            
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-user-circle me-1"></i>
-                    <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                    <li><a class="btn" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user"></i> &nbsp; Profile</a></li>
-                    <li><a class="btn" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock"></i> &nbsp; Password</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="btn text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> &nbsp; Logout</a></li>
-                </ul>
+        <a class="navbar-brand fw-bold" href="resident_homepage.php">
+            <i class="bi bi-building me-1"></i> Barangay San Pedro
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" href="resident_homepage.php"><i class="fa fa-home me-1"></i> Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="resident_announcement.php"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#services-section"><i class="bi bi-grid-fill me-1"></i> Services</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center">
+                <div class="dropdown">
+                    <button class="btn btn-light btn-sm dropdown-toggle text-primary fw-semibold" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                        <li><a class="dropdown-item" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user me-2"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock me-2"></i> Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </nav>
 
-      <div class="container mt-4">
-    <?php 
-    $view = $bmis->view_active_announcements($userdetails['id_resident']);
-    
-    if(is_array($view) && count($view) > 0): 
-        foreach($view as $announcement): ?>
-            <div class="alert alert-light border shadow-sm mb-3 position-relative p-3" role="alert" style="border-radius: 12px; border-left: 5px solid #0d6efd !important;">
-                
-                <div class="row align-items-center">
-                    <?php if(!empty($announcement['image'])): ?>
-                        <div class="col-3 col-md-2">
-                            <a href="uploads/<?= $announcement['image']; ?>" target="_blank">
-                                <img src="uploads/<?= $announcement['image']; ?>" 
-                                     class="rounded shadow-sm" 
-                                     style="width: 80px; height: 80px; object-fit: cover;" 
-                                     alt="Announcement Image">
-                            </a>
-                        </div>
-                    <?php endif; ?>
+<style>
+/* ===== FACEBOOK-STYLE ANNOUNCEMENT FEED ===== */
+#announcements-section {
+    background-color: #f0f2f5;
+    padding: 28px 0 10px;
+}
 
-                    <div class="<?= !empty($announcement['image']) ? 'col-9 col-md-10' : 'col-12' ?>">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="text-primary fw-bold" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">
-                                <i class="bi bi-megaphone-fill me-1"></i> Announcement
-                            </span>
-                            <small class="text-muted" style="font-size: 1rem; rright"><?= $announcement['start_date']; ?></small>
-                        </div>
-                        
-                        <p class="mb-2 text-dark" style="font-size: 1rem; line-height: 1.3;">
-                            <?= htmlspecialchars($announcement['event']); ?>
-                        </p>
-                        
-                        <form action="" method="POST" class="m-0">
-                            <input type="hidden" name="id_announcement" value="<?= $announcement['id_announcement']; ?>">
-                            <button type="submit" name="delete_announcement" class="btn p-0 text-muted" style="font-size: 0.75rem; text-decoration: none;">
-                                <i class="bi bi-eye-slash"></i> Hide
-                            </button>
-                        </form>
-                    </div>
-                </div>
+.fb-feed-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 12px;
+}
 
-                <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="alert" aria-label="Close" style="transform: scale(0.7);"></button>
-            </div>
-        <?php endforeach; 
-    else: ?>
-        <p class="text-center text-muted small py-3">No new announcements.</p>
-    <?php endif; ?>
-</div>
+.fb-feed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.fb-feed-header h5 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1c1e21;
+    margin: 0;
+}
+
+.fb-post-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.fb-post-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+.fb-post-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px 8px;
+}
+
+.fb-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1877f2, #0a5ecf);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.fb-post-meta {
+    margin-left: 10px;
+    flex: 1;
+}
+
+.fb-page-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1c1e21;
+    line-height: 1.2;
+}
+
+.fb-page-name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.fb-post-date {
+    font-size: 0.78rem;
+    color: #65676b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.fb-post-badge {
+    display: inline-block;
+    background: #e7f3ff;
+    color: #1877f2;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.fb-hide-btn {
+    background: none;
+    border: none;
+    color: #65676b;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    transition: background 0.15s;
+    margin-left: auto;
+}
+
+.fb-hide-btn:hover {
+    background: #f0f2f5;
+    color: #1c1e21;
+}
+
+.fb-post-body {
+    padding: 0 16px 10px;
+}
+
+.fb-post-text {
+    font-size: 0.97rem;
+    color: #1c1e21;
+    line-height: 1.55;
+    margin: 0;
+    word-break: break-word;
+    white-space: pre-line;
+}
+
+.fb-post-text.large-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.fb-post-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.fb-post-image:hover {
+    opacity: 0.95;
+}
+
+.fb-post-footer {
+    border-top: 1px solid #e4e6ea;
+    padding: 6px 16px;
+    display: flex;
+    gap: 4px;
+}
+
+.fb-react-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #65676b;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 8px 0;
+    border-radius: 6px;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s;
+}
+
+.fb-react-btn:hover {
+    background: #f0f2f5;
+    color: #1c1e21;
+}
+
+.fb-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #65676b;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.fb-empty-state i {
+    font-size: 2.5rem;
+    color: #bcc0c4;
+    display: block;
+    margin-bottom: 10px;
+}
+</style>
+
 
         <div id="down1"></div>
 
         <br>
 
-        <section class="heading-section"> 
+        <section class="heading-section" id="services-section"> 
             <div class="container text-center"> 
                 <div class="row"> 
                     <div class="col"> 
@@ -744,4 +903,3 @@ function showVerifyAlert() {
         <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
     </body>
 </html>
-

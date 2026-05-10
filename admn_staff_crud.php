@@ -1,6 +1,8 @@
 <?php
     ini_set('display_errors',1);
     error_reporting(E_ALL ^ E_WARNING);
+define('BMIS_ROLE_REQUIRED', 'admin');
+require_once('secure_header.php'); 
     require('classes/staff.class.php');
     $userdetails = $bmis->get_userdata();
     $bmis->validate_admin();

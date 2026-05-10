@@ -29,7 +29,6 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
     <style>
         :root {
@@ -207,29 +206,27 @@
             }
         }
         .official-card {
-        border: none;
-        border-radius: 15px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        background: #f8f9fa;
+        background: #fff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-
+    
     .official-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        background: #fff;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        border-color: #0d6efd !important;
     }
 
-    .avatar-circle {
-        width: 80px;
-        height: 80px;
-        background: #e9ecef;
-        border-radius: 50%;
+    .official-name {
+        color: #333;
+        font-size: 1rem;
+    }
+
+    /* Prevents layout shifts if names are long */
+    .official-card h6 {
+        min-height: 2.4em;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 15px;
-        border: 3px solid #fff;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     }
 
     .official-name {
@@ -256,22 +253,24 @@
         padding: 25px;
     }
         
-        
+  
     </style>
 <body>
 <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="fas fa-landmark"></i> SAN PEDRO IRIGA</a>
-            <div class="ms-auto d-flex">
-                <a class="nav-link" data-bs-toggle="modal" data-bs-target="#officialsModal">
-                    <i class="fas fa-users"></i> Barangay Officials
-                </a>
-                <a class="nav-link" href="resident_registration.php">
-                    <i class="fas fa-user-plus"></i> Register
-                </a>
-            </div>
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#"><i class="fas fa-landmark"></i> SAN PEDRO IRIGA</a>
+        
+        <!-- Use navbar-nav for automatic side-by-side alignment in large screens -->
+        <div class="navbar-nav ms-auto d-flex flex-row">
+            <a class="nav-link me-3" data-bs-toggle="modal" data-bs-target="#officialsModal" href="#">
+                <i class="fas fa-users"></i> Barangay Officials
+            </a>
+            <a class="nav-link" href="resident_registration.php">
+                <i class="fas fa-user-plus"></i> Register
+            </a>
         </div>
-    </nav>
+    </div>
+</nav>
     <div class="main-container">
         
         <div class="info-panel">
@@ -294,7 +293,7 @@
                 <p class="subtitle">Please enter your credentials to log in.</p>
 
                 <form method="post">
-                   <label class="form-label">Email or Phone Number</label>
+                   <label class="form-label">Username or Phone Number</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                         <input type="text" class="form-control" placeholder="Enter Email or Phone Number" name="login_identity" required>
@@ -310,9 +309,7 @@
                         <input type="checkbox" class="form-check-input" id="showCheck" onclick="togglePass()">
                         <label class="form-check-label" for="showCheck" style="font-size: 0.85rem; color: #555;">Show Password</label>
                     </div>
-                    <div class="d-flex justify-content-center mb-3">
-    <div class="g-recaptcha" data-sitekey="6Ldeb9AsAAAAABRC_DlywqU84wD6KOI3onvl-XmX"></div>
-</div>
+
                     <button type="submit" name="login" class="btn btn-primary btn-signin w-100">SIGN IN</button>
                 </form>
 
@@ -321,10 +318,12 @@
                 </p>
             </div>
         </div>
+<!-- Modal -->
 <div class="modal fade" id="officialsModal<?= $view['id_user'];?>" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content shadow-lg">
-            <div class="modal-header bg-primary text-white">
+        <div class="modal-content border-0 shadow-lg">
+            <!-- Header with a slight gradient for a premium look -->
+            <div class="modal-header bg-primary text-white py-3" style="background: linear-gradient(45deg, #0d6efd, #0a58ca);">
                 <div class="d-flex align-items-center">
                     <i class="fas fa-users-cog me-3 fa-2x"></i>
                     <div>
@@ -336,43 +335,49 @@
             </div>
 
             <div class="modal-body p-4">
-                <div class="row g-4">
+                <div class="row g-4 justify-content-center">
                     <?php 
-                    // Note: Ensure $view is your array of staff/officials
-                    if(is_array($view)) { 
+                    if(!empty($view) && is_array($view)) { 
                         foreach($view as $row) { 
                     ?>
-                       <div class="col-md-4 col-sm-6">
-    <div class="official-card p-4 text-center">
-        <div class="avatar-circle">
-            <?php if (!empty($row['photo']) && file_exists($row['photo'])): ?>
-                <img src="<?= $row['photo']; ?>" 
-     style="width: 100%; height: 100%; object-fit: cover;">
-            <?php else: ?>
-                <i class="fas fa-user-circle fa-3x text-secondary"></i>
-            <?php endif; ?>
-        </div>
-        
-        <h5 class="official-name fw-bold">
-            <?= htmlspecialchars($row['fname'] . ' ' . $row['mi'] . ' ' . $row['lname']); ?>
-        </h5>
-        
-        <p class="official-position fw-bold text-uppercase">
-            <?= htmlspecialchars($row['position']); ?>
-        </p>
-    </div>
-</div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="official-card h-100 p-3 text-center border rounded-3 shadow-sm transition-hover">
+                                <!-- Avatar Container -->
+                                <div class="mx-auto mb-3" style="width: 100px; height: 100px;">
+                                    <?php if (!empty($row['photo']) && file_exists($row['photo'])): ?>
+                                        <img src="<?= $row['photo']; ?>" 
+                                             class="rounded-circle shadow-sm border" 
+                                             style="width: 100%; height: 100%; object-fit: cover; border: 3px solid #f8f9fa !important;">
+                                    <?php else: ?>
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center h-100 border">
+                                            <i class="fas fa-user fa-3x text-secondary"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <h6 class="official-name fw-bold mb-1">
+                                    <?= htmlspecialchars($row['fname'] . ' ' . ($row['mi'] ? $row['mi'].'. ' : '') . $row['lname']); ?>
+                                </h6>
+                                
+                                <span class="badge rounded-pill bg-light text-primary border border-primary-subtle text-uppercase px-3 py-2" style="font-size: 0.7rem;">
+                                    <?= htmlspecialchars($row['position']); ?>
+                                </span>
+                            </div>
+                        </div>
                     <?php 
                         } 
                     } else {
-                        echo '<p class="text-center text-muted">No officials found.</p>';
+                        echo '<div class="col-12 text-center py-5">
+                                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No officials currently listed for this record.</p>
+                              </div>';
                     }
                     ?>
                 </div>
             </div>
             
             <div class="modal-footer border-0 bg-light">
-                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -380,6 +385,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
         function togglePass() {
             const passField = document.getElementById("passInput");
             passField.type = passField.type === "password" ? "text" : "password";

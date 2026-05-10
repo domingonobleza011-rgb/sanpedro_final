@@ -29,13 +29,16 @@
 <html lang="en">
 <head>
     <title>Announcements – Barangay San Pedro Iriga</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <!-- responsive tags for screen compatibility -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- custom css --> 
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+        <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body{background:#f0f2f5;font-family:'Segoe UI',Helvetica,Arial,sans-serif;margin:0}
-        .navbar-brand{font-weight:700}
+        body
         .page-wrap{max-width:680px;margin:28px auto 60px;padding:0 12px}
         .page-title{font-size:1.35rem;font-weight:700;color:#1c1e21;margin-bottom:18px;display:flex;align-items:center;gap:10px}
         .post-count-badge{background:#e7f3ff;color:#1877f2;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase}
@@ -60,16 +63,19 @@
         .comment-count-link{cursor:pointer}
         .comment-count-link:hover{text-decoration:underline}
         /* Action bar */
+        .fb-react-btn {
+    transition: color 0.1s ease-in-out, background 0.2s;
+}
         .fb-card-footer{border-top:1px solid #e4e6ea;padding:4px 12px;display:flex;gap:2px}
-        .fb-react-btn{flex:1;background:none;border:none;color:#65676b;font-size:.88rem;font-weight:600;padding:8px 4px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;position:relative;user-select:none}
+        .fb-react-btn{flex:1;background:none;border:none;color:#65676b;font-size:.88rem;font-weight:600;padding:8px 4px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition: color 0.1s ease-in-out, background 0.2s;position:relative;user-select:none}
         .fb-react-btn:hover{background:#f0f2f5;color:#1c1e21}
         .fb-react-btn.reacted-like{color:#1877f2}
         .fb-react-btn.reacted-love{color:#f33e58}
         .fb-react-btn.reacted-haha,.fb-react-btn.reacted-wow,.fb-react-btn.reacted-sad{color:#f7b928}
         .fb-react-btn.reacted-angry{color:#e9710f}
-        /* Reaction picker */
+        /* Reaction picker - click based */
         .reaction-picker{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:#fff;border-radius:30px;box-shadow:0 2px 12px rgba(0,0,0,.2);padding:6px 10px;gap:4px;flex-direction:row;z-index:200;white-space:nowrap}
-        .fb-react-btn:hover .reaction-picker,.reaction-picker:hover{display:flex}
+        .reaction-picker.open{display:flex}
         .reaction-option{font-size:1.5rem;cursor:pointer;border-radius:50%;padding:4px;transition:transform .15s;display:inline-flex;align-items:center;justify-content:center;position:relative}
         .reaction-option:hover{transform:scale(1.35) translateY(-4px)}
         .reaction-option .tip{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s}
@@ -140,49 +146,108 @@
     font-size: 0.9rem;
     font-weight: 500;
 }
+        .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1050;
+    border-top: 1px solid #dee2e6;
+}
+
+.mobile-bottom-nav .nav-item {
+    text-decoration: none;
+    color: #6c757d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.7rem; /* Small text for mobile */
+    font-weight: 500;
+}
+
+.mobile-bottom-nav .nav-item i {
+    font-size: 1.4rem; /* Larger icons for easy tapping */
+    margin-bottom: 2px;
+}
+
+.mobile-bottom-nav .nav-item:active {
+    color: #0d6efd;
+}
+
+/* Add padding to the bottom of the body so content isn't hidden by the nav */
+@media (max-width: 767px) {
+    body {
+        padding-bottom: 80px;
+    }
+}
     </style>
 </head>
 <body>
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content" style="background: rgba(0,0,0,0.9); border: none;">
+        <div class="modal-content" style="background: rgba(0,0,0,0.9); border: none; position: relative;">
             <div class="modal-header border-0">
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            
             <div class="modal-body p-0 d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-                <!-- This is the image that gets "zoomed out" -->
+                <button class="btn text-black position-absolute start-0 ms-3" id="prevBtn" onclick="changeImage(-1)" style="font-size: 3rem; z-index: 10;">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+
                 <img src="" id="modalImg" style="width: 100%; max-height: 90vh; object-fit: contain;" alt="Zoomed view">
+
+                <button class="btn text-black position-absolute end-0 me-3" id="nextBtn" onclick="changeImage(1)" style="font-size: 3rem; z-index: 10;">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
     </div>
 </div>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+ <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
     <div class="container-fluid">
-        <a class="navbar-brand" href="resident_homepage.php"><i class="bi bi-building me-1"></i> Barangay San Pedro</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navMain">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="resident_homepage.php"><i class="fa fa-home me-1"></i> Home</a></li>
-                <li class="nav-item"><a class="nav-link active" href="resident_announcement.php"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a></li>
-                <li class="nav-item"><a class="nav-link" href="resident_homepage.php#services-section"><i class="bi bi-grid-fill me-1"></i> Services</a></li>
-            </ul>
-            <div class="dropdown">
-                <button class="btn btn-light btn-sm dropdown-toggle text-primary fw-semibold" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-user-circle me-1"></i>
-                    <?= htmlspecialchars($userdetails['surname']); ?>, <?= htmlspecialchars($userdetails['firstname']); ?>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="resident_profile.php?id_resident=<?= $user_id; ?>"><i class="fas fa-user me-2"></i> Profile</a></li>
-                    <li><a class="dropdown-item" href="resident_changepass.php?id_resident=<?= $user_id; ?>"><i class="fas fa-lock me-2"></i> Change Password</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                </ul>
-            </div>
+        <a class="navbar-brand fw-bold" href="resident_homepage.php">
+            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
+        </a>
+        <div class="d-flex ms-auto">
+            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
+            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
+            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
+            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
+            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
         </div>
     </div>
 </nav>
+
+<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
+<div class="mobile-bottom-nav d-md-none">
+    <a href="resident_homepage.php" class="nav-item">
+        <i class="bi bi-house-door-fill"></i>
+        <span>Home</span>
+    </a>
+    <a href="resident_announcement.php" class="nav-item">
+        <i class="bi bi-megaphone-fill"></i>
+        <span>News</span>
+    </a>
+    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-person-badge"></i>
+        <span>Profile</span>
+    </a>
+    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-shield-lock"></i>
+        <span>Pass</span>
+    </a>
+    <a href="logout.php" class="nav-item text-danger">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Exit</span>
+    </a>
+</div>
 
 <div class="page-wrap">
     <div class="page-title">
@@ -201,11 +266,11 @@ if(is_array($view) && count($view) > 0):
         $hasImg    = !empty($ann['image']);
         $isShort   = strlen($ann['event']) < 130 && !$hasImg;
         $reactions = $bmis->get_reactions($ann_id);
-        $userReact = $bmis->get_user_reaction($ann_id, $user_id);
+        $userReact = $bmis->get_user_reaction($ann_id, $current_user_id);
         $comments  = $bmis->get_comments($ann_id);
         $totalReact = array_sum(array_column($reactions, 'count'));
         usort($reactions, fn($a,$b) => $b['count'] - $a['count']);
-        $topReactions = array_slice($reactions, 0, 3);
+        $topReactions = array_slice($reactions, 0, 1);
         $reactionLabel = $userReact ? ucfirst($userReact) : 'Like';
         $reactionIcon  = $userReact ? $emojiMap[$userReact] : '👍';
         $initials = strtoupper(substr($userdetails['firstname'],0,1) . substr($userdetails['surname'],0,1));
@@ -223,14 +288,25 @@ if(is_array($view) && count($view) > 0):
             <p class="fb-post-text"><?= nl2br(htmlspecialchars($ann['event'])); ?></p>
         </div>
         <?php endif; ?>
-        <?php if($hasImg): ?>
-        <div class="img-container">
-            <!-- Modified: Removed <a> tag, added onclick for Modal -->
-            <img src="uploads/<?= $ann['image']; ?>" 
-                 class="fb-post-img" 
-                 alt="Announcement"
-                 onclick="openImageModal('uploads/<?= $ann['image']; ?>')">
-        </div>
+        <?php 
+        if($hasImg): 
+            $images = explode(',', $ann['image']);
+            $count = count($images);
+        ?>
+        <div class="fb-image-gallery d-flex flex-wrap bg-light p-2 gap-2">
+    <?php 
+    $images = explode(',', $ann['image']);
+    $images_json = json_encode($images); // Prepare the array for JS
+    foreach($images as $index => $img): 
+        $img = trim($img);
+        if(empty($img)) continue;
+    ?>
+        <img src="uploads/<?= htmlspecialchars($img); ?>" 
+             class="fb-gallery-item" 
+             style="width: <?= count($images) > 1 ? 'calc(50% - 4px)' : '100%'; ?>; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; cursor: pointer;"
+             onclick='openGallery(<?= $images_json; ?>, <?= $index; ?>)'>
+    <?php endforeach; ?>
+</div>
         <?php endif; ?>
         <!-- Reaction Summary -->
         <div class="reaction-summary">
@@ -252,11 +328,17 @@ if(is_array($view) && count($view) > 0):
             id="like-btn-<?= $ann_id; ?>"
             data-ann="<?= $ann_id; ?>"
             data-current="<?= $userReact ?: ''; ?>"
-            onclick="quickLike(event, <?= $ann_id; ?>)">
+            onclick="quickLike(event, <?= $ann_id; ?>)"
+            onmousedown="startHold(<?= $ann_id; ?>)"
+            onmouseup="cancelHold()"
+            onmouseleave="cancelHold()"
+            ontouchstart="startHold(<?= $ann_id; ?>)"
+            ontouchend="cancelHold()">
 
         <div class="reaction-picker" id="picker-<?= $ann_id; ?>">
             <?php foreach($emojiMap as $type => $emoji): ?>
-            <span class="reaction-option" onclick="react(<?= $ann_id; ?>,'<?= $type; ?>');event.stopPropagation();"><?= $emoji; ?><span class="tip"><?= ucfirst($type); ?></span></span>
+            <span class="reaction-option" 
+                  onclick="pickReaction(event, <?= $ann_id; ?>,'<?= $type; ?>')"><?= $emoji; ?><span class="tip"><?= ucfirst($type); ?></span></span>
             <?php endforeach; ?>
         </div>
 
@@ -279,7 +361,7 @@ if(is_array($view) && count($view) > 0):
             <div id="comment-list-<?= $ann_id; ?>">
                 <?php foreach($comments as $c):
                     $cInit = strtoupper(substr($c['full_name'],0,1) . (strpos($c['full_name'],' ')!==false ? substr($c['full_name'],strpos($c['full_name'],' ')+1,1) : ''));
-                    $isOwn = ((int)$c['user_id'] === (int)$user_id);
+                    $isOwn = ((int)$c['user_id'] === (int)$current_user_id);
                 ?>
                 <div class="comment-item" id="comment-item-<?= $c['id_comment']; ?>">
                     <div class="comment-avatar"><?= htmlspecialchars($cInit); ?></div>
@@ -324,7 +406,49 @@ else: ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+let currentImages = [];
+let currentIndex = 0;
 
+function openGallery(images, index) {
+    currentImages = images;
+    currentIndex = index;
+    updateModalImage();
+    
+    const myModal = new bootstrap.Modal(document.getElementById('imageModal'));
+    myModal.show();
+}
+
+function changeImage(direction) {
+    currentIndex += direction;
+
+    // Loop back to start or end
+    if (currentIndex >= currentImages.length) {
+        currentIndex = 0;
+    } else if (currentIndex < 0) {
+        currentIndex = currentImages.length - 1;
+    }
+
+    updateModalImage();
+}
+
+function updateModalImage() {
+    const modalImg = document.getElementById('modalImg');
+    const path = 'uploads/' + currentImages[currentIndex].trim();
+    modalImg.src = path;
+
+    // Optional: Hide buttons if there is only 1 image
+    const display = currentImages.length > 1 ? 'block' : 'none';
+    document.getElementById('prevBtn').style.display = display;
+    document.getElementById('nextBtn').style.display = display;
+}
+
+// Optional: Add keyboard support (Left/Right arrows)
+document.addEventListener('keydown', function(e) {
+    if (document.getElementById('imageModal').classList.contains('show')) {
+        if (e.key === "ArrowLeft") changeImage(-1);
+        if (e.key === "ArrowRight") changeImage(1);
+    }
+});
     function openImageModal(imgSrc) {
     const modalImg = document.getElementById('modalImg');
     modalImg.src = imgSrc;
@@ -335,6 +459,47 @@ else: ?>
 const AJAX = 'announcement_ajax.php';
 const EM   = {like:'👍',love:'❤️',haha:'😂',wow:'😮',sad:'😢',angry:'😡'};
 
+// --- Reaction Picker: hold to open ---
+let holdTimer = null;
+let pickerOpen = null;
+
+function startHold(id) {
+    holdTimer = setTimeout(() => {
+        openPicker(id);
+    }, 400); // hold 400ms to open picker
+}
+
+function cancelHold() {
+    clearTimeout(holdTimer);
+    holdTimer = null;
+}
+
+function openPicker(id) {
+    // Close any open picker first
+    if (pickerOpen && pickerOpen !== id) {
+        document.getElementById('picker-' + pickerOpen)?.classList.remove('open');
+    }
+    const picker = document.getElementById('picker-' + id);
+    picker.classList.toggle('open');
+    pickerOpen = picker.classList.contains('open') ? id : null;
+}
+
+// Close picker when clicking outside
+document.addEventListener('click', function(e) {
+    if (pickerOpen && !e.target.closest('.fb-react-btn')) {
+        document.getElementById('picker-' + pickerOpen)?.classList.remove('open');
+        pickerOpen = null;
+    }
+});
+
+function pickReaction(e, annId, type) {
+    e.stopPropagation();
+    // Close the picker
+    document.getElementById('picker-' + annId)?.classList.remove('open');
+    pickerOpen = null;
+    react(annId, type);
+}
+
 function toggleComments(id){
     const el=document.getElementById('comments-'+id);
     const show=el.style.display==='none';
@@ -343,30 +508,90 @@ function toggleComments(id){
 }
 
 function quickLike(e,id){
-    if(e.target.closest('.reaction-option')||e.target.closest('.reaction-picker')) return;
+    // Don't fire if clicking a reaction option or if picker is open
+    if(e.target.closest('.reaction-option') || e.target.closest('.reaction-picker')) return;
+    if(pickerOpen === id) {
+        document.getElementById('picker-' + id)?.classList.remove('open');
+        pickerOpen = null;
+        return;
+    }
     const btn=document.getElementById('like-btn-'+id);
     const cur=btn.dataset.current||'like';
     react(id,cur);
 }
 
-function react(annId,type){
-    fetch(AJAX,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:`action=toggle_reaction&announcement_id=${annId}&reaction_type=${type}`})
-    .then(r=>r.json()).then(d=>{
-        if(!d.success)return;
-        const btn=document.getElementById('like-btn-'+annId);
-        btn.className='fb-react-btn'+(d.user_reaction?' reacted-'+d.user_reaction:'');
-        btn.dataset.current=d.user_reaction||'like';
-        document.getElementById('like-icon-'+annId).textContent=d.user_reaction?EM[d.user_reaction]:'👍';
-        document.getElementById('like-label-'+annId).textContent=d.user_reaction?(d.user_reaction.charAt(0).toUpperCase()+d.user_reaction.slice(1)):'Like';
-        const total=d.counts.reduce((s,r)=>s+parseInt(r.count),0);
-        document.getElementById('react-total-'+annId).textContent=total>0?total:'';
-        const sorted=[...d.counts].sort((a,b)=>b.count-a.count).slice(0,3);
-        document.getElementById('bubbles-'+annId).innerHTML=sorted.filter(r=>r.count>0).map(r=>
-            `<div class="reaction-emoji-bubble bg-${r.reaction_type}" title="${r.reaction_type}">${EM[r.reaction_type]}</div>`).join('');
+function react(annId, type) {
+    const btn = document.getElementById('like-btn-' + annId);
+    const label = document.getElementById('like-label-' + annId);
+    const icon = document.getElementById('like-icon-' + annId);
+    const totalEl = document.getElementById('react-total-' + annId);
+    
+    // 1. OPTIMISTIC UPDATE: Change the UI immediately
+    const isRemoving = btn.classList.contains('reacted-' + type);
+    const prevClass = btn.className;
+    const prevLabel = label.textContent;
+    const prevIcon = icon.textContent;
+    const prevTotal = parseInt(totalEl.textContent || 0);
+
+    if (isRemoving) {
+        // User is clicking the same reaction to remove it
+        btn.className = 'fb-react-btn';
+        label.textContent = 'Like';
+        icon.textContent = '👍';
+        totalEl.textContent = (prevTotal - 1) > 0 ? (prevTotal - 1) : '';
+        btn.dataset.current = '';
+    } else {
+        // User is adding or changing a reaction
+        const wasReacted = btn.dataset.current !== "";
+        btn.className = 'fb-react-btn reacted-' + type;
+        label.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+        icon.textContent = EM[type];
+        
+        // If they hadn't reacted before, increase count. If they are just changing types, keep count same.
+        if (!wasReacted) {
+            totalEl.textContent = prevTotal + 1;
+        }
+        btn.dataset.current = type;
+    }
+
+    // 2. BACKGROUND REQUEST: Send to InfinityFree
+    fetch(AJAX, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=toggle_reaction&announcement_id=${annId}&reaction_type=${type}`
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.success) {
+            // Rollback if server had an error
+            btn.className = prevClass;
+            label.textContent = prevLabel;
+            icon.textContent = prevIcon;
+            totalEl.textContent = prevTotal > 0 ? prevTotal : '';
+            return;
+        }
+
+        // 3. SILENT UPDATE: Update the "bubbles" and final total correctly once server responds
+        const total = d.counts.reduce((s, r) => s + parseInt(r.count), 0);
+        totalEl.textContent = total > 0 ? total : '';
+        
+        const sorted = [...d.counts].sort((a, b) => b.count - a.count).slice(0, 3);
+        document.getElementById('bubbles-' + annId).innerHTML = sorted
+            .filter(r => r.count > 0)
+            .map(r => `<div class="reaction-emoji-bubble bg-${r.reaction_type}" title="${r.reaction_type}">${EM[r.reaction_type]}</div>`)
+            .join('');
+            
+        // Final sync of state just in case
+        btn.dataset.current = d.user_reaction || '';
+    })
+    .catch(err => {
+        // Rollback on connection failure
+        btn.className = prevClass;
+        label.textContent = prevLabel;
+        icon.textContent = prevIcon;
+        totalEl.textContent = prevTotal > 0 ? prevTotal : '';
     });
 }
-
 function onCommentInput(ta,id){
     ta.style.height='auto';
     ta.style.height=Math.min(ta.scrollHeight,120)+'px';

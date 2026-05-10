@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -132,22 +135,6 @@
                 <a class="nav-link" href="staff_blotterreport.php">
                     <i class="fas fa-user-shield"></i>
                     <span>Peace and Order Report</span></a>
-            </li>
-
-            <!-- Programs & Activities -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePrograms"
-                    aria-expanded="true" aria-controls="collapsePrograms">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Programs &amp; Activities</span>
-                </a>
-                <div id="collapsePrograms" class="collapse" aria-labelledby="headingPrograms"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="admn_programs.php"><i class="fas fa-list me-2"></i>Manage Programs</a>
-                        <a class="collapse-item" href="admn_programs.php?view=calendar"><i class="fas fa-calendar me-2"></i>Event Calendar</a>
-                    </div>
-                </div>
             </li>
 
             <!-- Divider -->

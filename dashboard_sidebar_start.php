@@ -74,9 +74,9 @@
                     <i class="bi bi-chat-left-text"></i>
                     <span>Messages</span></a>
             </li>
-            <li class="nav-item">
+        <li class="nav-item">
                 <a class="nav-link" href="admn_complaints.php">
-                    <i class="fas fa-bullhorn"></i>
+                    <i class="bi bi-person-exclamation"></i>
                     <span>Complaints</span></a>
             </li>
             <!-- Divider -->
@@ -93,7 +93,6 @@
                     <i class="fas fa-bullhorn"></i>
                     <span>Announcements</span></a>
             </li>
-
 
             <li class="nav-item">
                 <a class="nav-link" href="admn_youth_profile.php">

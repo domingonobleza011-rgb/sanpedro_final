@@ -1,7 +1,4 @@
-<?php
-$userdetails = $_SESSION['userdata'];
-$resident_id = $userdetails['id_resident'];
-?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,12 +19,6 @@ $resident_id = $userdetails['id_resident'];
     <style>
         body {
             background-color: #f8f9fa;
-        }
-        .hero-section {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 60px 0 80px 0;
-            border-bottom: 5px solid #ffc107; /* Added a gold accent line */
         }
         .feature-icon {
             font-size: 3.5rem;
@@ -460,28 +451,36 @@ $resident_id = $userdetails['id_resident'];
                 height: 120px;
                 width: 120px;
             }
+
             
     </style>
 </head>
-<body class="text-center"> <header class="hero-section">
-        <div class="container">
-            <a href="resident_homepage.php" class="btn-home-outline">
-                <i class="bi bi-house-door-fill me-2"></i> RETURN TO HOME
+<header class="hero-section">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="resident_homepage.php">Barangay San Pedro Management System</a>
+        
+        <div class="d-flex align-items-center ms-auto">
+            <a href="resident_homepage.php" class="btn btn-primary me-3">
+                <i class="fa fa-home fa-lg"></i> Home
             </a>
-<br><br><br> <hr style="
-    border: 2px solid #000; 
-    opacity: 1; 
-    width: 100vw; 
-    position: relative; 
-    left: 50%; 
-    right: 50%; 
-    margin-left: -50vw; 
-    margin-right: -50vw;">
-            <h1 class="display-3 fw-bold">System Overview</h1>
-            <p class="lead text-uppercase tracking-wider opacity-75">Smart Integrated Barangay Records & Youth Engagement System</p>
-            <p class="h5 fw-light">Barangay San Pedro, Iriga City</p>
+            
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle me-1"></i>
+                    <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                    <li><a class="btn" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user"></i> &nbsp; Profile</a></li>
+                    <li><a class="btn" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock"></i> &nbsp; Password</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="btn text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> &nbsp; Logout</a></li>
+                </ul>
+            </div>
         </div>
-    </header>
+    </div>
+</nav>
+</header>
     <main class="container my-5">
         
         <section class="row justify-content-center mb-10">

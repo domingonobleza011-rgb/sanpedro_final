@@ -1,6 +1,5 @@
 <?php
 
-    
     require('classes/main.class.php');
     $bmis->admin_changepass();
     $userdetails = $bmis->get_userdata();
@@ -16,7 +15,7 @@
         <meta charset="UTF-8">
         <link href="css/sb-admin-2.min.css" rel="stylesheet">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Change Password</title>
+        <title>Document</title>
         
     </head>
     <body>

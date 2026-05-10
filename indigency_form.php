@@ -55,22 +55,22 @@ body {
     font-size: 22px;
     font-weight: bold;
     color: #003366;
-    margin-top: 20px;
+    margin-top: 10px !important;
     border-bottom: 2px solid #003366;
     padding-bottom: 5px;
 }
 
 h1 {
     text-align: center;
-    font-size: 28px;
-    margin-top: 30px;
+    font-size: 24px;
+    margin-top: 15px !important;
     text-transform: capitalize;
 }
 
 /* Body Text */
 .content {
-    margin-top: 50px;
-    line-height: 1.8;
+    margin-top: 30px !important;
+    line-height: 1.5;
     text-align: justify;
     font-size: 16px;
 }
@@ -82,7 +82,7 @@ h1 {
 
 /* Footer & Signature */
 .footer {
-    margin-top: 80px;
+    margin-top: 70px !important;
     display: flex;
     justify-content: flex-end;
 }
@@ -108,18 +108,36 @@ h1 {
 
 /* Print Settings */
 @media print {
-    .noprint {
-            display: none !important;
-        }
-    body { background: none; }
-    .certificate {
-        margin: 0;
-        border: none;
-        box-shadow: none;
-    }
     @page {
-        size: A4;
+        size: A4 portrait;
+        margin: 0; /* This removes the URL/Date at the top and bottom */
+    }
+
+    body {
         margin: 0;
+        padding: 0;
+    }
+
+    .certificate {
+        margin: 0 !important;
+        padding: 15mm !important; /* Slightly reduce padding to fit content */
+        width: 210mm;
+        height: 297mm; /* Force exact A4 height */
+        border: none !important;
+        box-shadow: none !important;
+        overflow: hidden; /* Prevents a stray line from creating Page 2 */
+    }
+    .header {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        /* Ensure the header has enough space at the top */
+        margin-top: 0 !important; 
+    }
+
+    .noprint {
+        display: none !important;
     }
 }
 </style>
@@ -161,16 +179,23 @@ h1 {
 </head>
 <body>
     <div class="certificate">
-        <div class="header">
-            <img src="icons/logo.png" class="seal1 left" alt="Barangay Seal">
-            <div class="header-text">
-                <p>Republic of the Philippines</p>
-                <p>Province of Camarines Sur</p>
-                <p>City of Iriga</p>
-                <p><strong>Barangay San Pedro</strong></p>
-            </div>
-            <img src="icons/Documents/seal.png" class="seal2 right" alt="City Seal">
-        </div>
+       <div class="header" style="width: 100%; margin-bottom: 20px;">
+    <div style="float: left; width: 100px;">
+        <img src="icons/logo.png" class="seal1" alt="Barangay Seal" style="display: block;">
+    </div>
+    
+    <div class="header-text" style="display: inline-block; text-align: center; width: calc(100% - 220px);">
+        <p>Republic of the Philippines</p>
+        <p>Province of Camarines Sur</p>
+        <p>City of Iriga</p>
+        <p><strong>Barangay San Pedro</strong></p>
+    </div>
+
+    <div style="float: right; width: 100px;">
+        <img src="icons/Documents/seal.png" class="seal2" alt="City Seal" style="display: block;">
+    </div>
+    <div style="clear: both;"></div> <!-- Clears the floats -->
+</div>
 
         <div class="office-title">
             OFFICE OF THE PUNONG BARANGAY
@@ -205,14 +230,11 @@ h1 {
     </div>
 </body>
 </html>
-    <button 
-        type="button" 
-        class="btn btn-success noprint" 
-        id="printpagebutton" 
-        style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px;" 
-        onclick="PrintElem('#clearance')">
-        Print 
-    </button>
+    <div class="text-center">
+        <button type="button" class="btn btn-success noprint" onclick="window.print()">
+            Print Certificate
+        </button>
+    </div>
     </body>
     <?php
     
@@ -220,10 +242,20 @@ h1 {
 
 
     <script>
-         function PrintElem(elem)
-    {
+        window.onload = function() {
         window.print();
-    }
+    };
+    
+    // Optional: Close the window/tab automatically after printing or canceling
+    window.onafterprint = function() {
+        window.close();
+    };
+function PrintElem(elem) {
+    // This ensures any elements with the 'noprint' class are hidden
+    // and the window focus is on the current document for the printer.
+    window.focus();
+    window.print();
+}
 
     function Popup(data) 
     {

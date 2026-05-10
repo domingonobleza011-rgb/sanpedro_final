@@ -7,7 +7,7 @@
 
 <table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
         <thead class="alert-info">
-			<th> Email </th>
+			
 			<th> Surname </th>
 			<th> First name </th>
 			<th> Middle name </th>
@@ -29,7 +29,7 @@
 			while($view = $stmnt->fetch()){
 		?>
 			<tr>
-				<td> <?= $view['email'];?> </td>
+			
 				<td> <?= $view['lname'];?> </td>
 				<td> <?= $view['fname'];?> </td>
 				<td> <?= $view['mi'];?> </td>
@@ -52,7 +52,7 @@
 <table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
         <thead class="alert-info">
 		<tr>
-			<th> Email </th>
+			
 			<th> Surname </th>
 			<th> First name </th>
 			<th> Middle name </th>
@@ -67,7 +67,7 @@
 		<?php if(is_array($view)) {?>
 			<?php foreach($view as $view) {?>
 				<tr>
-					<td> <?= $view['email'];?> </td>
+					
 					<td> <?= $view['lname'];?> </td>
 					<td> <?= $view['fname'];?> </td>
 					<td> <?= $view['mi'];?> </td>

@@ -3,11 +3,50 @@
    ini_set('display_errors', 1);
    require('classes/resident.class.php');
    
+   // --- FIREBASE INTEGRATION START ---
+   require 'vendor/autoload.php'; 
+   use Kreait\Firebase\Factory;
+   use Kreait\Firebase\Messaging\CloudMessage;
+   use Kreait\Firebase\Messaging\Notification;
+   // --- FIREBASE INTEGRATION END ---
+
    $userdetails = $bmis->get_userdata();
    $bmis->validate_admin();
    $current_admin_id = $userdetails['id_resident']; 
 
-   $bmis->create_announcement();
+   // Handle Announcement Creation
+   if(isset($_POST['create_announce'])) {
+       $bmis->create_announcement();
+       
+       // TRIGGER NOTIFICATION AFTER CREATION
+       try {
+           $factory = (new Factory)->withServiceAccount(__DIR__ . '/config/firebase_credentials.json');
+           $messaging = $factory->createMessaging();
+
+           // Fetch all resident tokens from your new table
+           // Ensure you have a global $conn or get it from your $bmis class
+           $tokenQuery = mysqli_query($bmis->conn, "SELECT token FROM resident_tokens");
+
+           if($tokenQuery && mysqli_num_rows($tokenQuery) > 0) {
+               while($tokenRow = mysqli_fetch_assoc($tokenQuery)) {
+                   $deviceToken = $tokenRow['token'];
+                   
+                   $message = CloudMessage::withTarget('token', $deviceToken)
+                       ->withNotification(Notification::create(
+                           'Barangay San Pedro Alert', 
+                           substr($_POST['event'], 0, 100) . '...' // Sends first 100 chars of your message
+                       ))
+                       ->withData(['click_action' => 'OPEN_ANNOUNCEMENTS']);
+
+                   $messaging->send($message);
+               }
+           }
+       } catch (\Exception $e) {
+           // Silently fail or log error so the page doesn't crash if Firebase is down
+           error_log("Firebase Error: " . $e->getMessage());
+       }
+   }
+
    $bmis->admin_delete_announcement(); 
    
    $view = $bmis->view_announcement(); 
@@ -15,8 +54,6 @@
 
    $dt = new DateTime("now", new DateTimeZone('Asia/Manila'));
    $cdate = $dt->format('Y/m/d');   
-   
-   // DO NOT put $bmis->get_reactions($row['...']) here!
 ?>
 
 <?php include('dashboard_sidebar_start.php'); ?>
@@ -36,7 +73,7 @@
 <div class="main-container">
     <div class="row mb-5"> 
         <div class="col-md-12"> 
-            <h2 class="text-center fw-bold text-dark">Bulletin Management</h2>
+            <h2 class="text-center fw-bold text-dark">ANNOUNCEMENTS!!!!!!</h2>
             <p class="text-center text-muted">Create and manage announcements for Barangay San Pedro</p>
         </div>
     </div>
@@ -54,14 +91,15 @@
                             <textarea name="event" class="form-control" rows="5" placeholder="What is happening in the Barangay?" style="border-radius: 10px; border: 1px solid #dee2e6;"></textarea>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold"><i class="fas fa-image text-primary me-2"></i>Upload Poster</label>
-                            <input type="file" name="announcement_img" class="form-control" accept="image/*" style="border-radius: 10px;">
-                            <small class="text-muted">High-quality JPG or PNG recommended.</small>
-                        </div>
+                        <!-- Change your input to this -->
+<div class="mb-4">
+    <label class="form-label fw-bold"><i class="fas fa-image text-primary me-2"></i>Upload Posters</label>
+    <input type="file" name="announcement_img[]" class="form-control" accept="image/*" multiple style="border-radius: 10px;">
+    <small class="text-muted">You can select more than one image.</small>
+</div>
 
                         <input type="hidden" name="start_date" value="<?= $cdate?>">
-                        <input name="addedby" type="hidden" value="<?= $userdetails['surname']?>, <?= $userdetails['firstname']?>">
+                        <input name="addedby" type="hidden" value="<?= $userdetails['surname']?>, <?= $userdetails['firstname']?> <?= $userdetails['mname']?>">
                         
                         <button type="submit" name="create_announce" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius: 10px;"> 
                             Publish Announcement 

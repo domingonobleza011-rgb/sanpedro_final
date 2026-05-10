@@ -11,7 +11,7 @@ class BMISClass {
     protected $con;
 
 
-    public function show_404()
+     public function show_404()
     {
         http_response_code(404);
         echo "Page is currently unavailable";
@@ -261,36 +261,41 @@ class BMISClass {
 
 public function create_announcement() {
     if(isset($_POST['create_announce'])) {
-        // We don't usually manually set id_announcement if it's Auto-Increment
         $event = $_POST['event'];
         $start_date = $_POST['start_date'];
         $addedby = $_POST['addedby'];
-        $image_name = null; // Default if no image is uploaded
+        $uploaded_images = []; // Array to hold new filenames
 
-        // Check if an image was actually uploaded
-        if(isset($_FILES['announcement_img']) && $_FILES['announcement_img']['error'] == 0) {
+        // Check if images were uploaded
+        if(isset($_FILES['announcement_img']) && !empty($_FILES['announcement_img']['name'][0])) {
             $upload_dir = "uploads/";
             
-            // Create directory if it doesn't exist
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
 
-            // Generate a unique name to prevent overwriting files with the same name
-            $file_ext = pathinfo($_FILES['announcement_img']['name'], PATHINFO_EXTENSION);
-            $image_name = time() . '_' . uniqid() . '.' . $file_ext;
-            $target_file = $upload_dir . $image_name;
+            // Loop through each file
+            foreach($_FILES['announcement_img']['name'] as $key => $name) {
+                if($_FILES['announcement_img']['error'][$key] == 0) {
+                    $file_ext = pathinfo($name, PATHINFO_EXTENSION);
+                    $new_name = time() . '_' . uniqid() . '.' . $file_ext;
+                    $target_file = $upload_dir . $new_name;
 
-            // Move the file from temporary storage to your uploads folder
-            move_uploaded_file($_FILES['announcement_img']['tmp_name'], $target_file);
+                    if(move_uploaded_file($_FILES['announcement_img']['tmp_name'][$key], $target_file)) {
+                        $uploaded_images[] = $new_name;
+                    }
+                }
+            }
         }
 
-        $connection = $this->openConn();
-        // Added 'image' column to your INSERT statement
-        $stmt = $connection->prepare("INSERT INTO tbl_announcement (`event`, `start_date`, `addedby`, `image`, `status`) VALUES (?, ?, ?, ?, 'active')");
-        $stmt->execute([$event, $start_date, $addedby, $image_name]);
+        // Convert the array of names into a single string (e.g., "img1.jpg,img2.jpg")
+        $image_string = !empty($uploaded_images) ? implode(',', $uploaded_images) : null;
 
-        echo "<script type='text/javascript'>alert('Announcement Added');</script>";
+        $connection = $this->openConn();
+        $stmt = $connection->prepare("INSERT INTO tbl_announcement (`event`, `start_date`, `addedby`, `image`, `status`) VALUES (?, ?, ?, ?, 'active')");
+        $stmt->execute([$event, $start_date, $addedby, $image_string]);
+
+        echo "<script type='text/javascript'>alert('Announcement Added with " . count($uploaded_images) . " images');</script>";
         header('refresh:0');
     }
 }
@@ -335,24 +340,25 @@ public function admin_delete_announcement(){
         $id_announcement = $_POST['id_announcement'];
         $connection = $this->openConn(); 
 
-        // 1. Get the filename first
         $stmt = $connection->prepare("SELECT image FROM tbl_announcement WHERE id_announcement = ?");
         $stmt->execute([$id_announcement]);
         $row = $stmt->fetch();
 
-        // 2. Delete the actual file from the folder if it exists
         if($row && !empty($row['image'])) {
-            $file_path = "uploads/" . $row['image'];
-            if(file_exists($file_path)) {
-                unlink($file_path);
+            // Split the string back into an array
+            $images = explode(',', $row['image']);
+            foreach($images as $img) {
+                $file_path = "uploads/" . trim($img);
+                if(file_exists($file_path)) {
+                    unlink($file_path);
+                }
             }
         }
 
-        // 3. Delete from database
         $stmt = $connection->prepare("DELETE FROM tbl_announcement WHERE id_announcement = ?");
         $stmt->execute([$id_announcement]);
 
-        echo "<script>alert('Announcement Deleted'); window.location.href='".basename($_SERVER['PHP_SELF'])."';</script>";
+        echo "<script>alert('Announcement and all images deleted'); window.location.href='".basename($_SERVER['PHP_SELF'])."';</script>";
         exit();
     }
 }
@@ -1254,14 +1260,7 @@ public function update_blotter() {
         header("refresh: 0");
     }
 }
-
-    
-
-// ─────────────────────────────────────────────────────────────────
-// ANNOUNCEMENT COMMENTS & REACTIONS
-// ─────────────────────────────────────────────────────────────────
-
-    public function add_comment($announcement_id, $user_id, $comment_text) {
+      public function add_comment($announcement_id, $user_id, $comment_text) {
         $connection = $this->openConn();
         $stmt = $connection->prepare(
             "INSERT INTO tbl_announcement_comments (announcement_id, user_id, comment_text, created_at)
@@ -1346,6 +1345,8 @@ public function update_blotter() {
         $row = $stmt->fetch();
         return $row ? $row['reaction_type'] : null;
     }
+
+    
 
 }
 

@@ -5,7 +5,7 @@
 		$keyword = $_POST['keyword'];
 ?>
 
-<table class="table table-hover table-bordered text-center table-responsive" >
+<table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
 	<thead class="alert-info">
 		<tr>
 			<th> Surname </th>

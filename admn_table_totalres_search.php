@@ -1,5 +1,5 @@
 <?php
-	// require the database connection
+	// require the database connection 
 	require 'classes/conn.php';
 	if(isset($_POST['search_totalres'])){
 		$keyword = $_POST['keyword'];
@@ -7,7 +7,7 @@
 <table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
         <thead class="alert-info">
                 <tr>
-                        <th> Email </th>
+                        
                         <th> fullname </th>
                         <th> Age </th>
                         <th> Sex </th>
@@ -36,7 +36,7 @@
                 while($view = $stmnt->fetch()){
                 ?>
                         <tr>
-                                <td> <?= $view['email'];?> </td>
+                                
                                 <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
                                 <td> <?= $view['age'];?> </td>
                                 <td> <?= $view['sex'];?> </td>
@@ -64,7 +64,7 @@
 <table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
         <thead class="alert-info">
                 <tr>
-                        <th> Email </th>
+                       
                         <th> Fullname </th>
                         <th> Age </th>
                         <th> Sex </th>
@@ -82,7 +82,7 @@
                 <?php if(is_array($view)) {?>
                         <?php foreach($view as $view) {?>
                                 <tr>
-                                        <td> <?= $view['email'];?> </td>
+                                       
                                         <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
                                         <td> <?= $view['age'];?> </td>
                                         <td> <?= $view['sex'];?> </td>

@@ -8,17 +8,17 @@
     <table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
         <thead class="alert-info">
             <tr>
-                <th style="width: 10%;">Actions</th>
-                <th style="width: 5%;">Youth ID</th>
-                <th style="width: 50%;">FullName</th>
-                <th style="width: 50%;">Age</th>
-                <th style="width: 50%;">Sex</th>
-                <th style="width: 50%;">status</th>
-                <th style="width: 50%;">Contact</th>
-                <th style="width: 50%;">Email</th>
-                <th style="width: 50%;">Education</th>
-                <th style="width: 50%;">Employed</th>
-                <th style="width: 100%;">Skills</th>
+                 <th>Actions</th>
+                <th>Youth ID</th>
+                <th>FullName</th>
+                <th>Age</th>
+                <th>Sex</th>
+                <th>status</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Education</th>
+                <th>Employed</th>
+                <th>Skills</th>
             </tr>
         </thead>
         <tbody>
@@ -69,17 +69,17 @@
     <table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
         <thead class="alert-info">
             <tr>
-                <th style="width: 10%;">Actions</th>
-                <th style="width: 5%;">Youth ID</th>
-                <th style="width: 50%;">FullName</th>
-                <th style="width: 50%;">Age</th>
-                <th style="width: 50%;">Sex</th>
-                <th style="width: 50%;">status</th>
-                <th style="width: 50%;">Contact</th>
-                <th style="width: 50%;">Email</th>
-                <th style="width: 50%;">Education</th>
-                <th style="width: 50%;">Employed</th>
-                <th style="width: 100%;">Skills</th>
+                <th>Actions</th>
+                <th>Youth ID</th>
+                <th>FullName</th>
+                <th>Age</th>
+                <th>Sex</th>
+                <th>status</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Education</th>
+                <th>Employed</th>
+                <th>Skills</th>
             </tr>
         </thead>
         <tbody>

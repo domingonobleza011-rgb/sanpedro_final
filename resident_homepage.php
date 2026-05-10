@@ -1,4 +1,6 @@
-<?php 
+<?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require('secure_header.php'); 
     error_reporting(E_ALL ^ E_WARNING);
     include('classes/resident.class.php');
     $userdetails = $bmis->get_userdata();
@@ -56,7 +58,47 @@
         
 
     <style>
+/* Mobile Bottom Nav Styling */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1050;
+    border-top: 1px solid #dee2e6;
+}
 
+.mobile-bottom-nav .nav-item {
+    text-decoration: none;
+    color: #6c757d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.7rem; /* Small text for mobile */
+    font-weight: 500;
+}
+
+.mobile-bottom-nav .nav-item i {
+    font-size: 1.4rem; /* Larger icons for easy tapping */
+    margin-bottom: 2px;
+}
+
+.mobile-bottom-nav .nav-item:active {
+    color: #0d6efd;
+}
+
+/* Add padding to the bottom of the body so content isn't hidden by the nav */
+@media (max-width: 767px) {
+    body {
+        padding-bottom: 80px;
+    }
+}
     /* Navbar Buttons */
 
   .service-card {
@@ -280,43 +322,45 @@
 
         <!-- Eto yung navbar -->
 
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <!-- DESKTOP NAVBAR (Hidden on Mobile) -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="resident_homepage.php">
-            <i class="bi bi-building me-1"></i> Barangay San Pedro
+            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="mainNavbar">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" href="resident_homepage.php"><i class="fa fa-home me-1"></i> Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="resident_announcement.php"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#services-section"><i class="bi bi-grid-fill me-1"></i> Services</a>
-                </li>
-            </ul>
-            <div class="d-flex align-items-center">
-                <div class="dropdown">
-                    <button class="btn btn-light btn-sm dropdown-toggle text-primary fw-semibold" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-1"></i>
-                        <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                        <li><a class="dropdown-item" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user me-2"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock me-2"></i> Change Password</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                    </ul>
-                </div>
-            </div>
+        <div class="d-flex ms-auto">
+            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
+            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
+            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
+            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
+            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
         </div>
     </div>
 </nav>
+
+<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
+<div class="mobile-bottom-nav d-md-none">
+    <a href="resident_homepage.php" class="nav-item">
+        <i class="bi bi-house-door-fill"></i>
+        <span>Home</span>
+    </a>
+    <a href="resident_announcement.php" class="nav-item">
+        <i class="bi bi-megaphone-fill"></i>
+        <span>News</span>
+    </a>
+    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-person-badge"></i>
+        <span>Profile</span>
+    </a>
+    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-shield-lock"></i>
+        <span>Pass</span>
+    </a>
+    <a href="logout.php" class="nav-item text-danger">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Exit</span>
+    </a>
+</div>
 
 <style>
 /* ===== FACEBOOK-STYLE ANNOUNCEMENT FEED ===== */
@@ -538,7 +582,9 @@
 
 <div class="container my-5">
 
-<?php if (!$is_verified): ?>
+<?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if (!$is_verified): ?>
 <!-- VERIFICATION NOTICE BANNER -->
 <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 p-4" role="alert" style="border-left: 6px solid #ffc107 !important;">
     <div class="d-flex align-items-start gap-3">
@@ -553,26 +599,38 @@
         </div>
     </div>
 </div>
-<?php else: ?>
+<?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); else: ?>
 <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 py-2 px-4" role="alert">
     <i class="bi bi-patch-check-fill me-2"></i> <strong>Account Verified</strong> &mdash; You have full access to all barangay services.
 </div>
-<?php endif; ?>
+<?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); endif; ?>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
 
         <!-- CERTIFICATE SERVICES (locked if not verified) -->
 
         <div class="col">
-            <?php if ($is_verified): ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_business.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php else: ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php endif; ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
-                            <?php if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+                            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-file-earmark-medical-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Business Permit</h4>
                         </div>
@@ -582,15 +640,23 @@
         </div>
 
         <div class="col">
-            <?php if ($is_verified): ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_brgyid.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php else: ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php endif; ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
-                            <?php if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+                            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-person-vcard-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Barangay ID</h4>
                         </div>
@@ -600,15 +666,23 @@
         </div>
 
         <div class="col">
-            <?php if ($is_verified): ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_certofindigency.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php else: ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php endif; ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
-                            <?php if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+                            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-briefcase-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Certificate of Indigency</h4>
                         </div>
@@ -618,15 +692,23 @@
         </div>
 
         <div class="col">
-            <?php if ($is_verified): ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_certofres.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php else: ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php endif; ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
-                            <?php if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+                            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-house-check-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Certificate of Residency</h4>
                         </div>
@@ -636,15 +718,23 @@
         </div>
 
         <div class="col">
-            <?php if ($is_verified): ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_brgyclearance.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php else: ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php endif; ?>
+            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
-                            <?php if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+                            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-shield-lock-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Barangay Clearance</h4>
                         </div>
@@ -686,10 +776,14 @@
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body text-center">
-                            <?php if (!$is_verified): ?><span class="badge bg-warning text-dark float-end">Action Needed</span><?php endif; ?>
+                            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-warning text-dark float-end">Action Needed</span><?php endif; ?>
                             <i class="bi bi-chat-dots-fill fs-1"></i>
                             <h4 class="mt-2 text-dark">Messages</h4>
-                            <?php if (!$is_verified): ?><small class="text-warning fw-bold">Upload ID here</small><?php endif; ?>
+                            <?php
+define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php'); if (!$is_verified): ?><small class="text-warning fw-bold">Upload ID here</small><?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -743,123 +837,6 @@ function showVerifyAlert() {
 </script>
 
         </section>
-
-        <br>
-        <br>
-        <br>
-
-        <!-- Footer -->
-
-        <footer id="footer" class="bg-primary text-white d-flex-column text-center">
-            <hr class="mt-0">
-
-            <div class="text-center">
-                <h1 class="text-white">Services</h1>
-                <ul class="list-unstyled list-inline">
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Documents">
-                    <i class="fas fa-file fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="footerlinks sbtn btn-large mx-1" title="Card">
-                    <i class="fas fa-id-card fa-2x"></i>
-                    </a>
-                    
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Friends">
-                    <i class="fas fa-user-friends fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Blotter">
-                    <i class="fas fa-user-shield fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Contact">
-                    <i class="fas fa-phone fa-2x"></i>
-                    </a>
-                </li>
-                </ul>
-            </div>
-
-            <hr class="mb-0">
-
-            <!--Footer Links-->
-
-            <div class="container text-left text-md-center">
-                <div class="row">
-
-                    <!--First column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Documentation</h5>
-                        <div class="d-md-none title" data-target="#Documentation" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Documentation
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <ul class="list-unstyled collapse" id="Documentation">
-                            <li><a class="footerlinks" href="services_certofres.php">Certificate of Residency</a></li>
-                            <li><a class="footerlinks" href="services_brgyclearance.php">Barangay Clearance</a></li>
-                            <li><a class="footerlinks" href="services_certofindigency.php">Certificate of Indigency</a></li>
-                            <li><a class="footerlinks" href="services_business.php">Business Permit</a></li>
-                            <li><a class="footerlinks" href="services_brgyid.php">Barangay ID</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.First column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
-
-                    <!--Third column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Other Services</h5>
-                        <div class="d-md-none title" data-target="#OtherServices" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Other Services
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="list-unstyled collapse" id="OtherServices">
-                            <li><a class="footerlinks" href="services_blotter.php">Peace and Order</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.Third column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
- 
-     
-
-                </div>
-            </div>
-
-        
 
         <script>
             $(document).ready(function(){

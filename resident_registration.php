@@ -34,7 +34,7 @@
 
 <body>
 
-    <div class="container-fluid" style="margin-top: 2em;">
+   <div class="container-fluid" style="margin-top: 2em;">
         <div class="row">
             <div class="col-12">
                 <h1 class="text-center">Registration Form</h1>
@@ -64,12 +64,13 @@
                             </div>
 
                             <div class="row g-3 mtop">
-                                <div class="col-md-4">
-                                    <label class="form-label">Contact Number:</label>
-                                    <input type="tel" class="form-control" name="contact" maxlength="11" pattern="[0-9]{11}" placeholder="09123456789" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Email or Phone Number:</label>
+    <div class="col-md-4">
+        <label class="form-label">Contact Number:</label>
+        <input type="tel" class="form-control" name="contact" maxlength="11" pattern="[0-9]{11}" placeholder="09123456789" required>
+    </div>
+
+   <div class="col-md-4">
+                                    <label class="form-label"> Username or Phone Number:</label>
                                     <input type="text" class="form-control" name="login_identity" placeholder="Enter Email or Phone Number" required>
                                 </div>
 <div class="col-md-4">
@@ -199,7 +200,6 @@
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <div class="modal-content">

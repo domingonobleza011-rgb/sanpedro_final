@@ -1,5 +1,5 @@
 <?php
-	// require the database connection
+	// require the database connection 
 	require 'classes/conn.php';
 
 	if(isset($_POST['search_household'])){

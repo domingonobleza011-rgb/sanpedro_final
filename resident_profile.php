@@ -1,5 +1,7 @@
 <?php 
     error_reporting(E_ALL ^ E_WARNING);
+define('BMIS_ROLE_REQUIRED', 'resident');
+require('secure_header.php'); 
     require('classes/resident.class.php');
     ini_set('display_errors',0);
     $userdetails = $residentbmis->get_userdata();
@@ -16,21 +18,21 @@
 
     <head> 
     <title> Barangay Management System </title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
+      <!-- responsive tags for screen compatibility -->
+      <meta name="viewport" content="width=device-width, initial-scale=1"><!-- bootstrap css --> 
+      <link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+      <!-- fontawesome icons --> 
+      <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 
     <style>
 
         /* Back-to-Top */
-/* Navbar Customization */
-        .navbar { padding: 0.8rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .navbar-brand { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .dropdown-menu { border-radius: 10px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .dropdown-menu .btn { text-align: left; width: 100%; padding: 10px 20px; font-size: 0.9rem; }
-        .dropdown-menu .btn:hover { background: #f8f9fa; }
+
         .top-link {
         transition: all 0.25s ease-in-out;
         position: fixed;
@@ -261,11 +263,47 @@
         -webkit-transform: scale(1.4); /* Safari 3-8 */
         transform: scale(1.4); 
         }
-        .navbar { padding: 0.8rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .navbar-brand { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .dropdown-menu { border-radius: 10px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .dropdown-menu .btn { text-align: left; width: 100%; padding: 10px 20px; font-size: 0.9rem; }
-        .dropdown-menu .btn:hover { background: #f8f9fa; }
+/* Mobile Bottom Nav Styling */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1050;
+    border-top: 1px solid #dee2e6;
+}
+
+.mobile-bottom-nav .nav-item {
+    text-decoration: none;
+    color: #6c757d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.7rem; /* Small text for mobile */
+    font-weight: 500;
+}
+
+.mobile-bottom-nav .nav-item i {
+    font-size: 1.4rem; /* Larger icons for easy tapping */
+    margin-bottom: 2px;
+}
+
+.mobile-bottom-nav .nav-item:active {
+    color: #0d6efd;
+}
+
+/* Add padding to the bottom of the body so content isn't hidden by the nav */
+@media (max-width: 767px) {
+    body {
+        padding-bottom: 80px;
+    }
+}
     </style>
     <body> 
 
@@ -278,301 +316,184 @@
 
         <!-- Eto yung navbar -->
 
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+ <!-- DESKTOP NAVBAR (Hidden on Mobile) -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
     <div class="container-fluid">
-        <a class="navbar-brand" href="resident_homepage.php">Barangay San Pedro Management System</a>
-        
-        <div class="d-flex align-items-center ms-auto">
-            <a href="resident_homepage.php" class="btn btn-primary me-3">
-                <i class="fa fa-home fa-lg"></i> Home
-            </a>
-            
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-user-circle me-1"></i>
-                    <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                    <li><a class="btn" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user"></i> &nbsp; Profile</a></li>
-                    <li><a class="btn" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock"></i> &nbsp; Password</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="btn text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> &nbsp; Logout</a></li>
-                </ul>
-            </div>
+        <a class="navbar-brand fw-bold" href="resident_homepage.php">
+            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
+        </a>
+        <div class="d-flex ms-auto">
+            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
+            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
+            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
+            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
+            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
         </div>
     </div>
 </nav>
+
+<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
+<div class="mobile-bottom-nav d-md-none">
+    <a href="resident_homepage.php" class="nav-item">
+        <i class="bi bi-house-door-fill"></i>
+        <span>Home</span>
+    </a>
+    <a href="resident_announcement.php" class="nav-item">
+        <i class="bi bi-megaphone-fill"></i>
+        <span>News</span>
+    </a>
+    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-person-badge"></i>
+        <span>Profile</span>
+    </a>
+    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-shield-lock"></i>
+        <span>Pass</span>
+    </a>
+    <a href="logout.php" class="nav-item text-danger">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Exit</span>
+    </a>
+</div>
 
         <div id="down2"></div>
 
         <br>
 
-        <div class="container"> 
-            <div class="card" style="margin-top: 2em;">  
-                    <div class="card-header bg-primary text-white" style="font-size:20px"> Personal Information </div>
-                <div class="card-body"> 
-                    <form method="post">
+        <div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0"><i class="fas fa-id-card me-2"></i> Resident Profile Management</h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="post">
 
-                        <h6>
-                            <i class="fas fa-user-circle"></i>
-                            View Information
-                        </h6>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-user-circle text-primary fa-lg me-2"></i>
+                    <h6 class="mb-0 fw-bold">Permanent Records</h6>
+                </div>
+                <hr class="mt-0">
 
-                        <hr>
-
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Last Name:</label>
-                                    <input class="form-control" value="<?= $resident['lname'];?>" >
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>First Name:</label>
-                                    <input class="form-control" value="<?= $resident['fname'];?>" >
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Middle Name:</label>
-                                    <input class="form-control" value="<?= $resident['mi'];?>" >
-                                </div>
-                            </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="small fw-bold">Last Name</label>
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['lname']); ?>">
                         </div>
-
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Email:</label>
-                                    <input class="form-control" value="<?= $resident['email'];?>" >
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Sex:</label>
-                                    <input class="form-control" value="<?= $resident['sex'];?>" >
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Nationality:</label>
-                                    <input  class="form-control" value="<?= $resident['nationality'];?>">
-                                </div>
-                            </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="small fw-bold">First Name</label>
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['fname']); ?>">
                         </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="small fw-bold">Middle Name</label>
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['mi']); ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="small fw-bold">username</label>
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['login_identity']); ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="small fw-bold">Sex</label>
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['sex']); ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="small fw-bold">Nationality</label>
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['nationality']); ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="small fw-bold">Date of Birth</label>
+                            <input type="date" class="form-control bg-light" value="<?= $resident['bdate']; ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="small fw-bold">Place of Birth</label>
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['bplace']); ?>">
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="row">
-    <div class="col">
-        <div class="form-group">
-            <label>Birth Date:</label>
-            <input type="date" class="form-control" name="bdate" value="<?= $resident['bdate'];?>">
+                <div class="d-flex align-items-center mb-3 mt-5">
+                    <i class="fas fa-user-edit text-primary fa-lg me-2"></i>
+                    <h6 class="mb-0 fw-bold">Update Account Details</h6>
+                </div>
+                <hr class="mt-0">
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="small fw-bold">Age</label>
+                            <input class="form-control" type="number" name="age" value="<?= $resident['age']; ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="small fw-bold">Civil Status</label>
+                            <select class="form-control" name="status">
+                                <option value="Single" <?= $resident['status'] == 'Single' ? 'selected' : ''; ?>>Single</option>
+                                <option value="Married" <?= $resident['status'] == 'Married' ? 'selected' : ''; ?>>Married</option>
+                                <option value="Widowed" <?= $resident['status'] == 'Widowed' ? 'selected' : ''; ?>>Widowed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="small fw-bold">Contact Number</label>
+                            <input class="form-control" type="tel" name="contact" maxlength="11" placeholder="09XXXXXXXXX" value="<?= $resident['contact']; ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="small fw-bold">House No.</label>
+                            <input class="form-control" type="text" name="houseno" value="<?= $resident['houseno']; ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="small fw-bold">Street</label>
+                            <input class="form-control" type="text" name="street" value="<?= $resident['street']; ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="small fw-bold">Barangay</label>
+                            <input class="form-control" type="text" name="brgy" value="<?= $resident['brgy']; ?>">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row justify-content-center">
+                    <div class="col-auto">
+                        <input name="lname" type="hidden" value="<?= $resident['lname']; ?>"/>
+                        <input name="mi" type="hidden" value="<?= $resident['mi']; ?>" />
+                        
+                        
+                        
+                        <button type="submit" name="profile_update" class="btn btn-primary px-5">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+
+               
+            </form>
         </div>
     </div>
 </div>
-                            <div class="col">
-                                <div class="form-group" id="down1">
-                                    <label>Birth Place:</label>
-                                    <input class="form-control" value="<?= $resident['bplace'];?>" >
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr>
-
-                        <h6>
-                            <i class="fas fa-user-edit"></i>
-                            Update Information
-                        </h6>
-
-                        <hr>
-
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Age:</label>
-                                    <input class="form-control" type="number" name="age" value="<?= $resident['age'];?>">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Status:</label>
-                                    <input class="form-control" type="text" name="status" value="<?= $resident['status'];?>">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Contact:</label>
-                                    <input class="form-control" type="tel" name="contact" maxlength="11" pattern="[0-9]{11}" value="<?= $resident['contact'];?>">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>House No:</label>
-                                    <input class="form-control" type="text" name="houseno" value="<?= $resident['houseno'];?>">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Street:</label>
-                                    <input class="form-control" type="text" name="street" value="<?= $resident['street'];?>">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Barangay:</label>
-                                    <input class="form-control" type="text" name="brgy" value="<?= $resident['brgy'];?>">
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr>
-
-                        <div class="row" style="margin-bottom: 5px;"> 
-                            <div class="col-xl-12">
-                                <div class="form-inline">
-                                    <input class="form-control" name="lname" type="hidden" value="<?= $resident['lname'];?>"/>
-                                    <input class="form-control" name="mi" type="hidden" value="<?= $resident['mi'];?>" />
-                                    <button type="submit button" class="btn btn-info" style="margin-left: 37%; width:143px;"  name="search_household">View Household</button>
-                                    <button class="btn btn-primary" style="margin-left: .2%; width:143px;" type="submit" name="profile_update"> Update </button>
-                                    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"></a>   
-                                    <div>
-                                        <br><br>
-                                        <?php include'testingsearch.php'?>  
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>                               
-            </div>
-        </div>
-
-        <br>
-        <br>
-        <br>
-
-        <!-- Footer -->
-
-        <footer id="footer" class="bg-primary text-white d-flex-column text-center">
-            <hr class="mt-0">
-
-            <div class="text-center">
-                <h1 class="text-white">Services</h1>
-                <ul class="list-unstyled list-inline">
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Documents">
-                    <i class="fas fa-file fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="footerlinks sbtn btn-large mx-1" title="Card">
-                    <i class="fas fa-id-card fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Friend">
-                    <i class="fas fa-user-friends fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Blotter">
-                    <i class="fas fa-user-shield fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a class="footerlinks" href="#!" class="sbtn btn-large mx-1" title="Contact">
-                    <i class="fas fa-phone fa-2x"></i>
-                    </a>
-                </li>
-                </ul>
-            </div>
-
-            <hr class="mb-0">
-
-            <!--Footer Links-->
-
-            <div class="container text-left text-md-center">
-                <div class="row">
-
-                    <!--First column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Documentation</h5>
-                        <div class="d-md-none title" data-target="#Documentation" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Documentation
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <ul class="list-unstyled collapse" id="Documentation">
-                            <li><a class="footerlinks" href="services_certofres.php">Certificate of Residency</a></li>
-                            <li><a class="footerlinks" href="services_brgyclearance.php">Barangay Clearance</a></li>
-                            <li><a class="footerlinks" href="services_certofindigency.php">Certificate of Indigency</a></li>
-                            <li><a class="footerlinks" href="services_business.php">Business Permit</a></li>
-                            <li><a class="footerlinks" href="services_brgyid.php">Barangay ID</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.First column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
-
-                    <!--Third column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Other Services</h5>
-                        <div class="d-md-none title" data-target="#OtherServices" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Other Services
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="list-unstyled collapse" id="OtherServices">
-                            <li><a class="footerlinks" href="services_blotter.php">Peace and Order</a></li>
-                        </ul>
-                        <ul class="list-unstyled collapse" id="OtherServices">
-                            <li><a class="footerlinks" href="services_blotter.php">Youth Profiling</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.Third column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
- 
-
-                </div>
-            </div>
-
-            <!--/.Footer Links-->
-
-            <hr class="mb-0">
-
-
-        </footer>
         <script>
             $(document).ready(function(){
             $('[data-toggle="tooltip"]').tooltip();   
@@ -605,7 +526,8 @@
             });
             });
         </script>
-                <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>

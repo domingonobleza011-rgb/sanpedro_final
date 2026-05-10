@@ -1,4 +1,6 @@
 <?php 
+    define('BMIS_ROLE_REQUIRED', 'resident');
+require('secure_header.php'); 
     require('classes/resident.class.php');
     $userdetails = $bmis->get_userdata();
     $id_resident = $_GET['id_resident'];
@@ -15,26 +17,21 @@
 <html>
     <head> 
         <title> Barangay Management System </title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
-      <!-- responsive tags for screen compatibility -->
-      <meta name="viewport" content="width=device-width, initial-scale=1"><!-- bootstrap css --> 
-      <link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
-      <!-- fontawesome icons --> 
-      <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+       <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <!-- responsive tags for screen compatibility -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- custom css --> 
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+        <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     
         <style>
 
             /* Back-to-Top */
-/* Navbar Customization */
-        .navbar { padding: 0.8rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .navbar-brand { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .dropdown-menu { border-radius: 10px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .dropdown-menu .btn { text-align: left; width: 100%; padding: 10px 20px; font-size: 0.9rem; }
-        .dropdown-menu .btn:hover { background: #f8f9fa; }
+
             .top-link {
             transition: all 0.25s ease-in-out;
             position: fixed;
@@ -466,448 +463,327 @@
                 height: 120px;
                 width: 120px;
             }
+                .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1050;
+    border-top: 1px solid #dee2e6;
+}
+
+.mobile-bottom-nav .nav-item {
+    text-decoration: none;
+    color: #6c757d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.7rem; /* Small text for mobile */
+    font-weight: 500;
+}
+
+.mobile-bottom-nav .nav-item i {
+    font-size: 1.4rem; /* Larger icons for easy tapping */
+    margin-bottom: 2px;
+}
+
+.mobile-bottom-nav .nav-item:active {
+    color: #0d6efd;
+}
+
+/* Add padding to the bottom of the body so content isn't hidden by the nav */
+@media (max-width: 767px) {
+    body {
+        padding-bottom: 80px;
+    }
+}
 
         </style>
     </head>
 
     <body>
+    <a data-toggle="tooltip" title="Back to Top" class="top-link hide" href="#top" id="js-top">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
+        <span class="screen-reader-text">Back to top</span>
+    </a>
 
-        <!-- Back-to-Top and Back Button -->
-
-        <a data-toggle="tooltip" title="Back-To-Top" class="top-link hide" href="" id="js-top">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
-            <span class="screen-reader-text">Back to top</span>
-        </a>
-
-        <!-- Eto yung navbar -->
-
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+ <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
     <div class="container-fluid">
-        <a class="navbar-brand" href="resident_homepage.php">Barangay San Pedro Management System</a>
-        
-        <div class="d-flex align-items-center ms-auto">
-            <a href="resident_homepage.php" class="btn btn-primary me-3">
-                <i class="fa fa-home fa-lg"></i> Home
-            </a>
-            
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-user-circle me-1"></i>
-                    <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                    <li><a class="btn" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user"></i> &nbsp; Profile</a></li>
-                    <li><a class="btn" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock"></i> &nbsp; Password</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="btn text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> &nbsp; Logout</a></li>
-                </ul>
-            </div>
+        <a class="navbar-brand fw-bold" href="resident_homepage.php">
+            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
+        </a>
+        <div class="d-flex ms-auto">
+            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
+            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
+            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
+            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
+            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
         </div>
     </div>
 </nav>
-        <div id="down3"></div>
 
-        <br>
-        <br>
-        <br>
-
-        <!-- Slideshow -->
-
-        <div class="container-1">
-            <h1 style="text-align:center">Blotter Reason</h1>
-            <hr style="background-color: black;">
-            <div class="d-flex justify-content-center align-items-center gap-4">
-    <img class="picture" src="icons/3.jpg" >
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <img class="picture" src="icons/1.jpg">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <img class="picture" src="icons/2.jpg">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <img class="picture" src="icons/4.jpg">
-                    
+<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
+<div class="mobile-bottom-nav d-md-none">
+    <a href="resident_homepage.php" class="nav-item">
+        <i class="bi bi-house-door-fill"></i>
+        <span>Home</span>
+    </a>
+    <a href="resident_announcement.php" class="nav-item">
+        <i class="bi bi-megaphone-fill"></i>
+        <span>News</span>
+    </a>
+    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-person-badge"></i>
+        <span>Profile</span>
+    </a>
+    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-shield-lock"></i>
+        <span>Pass</span>
+    </a>
+    <a href="logout.php" class="nav-item text-danger">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Exit</span>
+    </a>
 </div>
-        <div id="down2"></div>
 
-        <br>
-        <br>
-        <br>
 
-        <div class="container container3">
-            <h1 style="text-align:center">Blotter Information</h1>
-            <hr style="background-color: black;">
+    <section class="container my-5 py-4">
+        <h2 class="text-center fw-bold">Blotter</h2>
+        <hr class="mx-auto border-dark shadow-sm" style="width: 100px; height: 3px;">
+        
+        <div class="row g-4 justify-content-center align-items-center mt-4 text-center">
+            <div class="col-6 col-md-3"><img class="img-fluid rounded shadow-sm" src="icons/3.jpg" alt="Incident Type 1"></div>
+            <div class="col-6 col-md-3"><img class="img-fluid rounded shadow-sm" src="icons/1.jpg" alt="Incident Type 2"></div>
+            <div class="col-6 col-md-3"><img class="img-fluid rounded shadow-sm" src="icons/2.jpg" alt="Incident Type 3"></div>
+            <div class="col-6 col-md-3"><img class="img-fluid rounded shadow-sm" src="icons/4.jpg" alt="Incident Type 4"></div>
+        </div>
+    </section>
 
-            <br> 
+<section class="container my-5 py-5">
+    <h2 class="text-center fw-bold mb-2">Public Information & Guidelines</h2>
+    <p class="text-center text-muted mb-4">Please review the procedures and definitions regarding the Barangay Blotter system.</p>
+    <hr class="mx-auto mb-5" style="width: 60px; height: 3px; background-color: #007bff; opacity: 1;">
 
-            <div class="row">
-                <div class="col">
-                    <div class="flip-card">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front bg-primary">
-                                <br>
-                                <br>
-                                <i class="fas fa-question-circle fa-4x"></i>
-                                <br>
-                                <br>
-                                <h2>How can I file a Barangay Blotter?</h2>
-                            </div>
-                            <div class="flip-card-back bg-info" style="font-size: 15px;">
-                                <br>
-                                Step 1: Fill-Up the entire form in our system.
-                                <br><br>
-                                Step 2: Verify all of the information you've been given
-                                        in our system that we can use to solve your case   
-                                        as quick as possible.
-                                <br><br>
-                                Step 3: Approve your complain, so we can set a schedule 
-                                        or an appointment to make an agreement on bot sides. 
-                            </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        
+        <div class="col">
+            <div class="flip-card shadow-sm">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front bg-white border d-flex flex-column justify-content-center align-items-center p-4">
+                        <div class="icon-circle bg-light mb-3">
+                            <i class="fas fa-file-signature fa-3x text-primary"></i>
                         </div>
+                        <h5 class="fw-bold text-dark">Filing Procedure</h5>
+                        <p class="text-muted small">Standard operating steps</p>
                     </div>
-                </div>
-                <div class="col">
-                    <div class="flip-card">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front bg-primary">
-                                <br>
-                                <br>
-                                <i class="fas fa-question-circle fa-4x"></i>
-                                <br>
-                                <br>
-                                <h2>What is Barangay Blotter?</h2>
-                            </div>
-                            <div class="flip-card-back  bg-info">
-                                <br>
-                                <h5>The entry in the barangay blotter merely states that private complainant 
-                                    was embraced ("niyakap") by the accused. This may be attributed to inaccurate 
-                                    reporting or to the victim's incomplete narration of events, whether or not 
-                                    intentionally done.</h5> 
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="flip-card">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front bg-primary">
-                                <br>
-                                <br>
-                                <i class="fas fa-question-circle fa-4x"></i>
-                                <br>
-                                <br>
-                                <h3>What is the purpose of Barangay Blotter?</h3>
-                            </div>
-                            <div class="flip-card-back  bg-info">
-                                <br>
-                                <h5>A written record of arrests and other occurrences maintained 
-                                    by the barangay. The report kept by the barangay when a suspect 
-                                    is booked, which involves the written recording of facts about 
-                                    the person's arrest and the charges against him or her.</h5> 
-                            </div>
-                        </div>
+                    <div class="flip-card-back bg-primary text-white p-4 d-flex flex-column justify-content-center">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-list-ol me-2"></i>How to File</h6>
+                        <ul class="list-unstyled small text-start">
+                            <li class="mb-2"><strong>Step 1: </strong> Complete the digital incident report form accurately.</li>
+                            <li class="mb-2"><strong>Step 2:</strong> Our officers will review the case details for validity.</li>
+                            <li class="mb-0"><strong> Step 3:</strong> An appointment will be scheduled for both parties.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="down1"></div>
+        <div class="col">
+            <div class="flip-card shadow-sm">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front bg-white border d-flex flex-column justify-content-center align-items-center p-4">
+                        <div class="icon-circle bg-light mb-3">
+                            <i class="fas fa-balance-scale fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark">System Definition</h5>
+                        <p class="text-muted small">What is a Blotter?</p>
+                    </div>
+                    <div class="flip-card-back bg-primary text-white p-4 d-flex flex-column justify-content-center">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-info-circle me-2"></i>Official Record</h6>
+                        <p class="small lh-base">The Barangay Blotter is an official daily log of events and complaints reported to local authorities, serving as a primary legal document for community mediation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <br>
-        <br>
-        <br>
+        <div class="col">
+            <div class="flip-card shadow-sm">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front bg-white border d-flex flex-column justify-content-center align-items-center p-4">
+                        <div class="icon-circle bg-light mb-3">
+                            <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark">Primary Purpose</h5>
+                        <p class="text-muted small">Why we record incidents</p>
+                    </div>
+                    <div class="flip-card-back bg-primary text-white p-4 d-flex flex-column justify-content-center">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-target-camera me-2"></i>Objectives</h6>
+                        <p class="small lh-base">To maintain a factual written history of incidents, support law enforcement in documentation, and facilitate fair conflict resolution within the Barangay.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+    </div>
+</section>
+</body>
 
         <!-- Button trigger modal -->
 
-        <div class="container container4">
+<div class="container container4 py-4">
+    <h1 class="text-center font-weight-bold">Resident Complain</h1>
+    <hr style="border-top: 2px solid #000; opacity: 1;">
 
-            <h1 class="text-center">Complain</h1>
-            
-            <hr style="background-color:black;">
+<div class="col-12 text-center">   
+    <!-- Added 'btn-block' for older Bootstrap or 'w-100' for Bootstrap 4/5 -->
+    <!-- Added 'py-3' for extra vertical height and 'mb-4' for spacing -->
+    <button type="button" 
+            class="btn btn-primary btn-lg w-100 w-md-auto py-3 px-5 shadow-sm" 
+            style="font-weight: 600; font-size: 1.2rem;"
+            data-toggle="modal" 
+            data-target="#exampleModalCenter">
+        <i class="fas fa-edit mr-2"></i> File  a Complain
+    </button>
+</div>
 
-            <div class="col">   
-                <button type="button" class="btn btn-primary applybutton" data-toggle="modal" data-target="#exampleModalCenter">
-                    Apply Form
-                </button>
-            </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 15px; border: none; overflow: hidden;">
+                
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title font-weight-bold" id="exampleModalCenterTitle">
+                        <i class="fas fa-folder-open mr-2"></i> Complain Form Details
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
+                <!-- Modal Body -->
+                <div class="modal-body px-4 py-4">
+                    <form method="post" class="was-validated" enctype="multipart/form-data"> 
 
-            <!-- Modal -->
+                        <!-- Complainant Info Section Header -->
+                        <div class="mb-3">
+                            <h6 class="text-muted font-weight-bold small text-uppercase">Resident Information</h6>
+                            <hr class="mt-1">
+                        </div>
 
-            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalCenterTitle">Complain Form</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                        <div class="row"> 
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Last name:</label>
+                                    <input name="lname" type="text" class="form-control bg-light" value="<?= $resident['lname']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">First name:</label>
+                                    <input name="fname" type="text" class="form-control bg-light" value="<?= $resident['fname']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Middle name:</label>
+                                    <input name="mi" type="text" class="form-control bg-light" value="<?= $resident['mi']?>" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Age</label>
+                                    <input name="age" type="number" class="form-control bg-light" value="<?= $resident['age']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">            
+                                    <label class="font-weight-bold small">Contact Number:</label>
+                                    <input name="contact" type="text" maxlength="11" class="form-control bg-light" value="<?= $resident['contact']?>" required>
+                                </div>
+                            </div>
+                        </div>            
+
+                        <div class="row mt-2">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">House No:</label>
+                                    <input type="text" class="form-control bg-light" name="houseno" value="<?= $resident['houseno']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Street:</label>
+                                    <input type="text" class="form-control bg-light" name="street" value="<?= $resident['street']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Barangay:</label>
+                                    <input type="text" class="form-control bg-light" name="brgy" value="<?= $resident['brgy']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Municipality:</label>
+                                    <input type="text" class="form-control bg-light" name="municipal" value="<?= $resident['municipal']?>" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Incident Details Section Header -->
+                        <div class="mt-4 mb-3">
+                            <h6 class="text-muted font-weight-bold small text-uppercase text-primary">Incident Report Details</h6>
+                            <hr class="mt-1 border-primary">
+                        </div>
+
+                        <!-- Styled Guidelines Box -->
+                        <div class="card bg-light mb-3 border-left-info shadow-sm">
+                            <div class="card-body py-2 px-3">
+                                <h6 class="font-weight-bold mb-1 small text-info"><i class="fas fa-info-circle mr-1"></i> Submission Guidelines:</h6>
+                                <ul class="mb-0 text-muted" style="font-size: 13px; padding-left: 20px;">
+                                    <li>Use simple words; avoid complex terminology.</li>
+                                    <li>Be specific; avoid profanity and bad language.</li>
+                                    <li>Ensure the report is clear and easy to read.</li>
+                                    <li><strong>Do not</strong> use Emojis or special Symbols.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="report" class="font-weight-bold">Narrative Report:</label>
+                            <textarea class="form-control border-primary" rows="6" id="report" name="narrative" 
+                                      placeholder="Describe the incident (Who, What, Where, When, Why)..." 
+                                      required style="border-width: 2px;"></textarea>
+                            <div class="invalid-feedback font-italic">Narrative report is required for submission.</div>
+                        </div>
+
+                        <div class="modal-footer bg-light px-0 pb-0 pt-3">
+                            <input name="id_resident" type="hidden" value="<?= $resident['id_resident']?>">
+                            <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">Cancel</button>
+                            <button type="submit" name="create_blotter" class="btn btn-primary px-4 shadow-sm font-weight-bold">
+                                <i class="fas fa-save mr-2"></i> Submit Blotter
                             </button>
-                        </div>
-
-                        <!-- Modal Body -->
-
-                        <div class="modal-body">
-                            <form method="post" class="was-validated" enctype="multipart/form-data"> 
-
-                                <div class="row"> 
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="lname">Last name:</label>
-                                            <input name="lname" type="text" class="form-control" value="<?= $resident['lname']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="fname">First name:</label>
-                                            <input name="fname" type="text" class="form-control" value="<?= $resident['fname']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>  
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="mname">Middle name:</label>
-                                            <input name="mi" type="text" class="form-control" value="<?= $resident['mi']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>  
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="age" class="mtop">Age </label>
-                                            <input name="age" type="number" class="form-control" value="<?= $resident['age']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">            
-                                            <label for="cno">Contact Number:</label>
-                                            <input name="contact" type="text" maxlength="11" class="form-control" value="<?= $resident['contact']?>" pattern="[0-9]{11}" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                </div>            
-
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label> House No: </label>
-                                            <input type="text" class="form-control" name="houseno"  
-                                            placeholder="Enter House No." value="<?= $resident['houseno']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label> Street: </label>
-                                            <input type="text" class="form-control" name="street"  
-                                            placeholder="Enter Street" value="<?= $resident['street']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label> Barangay: </label>
-                                            <input type="text" class="form-control" name="brgy"  
-                                            placeholder="Enter Barangay" value="<?= $resident['brgy']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label> Municipality: </label>
-                                            <input type="text" class="form-control" name="municipal" 
-                                            placeholder="Enter Municipality" value="<?= $resident['municipal']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <hr>
-
-
-                                <h6>Guidelines for Narrative Report:</h6>
-
-                                <p>
-                                    <ul style="font-size: 15px;">
-                                        <li>
-                                            Use simple, everyday words rather than complex terminology.
-                                        </li>
-                                        <li>
-                                            Be specific on your report
-                                        </li>
-                                        <li>
-                                            Don't use bad words
-                                        </li>
-                                        <li>
-                                            Clear and Easy to read report
-                                        </li>
-                                        <li>
-                                            Don't use Emoji or any kind of Symbols. 
-                                        </li>
-                                    </ul>
-                                </p>
-                                
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="report">Narrative Report:</label>
-                                            <textarea class="form-control" rows="5" id="report" name="narrative" placeholder="Enter Message here" required></textarea>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <div class="paa">
-                                        <input name="id_resident" type="hidden" value="<?= $resident['id_resident']?>">
-                                        <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
-                                        <button type="submit" name="create_blotter" class="btn btn-primary">Save changes</button>
-                                    </div>
-                                </div> 
-                            
-                            </form>
- 
-                        </div>
-                    </div>
+                        </div> 
+                    
+                    </form>
                 </div>
-            </div>  
+            </div>
         </div>
-
-        <!-- Footer -->
-
-        <footer id="footer" class="bg-primary text-white d-flex-column text-center">
-            <hr class="mt-0">
-
-            <div class="text-center">
-                <h1>Services</h1>
-                <ul class="list-unstyled list-inline">
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Documents">
-                    <i class="fas fa-file fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Card">
-                    <i class="fas fa-id-card fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Friend">
-                    <i class="fas fa-user-friends fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Blotter">
-                    <i class="fas fa-user-shield fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Contact">
-                    <i class="fas fa-phone fa-2x"></i>
-                    </a>
-                </li>
-                </li>
-                </ul>
-            </div>
-
-            <hr class="mb-0">
-
-            <!--Footer Links-->
-
-            <div class="container text-left text-md-center">
-                <div class="row">
-
-                    <!--First column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Documentation</h5>
-                        <div class="d-md-none title" data-target="#Documentation" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Documentation
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <ul class="list-unstyled collapse" id="Documentation">
-                            <li><a href="services_certofres.php">Certificate of Residency</a></li>
-                            <li><a href="services_brgyclearance.php">Barangay Clearance</a></li>
-                            <li><a href="services_certofindigency.php">Certificate of Indigency</a></li>
-                            <li><a href="services_business.php">Business Permit</a></li>
-                            <li><a href="services_brgyid.php">Barangay ID</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.First column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
-
-                    <!--Third column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Other Services</h5>
-                        <div class="d-md-none title" data-target="#OtherServices" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Other Services
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="list-unstyled collapse" id="OtherServices">
-                            <li><a href="services_blotter.php">Peace and Order</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.Third column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
- 
-                </div>
-            </div>
-
-            <!--/.Footer Links-->
-
-            <hr class="mb-0">
-        </footer>
+    </div>  
+</div>
+        <br>
+    <br>
+    <br>
+    
         <script>
 // This makes the filename appear inside the input box after you select it
 $(".custom-file-input").on("change", function() {

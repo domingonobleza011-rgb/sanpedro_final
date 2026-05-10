@@ -11,17 +11,17 @@
     $id_user = $_GET['id_user'];
     $staff = $staffbmis->get_single_staff($id_user);
 ?>
-
+ 
 <?php 
     include('dashboard_sidebar_start.php');
 ?>
-
+ 
 <!-- Begin Page Content -->
-
+ 
 <div class="container-fluid">
     <h1 class="mb-4 text-center">Barangay Staff Data</h1>
     <hr><br>
-
+ 
     <div class="row">
         <div class="col-md-2"></div>
         <div class="col-md-8">
@@ -45,7 +45,7 @@
                                 <small class="text-muted">Leave blank if you don't want to change the current photo.</small>
                             </div>
                         </div>
-
+ 
                         <div class="row mt-3">
                             <div class="col">
                                 <label class="form-group"> Last Name:</label>
@@ -63,8 +63,8 @@
                         
                         <div class="row mt-3">
                             <div class="col">
-                                <label class="form-group">Login Identity: </label>
-                                <input type="text" class="form-control" name="login_identity">
+                                <label class="form-group">Login Identity (Email or Phone): </label>
+                                <input type="text" class="form-control" name="login_identity" value="<?= htmlspecialchars($staff['login_identity']);?>" placeholder="Enter Email or Phone Number" required>
                             </div>
                             <div class="col">
                                 <label class="form-group">Password:</label>
@@ -75,7 +75,7 @@
                                 <input type="tel" class="form-control" name="contact" value="<?= htmlspecialchars($staff['contact']);?>">
                             </div>
                         </div>
-
+ 
                         <div class="row mt-3">
                             <div class="col"> 
                                 <label class="form-group">Position: </label>
@@ -137,9 +137,9 @@
     <br>
 </div>
 <!-- /.container-fluid -->
-
+ 
 <!-- End of Main Content -->
-
+ 
 <?php 
     include('dashboard_sidebar_end.php');
 ?>

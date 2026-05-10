@@ -1,4 +1,6 @@
 <?php 
+    define('BMIS_ROLE_REQUIRED', 'resident');
+require('secure_header.php'); 
     require('classes/main.class.php');
     require('classes/resident.class.php');
     
@@ -12,24 +14,20 @@
 <html>
   <head> 
     <title> Barangay Management System </title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
-      <!-- responsive tags for screen compatibility -->
-      <meta name="viewport" content="width=device-width, initial-scale=1"><!-- bootstrap css --> 
-      <link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
-      <!-- fontawesome icons --> 
-      <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <!-- responsive tags for screen compatibility -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- custom css --> 
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+        <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
         <style>
 
             /* Navbar Buttons */
-/* Navbar Customization */
-        .navbar { padding: 0.8rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .navbar-brand { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .dropdown-menu { border-radius: 10px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .dropdown-menu .btn { text-align: left; width: 100%; padding: 10px 20px; font-size: 0.9rem; }
-        .dropdown-menu .btn:hover { background: #f8f9fa; }
+
             .btn1 {
             border-radius: 20px;
             border: none; /* Remove borders */
@@ -370,7 +368,57 @@
             -webkit-transform: scale(1.4); /* Safari 3-8 */
             transform: scale(1.4); 
             }
+            .container1 img {
+    /* Prevents icons from getting too large on desktop */
+    max-height: 120px; 
+    object-fit: contain;
+}
 
+@media (max-width: 576px) {
+    .text1 {
+        font-size: 1.8rem; /* Shrinks the title slightly on phones */
+    }
+}
+    .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1050;
+    border-top: 1px solid #dee2e6;
+}
+
+.mobile-bottom-nav .nav-item {
+    text-decoration: none;
+    color: #6c757d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.7rem; /* Small text for mobile */
+    font-weight: 500;
+}
+
+.mobile-bottom-nav .nav-item i {
+    font-size: 1.4rem; /* Larger icons for easy tapping */
+    margin-bottom: 2px;
+}
+
+.mobile-bottom-nav .nav-item:active {
+    color: #0d6efd;
+}
+
+/* Add padding to the bottom of the body so content isn't hidden by the nav */
+@media (max-width: 767px) {
+    body {
+        padding-bottom: 80px;
+    }
+}
         </style>
   </head>
 
@@ -385,53 +433,69 @@
 
         <!-- Eto yung navbar -->
 
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
     <div class="container-fluid">
-        <a class="navbar-brand" href="resident_homepage.php">Barangay San Pedro Management System</a>
-        
-        <div class="d-flex align-items-center ms-auto">
-            <a href="resident_homepage.php" class="btn btn-primary me-3">
-                <i class="fa fa-home fa-lg"></i> Home
-            </a>
-            
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-user-circle me-1"></i>
-                    <?= $userdetails['surname'];?>, <?= $userdetails['firstname'];?>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                    <li><a class="btn" href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-user"></i> &nbsp; Profile</a></li>
-                    <li><a class="btn" href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>"><i class="fas fa-lock"></i> &nbsp; Password</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="btn text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> &nbsp; Logout</a></li>
-                </ul>
-            </div>
+        <a class="navbar-brand fw-bold" href="resident_homepage.php">
+            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
+        </a>
+        <div class="d-flex ms-auto">
+            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
+            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
+            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
+            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
+            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
         </div>
     </div>
 </nav>
 
-        <div class="container-fluid container1"> 
-            <div class="row"> 
-                <div class="col"> 
-                    <div class="header">
-                        <h1 class="text1">Barangay Clearance </h1>
-                        <h5> A Barangay Clearance is a document issued by the Barangay Secretary and signed by the 
-                        <br> Barangay Captain stating that you are a living at that specific place and you are 
-                        <br> of good moral character. Somehow, a smaller version of NBI or Police clearance.</h5>
-                    </div>
+<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
+<div class="mobile-bottom-nav d-md-none">
+    <a href="resident_homepage.php" class="nav-item">
+        <i class="bi bi-house-door-fill"></i>
+        <span>Home</span>
+    </a>
+    <a href="resident_announcement.php" class="nav-item">
+        <i class="bi bi-megaphone-fill"></i>
+        <span>News</span>
+    </a>
+    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-person-badge"></i>
+        <span>Profile</span>
+    </a>
+    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
+        <i class="bi bi-shield-lock"></i>
+        <span>Pass</span>
+    </a>
+    <a href="logout.php" class="nav-item text-danger">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Exit</span>
+    </a>
+</div>
 
-                    <br>
 
-                    <img class="picture" src="icons/Documents/docu1.png">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <img class="picture" src="icons/Documents/docu3.png">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <img class="picture" src="icons/Documents/docu2.png">
+        <div class="container-fluid container1 py-4"> 
+    <div class="row justify-content-center text-center"> 
+        <div class="col-12 col-md-10 col-lg-8"> 
+            
+            <div class="header mb-4">
+                <h1 class="text1 display-4 fw-bold">Barangay Clearance</h1>
+            </div>
+
+            <div class="row g-3 justify-content-center align-items-center">
+                <div class="col-4 col-sm-3">
+                    <img class="img-fluid" src="icons/Documents/docu1.png" alt="Document 1">
+                </div>
+                <div class="col-4 col-sm-3">
+                    <img class="img-fluid" src="icons/Documents/docu3.png" alt="Document 3">
+                </div>
+                <div class="col-4 col-sm-3">
+                    <img class="img-fluid" src="icons/Documents/docu2.png" alt="Document 2">
                 </div>
             </div>
+
         </div>
+    </div>
+</div>
 
         <div id="down3"></div>
 
@@ -439,7 +503,7 @@
         <br>
         <br>
 
-        <div class="container text-center">
+<div class="container text-center">
             <div class="row">
                 <div class="col">
                     <h1>Procedure</h1>
@@ -451,13 +515,24 @@
 
             <div class="row">
                 <div class="col">
+                    <i class="fas fa-id-card fa-7x"></i>
+
+                    <br>
+                    <br>
+
+                    <h3>Step 1: Prepare</h3>
+                    <p>First step is to prepare all of the information that will be needed
+                    in acquiring a Barangay Clearance.</p>
+                </div>
+
+                <div class="col">
                     <i class="fas fa-laptop fa-7x"></i>
 
                     <br>
                     <br>
 
-                    <h3>Step 1: Fill-Up</h3>
-                    <p>First step is to Fill-Up the entire form in our system.</p>
+                    <h3>Step 2: Fill-Up</h3>
+                    <p>Second step is to Fill-Up the entire form in our system.</p>
                 </div>
 
                 <div class="col">
@@ -466,8 +541,8 @@
                     <br>
                     <br>
 
-                    <h3>Step 2: Assessment</h3>
-                    <p>Second step is to verify all of the information you've been given
+                    <h3>Step 3: Assessment</h3>
+                    <p>Third step is to verify all of the information you've been given
                     in our system that we can use to make the information of your document
                     accurately.</p>
                 </div>
@@ -478,109 +553,15 @@
                     <br>
                     <br>
 
-                    <h3>Step 3: Release</h3>
-                    <p>Fourth step is for releasing of your document.</p>
+                    <h3>Step 4: Release</h3>
+                    <p>Fourth step is for releasing of your Barangay Clearance.</p>
                 </div>
             </div>
 
             <div id="down2"></div>
 
             <br>
-            <br>
-            <br>
-
-            <div class="row">
-                <div class="col">
-                    <h1>Other Details</h1>
-                    <hr style="background-color: black;">
-                </div>
-            </div>
-
-            <br> 
-
-            <div class="row text2">
-                <div class="col">
-                    <div class="card bg-primary card1">
-                        <div class="card-header">
-                            <h5> Eligibility <br><br> <i class="fas fa-user-check fa-2x"></i>  </h5>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: left; font-size: 16px;">
-                                <p class="card-text">
-                                    <li> A Philippines Resident. </li>
-                                    <li> Recent Cedula. </li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card bg-primary card2">
-                        <div class="card-header">
-                            <h5> Validity <br><br> <i class="fas fa-clipboard-check fa-2x"></i>  </h5>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: left; font-size: 16px;">
-                                <p class="card-text">
-                                    <li> Valid for Six (6) Months. Not valid without Barangay dry seal </li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card bg-primary card3">
-                        <div class="card-header">
-                            <h5> Fees <br><br> <i class="fas fa-coins fa-2x"></i>  </h5>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: justify;">
-                                <p class="card-text">
-                                    <li> 100% Free </li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card bg-primary card4">
-                        <div class="card-header">
-                            <h5 style="font-size: 19.4px;"> Processing Time <br><br> <i class="fas fa-clock fa-2x"></i>  </h5>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: justify;">
-                                <p class="card-text">
-                                    <li> Within Working Hours (8:00am - 5:00pm) </li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card bg-primary card5">
-                        <div class="card-header">
-                            <h6> Reason to get a Barangay Clearance<br><br> <i class="fas fa-file fa-2x"></i>  </h6>
-                        </div>
-                        <div class="card-body">
-                            <ul style="text-align: left; font-size: 16px;">
-                                <p class="card-text">
-                                    <li> Job Requirement  </li>
-                                    <li> Open a Bank Account </li>
-                                    <li> NBI Clearance </li>
-                                    <li> Police Clearance </li>
-                                    <li> Postal ID </li>
-                                    <li> UMID Card</li>
-                                    <li> Driver's License </li>
-                                    <li> Business Requirement </li>
-                                    <li> Indigent Certification of Philhealth</li>
-                                </p>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+           
         <div id="down1"></div>
 
         <br>
@@ -589,175 +570,146 @@
 
         <!-- Button trigger modal -->
 
-        <div class="container">
+        <div class="container py-4">
+    <h1 class="text-center font-weight-bold">Registration</h1>
+    <hr class="mb-4" style="border-top: 2px solid black; opacity: 1;">
 
-            <h1 class="text-center">Registration</h1>
-            <hr style="background-color:black;">
+    <div class="col-12 text-center">   
+    <!-- Added 'btn-block' for older Bootstrap or 'w-100' for Bootstrap 4/5 -->
+    <!-- Added 'py-3' for extra vertical height and 'mb-4' for spacing -->
+    <button type="button" 
+            class="btn btn-primary btn-lg w-100 w-md-auto py-3 px-5 shadow-sm" 
+            style="font-weight: 600; font-size: 1.2rem;"
+            data-toggle="modal" 
+            data-target="#exampleModalCenter">
+        <i class="fas fa-edit mr-2"></i> Request Form
+    </button>
+</div>
 
-            <div class="col">   
-                <button type="button" class="btn btn-primary applybutton" data-toggle="modal" data-target="#exampleModalCenter">
-                    Request Form
-                </button>
-            </div>
-
-
-            <!-- Modal -->
-
-            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalCenterTitle">Barangay CLearance Form</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-
-                        <!-- Modal Body -->
-
-                        <div class="modal-body">
-                            <form method="post" class="was-validated">
-
-                                <div class="row"> 
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="lname">Last Name:</label>
-                                            <input name="lname" type="text" class="form-control" 
-                                            placeholder="Enter Last Name" value="<?= $userdetails['surname']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="mi" class="mtop">Middle Name </label>
-                                            <input name="mi" type="text" class="form-control" 
-                                            placeholder="Enter Middle Name" value="<?= $userdetails['mname']?>" required>
-                                                <div class="valid-feedback">Valid.</div>
-                                                <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="fname">First Name:</label>
-                                            <input name="fname" type="text" class="form-control" 
-                                            placeholder="Enter First Name" value="<?= $userdetails['firstname']?>" required>
-                                                <div class="valid-feedback">Valid.</div>
-                                                <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="purposes">Purposes:</label>
-                                            <select class="form-control" name="purpose" id="purposes" placeholder="Enter Status" required>
-                                                <option value="">Choose your Purpose</option>
-                                                <option value="Job Requirement">Job Requirement</option>
-                                                <option value="Open a Bank Account">Open a Bank Account</option>
-                                                <option value="NBI Clearance">NBI Clearance</option>
-                                                <option value="Police Clearance">Police Clearance</option>
-                                                <option value="Postal ID">Postal ID</option>
-                                                <option value="UMID Card">UMID Card</option>
-                                                <option value="Driver's License">Driver's License</option>
-                                                <option value="Business Requirement">Business Requirement</option>
-                                                <option value="Philhealth">Philhealth</option>
-                                            </select>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                    
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label> House No: </label>
-                                            <input type="text" class="form-control" name="houseno"  
-                                            placeholder="Enter House No." value="<?= $userdetails['houseno']?>"  required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label> Street: </label>
-                                            <input type="text" class="form-control" name="street"  
-                                            placeholder="Enter Street" value="<?= $userdetails['street']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label> Barangay: </label>
-                                            <input type="text" class="form-control" name="brgy"  
-                                            placeholder="Enter Barangay" value="<?= $userdetails['brgy']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label> Municipality: </label>
-                                            <input type="text" class="form-control" name="municipal" 
-                                            placeholder="Enter Municipality" value="<?= $userdetails['municipal']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="status">Status:</label>
-                                            <select class="form-control" name="status" id="status" placeholder="Enter Status" required>
-                                            <option value="">Choose your Status</option>
-                                            <option value="Single">Single</option>
-                                                <option value="In a relationship">In a relationship</option>
-                                                <option value="Engaged">Engaged</option>
-                                                <option value="Married">Married</option>
-                                                <option value="Widowed">Widowed</option>
-                                                <option value="Divorces">Divorced</option>
-                                            </select>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label for="Age" class="mtop">Age: </label>
-                                            <input type="number" name="age" class="form-control" 
-                                            placeholder="Enter your Age" value="<?= $userdetails['age']?>" required>
-                                            <div class="valid-feedback">Valid.</div>
-                                            <div class="invalid-feedback">Please fill out this field.</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            
-                        </div>
-
-                        <!-- Modal Footer -->
-            
-                        <div class="modal-footer">
-                            <div class="paa">
-                                <input name="id_resident" type="hidden" class="form-control" value="<?= $userdetails['id_resident']?>">
-                                <input name="addedby" type="hidden" class="form-control" value="<?= $userdetails['surname']?> <?= $userdetails['firstname']?> <?= $userdetails['mname']?>">
-                                <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
-                                <button name ="create_brgyclearance" type="submit" class="btn btn-primary">Submit Request</button>
-                            </div>
-                        </div> 
-                    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 15px; overflow: hidden; border: none;">
+                
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title font-weight-bold" id="exampleModalCenterTitle">
+                        <i class="fas fa-certificate mr-2"></i> Barangay Clearance Form
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
+
+                <form method="post" class="was-validated">
+                    <div class="modal-body p-4">
+                        
+                        <!-- Name Section -->
+                        <div class="row"> 
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Last Name</label>
+                                    <input name="lname" type="text" class="form-control" value="<?= $userdetails['surname']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">First Name</label>
+                                    <input name="fname" type="text" class="form-control" value="<?= $userdetails['firstname']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Middle Name</label>
+                                    <input name="mi" type="text" class="form-control" value="<?= $userdetails['mname']?>" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Personal Info Grid -->
+                        <div class="row">
+                            <div class="col-6 col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Age</label>
+                                    <input type="number" name="age" class="form-control" value="<?= $userdetails['age']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Civil Status</label>
+                                    <select class="form-control" name="status" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Single">Single</option>
+                                        <option value="Married">Married</option>
+                                        <option value="Widowed">Widowed</option>
+                                        <option value="Separated">Separated</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold small">Purpose</label>
+                                    <select class="form-control" name="purpose" required>
+                                        <option value="">Choose Purpose...</option>
+                                        <option value="Job Requirement">Job Requirement</option>
+                                        <option value="Open a Bank Account">Open a Bank Account</option>
+                                        <option value="NBI Clearance">NBI Clearance</option>
+                                        <option value="Police Clearance">Police Clearance</option>
+                                        <option value="Postal ID">Postal ID</option>
+                                        <option value="Business Requirement">Business Requirement</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address Section -->
+                        <div class="mt-4 mb-2">
+                            <h6 class="text-primary font-weight-bold"><i class="fas fa-map-marker-alt mr-1"></i> Address Information</h6>
+                            <hr class="mt-1">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 col-md-3">
+                                <div class="form-group">
+                                    <label class="small font-weight-bold">House No.</label>
+                                    <input type="text" class="form-control" name="houseno" value="<?= $userdetails['houseno']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="form-group">
+                                    <label class="small font-weight-bold">Street</label>
+                                    <input type="text" class="form-control" name="street" value="<?= $userdetails['street']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="form-group">
+                                    <label class="small font-weight-bold">Barangay</label>
+                                    <input type="text" class="form-control" name="brgy" value="<?= $userdetails['brgy']?>" required>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="form-group">
+                                    <label class="small font-weight-bold">Municipality</label>
+                                    <input type="text" class="form-control" name="municipal" value="<?= $userdetails['municipal']?>" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer bg-light p-3">
+                        <!-- Hidden fields for processing -->
+                        <input name="id_resident" type="hidden" value="<?= $userdetails['id_resident']?>">
+                        <input name="addedby" type="hidden" value="<?= $userdetails['surname']?> <?= $userdetails['firstname']?> <?= $userdetails['mname']?>">
+                        
+                        <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">Close</button>
+                        <button name="create_brgyclearance" type="submit" class="btn btn-primary px-5 shadow-sm font-weight-bold">
+                            Submit Request
+                        </button>
+                    </div> 
+                </form>
             </div>
         </div>
+    </div>
+</div>
         </form>
         
 
@@ -765,120 +717,7 @@
         <br>
         <br>
 
-        <!-- Footer -->
-
-        <footer id="footer" class="bg-primary text-white d-flex-column text-center">
-            <hr class="mt-0">
-
-            <div class="text-center">
-                <h1>Services</h1>
-                <ul class="list-unstyled list-inline">
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Documents">
-                    <i class="fas fa-file fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Card">
-                    <i class="fas fa-id-card fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Friend">
-                    <i class="fas fa-user-friends fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Blotter">
-                    <i class="fas fa-user-shield fa-2x"></i>
-                    </a>
-                </li>
-
-                &nbsp;
-
-                <li class="list-inline-item">
-                    <a href="#!" class="sbtn btn-large mx-1" title="Contact">
-                    <i class="fas fa-phone fa-2x"></i>
-                    </a>
-                </li>
-                </ul>
-            </div>
-
-            <hr class="mb-0">
-
-            <!--Footer Links-->
-
-            <div class="container text-left text-md-center">
-                <div class="row">
-
-                    <!--First column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Documentation</h5>
-                        <div class="d-md-none title" data-target="#Documentation" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Documentation
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <ul class="list-unstyled collapse" id="Documentation">
-                            <li><a href="services_certofres.php">Certificate of Residency</a></li>
-                            <li><a href="services_brgyclearance.php">Barangay Clearance</a></li>
-                            <li><a href="services_certofindigency.php">Certificate of Indigency</a></li>
-                            <li><a href="services_business.php">Business Permit</a></li>
-                            <li><a href="services_brgyid.php">Barangay ID</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.First column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
-
-                    <!--Third column-->
-
-                    <div class="col-md-3 mx-auto shfooter">
-                        <h5 class="my-2 font-weight-bold d-none d-md-block">Other Services</h5>
-                        <div class="d-md-none title" data-target="#OtherServices" data-toggle="collapse">
-                            <div class="mt-3 font-weight-bold">Other Services
-                                <div class="float-right navbar-toggler">
-                                    <i class="fas fa-angle-down"></i>
-                                    <i class="fas fa-angle-up"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="list-unstyled collapse" id="OtherServices">
-                            <li><a href="services_blotter.php">Peace and Order</a></li>
-                        </ul>
-                    </div>
-
-                    <!--/.Third column-->
-
-                    <hr class="clearfix w-100 d-md-none mb-0">
- 
-
-
-                </div>
-            </div>
-
-            <!--/.Footer Links-->
-
-            <hr class="mb-0">
-        </footer>
+       
         <script>
             $(document).ready(function(){
             $('[data-toggle="tooltip"]').tooltip();   
@@ -911,7 +750,7 @@
             });
             });
         </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

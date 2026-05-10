@@ -1,6 +1,5 @@
 <?php
 error_reporting(E_ALL ^ E_WARNING);
-header('Content-Type: application/json');
 include('classes/resident.class.php');
 
 $userdetails = $bmis->get_userdata();

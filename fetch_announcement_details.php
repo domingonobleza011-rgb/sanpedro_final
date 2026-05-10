@@ -1,4 +1,5 @@
 <?php
+
     require('classes/resident.class.php');
     // Ensure $bmis is initialized if not done automatically in the require
     // $bmis = new BMISClass(); 

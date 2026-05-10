@@ -2,6 +2,8 @@
     
    error_reporting(E_ALL ^ E_WARNING);
    ini_set('display_errors',0);
+define('BMIS_ROLE_REQUIRED', 'admin');
+require_once('secure_header.php'); 
    require('classes/resident.class.php');
    $userdetails = $bmis->get_userdata();
    $bmis->validate_admin();
@@ -71,25 +73,6 @@
         border-radius: 50px;
         padding: 8px 25px;
     }
-    /* Prevent the row from wrapping and hide scrollbar if desired */
-.flex-nowrap {
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-}
-
-/* Optional: Make the scrollbar look cleaner on mobile */
-.custom-scrollbar::-webkit-scrollbar {
-    height: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 10px;
-}
-
-/* Ensure cards don't shrink too much */
-.flex-nowrap .col-8 {
-    flex: 0 0 auto;
-}
 </style>
 
 <div class="container-fluid">
@@ -113,6 +96,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="font-size: 0.7rem;">Number of Residents</div>
                             <div class="h4 mb-0 font-weight-bold text-dark"><?= $rescount ?></div>
+                            <a href="admn_table_totalres.php"> View Records </a>
                         </div>
                         <div class="col-auto"><i class="fas fa-users fa-2x text-gray-300"></i></div>
                     </div>
@@ -127,6 +111,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="font-size: 0.7rem;">Total Household Head</div>
                             <div class="h4 mb-0 font-weight-bold text-dark"><?= $rescountfh ?></div>
+                            <a href="admn_table_totalhouse.php"> View Records </a>
                         </div>
                         <div class="col-auto"><i class="fas fa-user-tie fa-2x text-gray-300"></i></div>
                     </div>
@@ -141,6 +126,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="font-size: 0.7rem;">Total Male Residents</div>
                             <div class="h4 mb-0 font-weight-bold text-dark"><?= $rescountm ?></div>
+                            <a href="admn_table_maleres.php"> View Records </a>
                         </div>
                         <div class="col-auto"><i class="fas fa-male fa-2x text-gray-300"></i></div>
                     </div>
@@ -155,6 +141,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1" style="font-size: 0.7rem;">Total Female Residents</div>
                             <div class="h4 mb-0 font-weight-bold text-dark"><?= $rescountf ?></div>
+                            <a href="admn_table_femaleres.php"> View Records </a>
                         </div>
                         <div class="col-auto"><i class="fas fa-female fa-2x text-gray-300"></i></div>
                     </div>
@@ -165,7 +152,7 @@
 <div class="search-container mb-4">
                 <form method="POST" action="">
                     <div class="position-relative mb-3">
-                        <i class="fa fa-search search-icon-inside"></i>
+                        
                         <input type="search" class="form-control pill-search form-control-lg" name="keyword" placeholder="Search resident..." required>
                     </div>
                     <div class="text-center">
@@ -214,7 +201,7 @@
                             <label>Contact Number:</label>
                             <input type="tel" class="form-control" name="contact" maxlength="11" pattern="[0-9]{11}" placeholder="09xxxxxxxxx" required>
                         </div>
-                        <div class="col-md-4 form-group">
+                       <div class="col-md-4 form-group">
                             <label>Email or Phone Number:</label>
                             <input type="text" class="form-control" name="login_identity" placeholder="Enter Email or Phone Number" required>
                         </div>
@@ -298,22 +285,15 @@
 </div>
 <!-- End of Main Content -->
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
-<!-- responsive tags for screen compatibility -->
-<meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
-<!-- custom css --> 
-<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
-<!-- bootstrap css --> 
-<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
-<!-- fontawesome icons -->
-<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 
 <?php 
     include('dashboard_sidebar_end.php');

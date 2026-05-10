@@ -59,8 +59,8 @@
 
                             <div class="col">
                                 <div class="form-group">
-                                    <label>Email or Phone: </label>
-                                    <input type="text" class="form-control" name="login_identity" required>
+                                    <label>Email: </label>
+                                    <input type="email" class="form-control" name="email"  value="<?= $view['email']?>" required>
                                 </div>
                             </div>
                         </div>

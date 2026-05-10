@@ -45,32 +45,7 @@
                     </div>
                 </div>
 
-                <div class="row" style="margin-top: 2em;">
-                    <div class="col">
-                        <div class="form-group">
-                            <label>House No:</label>
-                            <input class="form-control" type="text" name="houseno" Value="<?= $view['houseno'];?>">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label>Street:</label>
-                            <input class="form-control" type="text" name="street" Value="<?= $view['street'];?>">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label>Barangay:</label>
-                            <input class="form-control" type="text" name="brgy" Value="<?= $view['brgy'];?>">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label> Municipality: </label>
-                            <input type="text" class="form-control" name="municipal" value="<?= $view['municipal']?>">
-                        </div>
-                    </div>
-                </div>
+
                 <div class="col">
                         <div class="form-group">
                             <label>Comple Address</label>
@@ -80,7 +55,7 @@
                 <div class="row" style="margin-top: 1.1em;">
                     <div class="col">
                         <label class="form-group">Email </label>
-                        <input type="text" class="form-control" name="login_identity"  Value="<?= $view['login_identity'];?>">
+                        <input type="email" class="form-control" name="email"  Value="<?= $view['email'];?>">
                     </div>
                     <div class="col">
                         <label class="form-group">Password </label>
@@ -123,17 +98,13 @@
 
 <!-- End of Main Content -->
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
-<!-- responsive tags for screen compatibility -->
-<meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
-<!-- custom css --> 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
-<!-- bootstrap css --> 
-<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
-<!-- fontawesome icons -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
 
 <?php 
     include('dashboard_sidebar_end.php');

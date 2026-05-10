@@ -2,8 +2,11 @@
     
     error_reporting(E_ALL ^ E_WARNING);
     ini_set('display_errors',0);
+define('BMIS_ROLE_REQUIRED', 'staff');
+require('secure_header.php');
     require('classes/resident.class.php');
     $userdetails = $bmis->get_userdata();
+    $bmis->validate_staff();
     $bmis->delete_brgyid();
     $view = $bmis->view_brgyid();
     $id_resident = $_GET['id_resident'];
@@ -77,7 +80,13 @@
     
 </div>
 <!-- End of Main Content -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 <?php 
     include('dashboard_sidebar_end.php');
 ?>

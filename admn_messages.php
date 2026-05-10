@@ -1,4 +1,6 @@
 <?php 
+    define('BMIS_ROLE_REQUIRED', 'admin');
+require('secure_header.php');
 require_once 'classes/main.class.php'; 
 $systemObject = new BMISClass();
 $userdetails = $systemObject->get_userdata();

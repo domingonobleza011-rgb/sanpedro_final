@@ -140,7 +140,7 @@ public function create_staff() {
             }
         }
 
-       public function update_staff() {
+public function update_staff() {
     if (isset($_POST['update_staff'])) {
         $id_user = $_GET['id_user'];
         $login_identity = $_POST['login_identity'];
@@ -168,7 +168,6 @@ public function create_staff() {
         $connection = $this->openConn();
 
         // --- PASSWORD LOGIC ---
-        // Only update password if the field is not empty
         $password_query = "";
         $password_param = [];
         if (!empty($_POST['password'])) {
@@ -179,35 +178,34 @@ public function create_staff() {
         // --- PHOTO UPLOAD LOGIC ---
         $photo_query = "";
         $photo_param = [];
-       // Inside update_staff(), when a new photo is uploaded:
-if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-    // ... your existing code to prepare $target_file ...
 
-    if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
-        
-        // --- ADD THIS: Delete old photo ---
-        $stmt_old = $connection->prepare("SELECT photo FROM tbl_user WHERE id_user = ?");
-        $stmt_old->execute([$id_user]);
-        $old_photo = $stmt_old->fetch();
-        
-        if ($old_photo && !empty($old_photo['photo']) && file_exists($old_photo['photo'])) {
-            unlink($old_photo['photo']); // Remove the previous image
+        if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
+            // Define your upload path here
+            $target_dir = "uploads/"; 
+            $target_file = $target_dir . time() . "_" . basename($_FILES["photo"]["name"]);
+
+            if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
+                // Delete old photo
+                $stmt_old = $connection->prepare("SELECT photo FROM tbl_user WHERE id_user = ?");
+                $stmt_old->execute([$id_user]);
+                $old_photo = $stmt_old->fetch();
+                
+                if ($old_photo && !empty($old_photo['photo']) && file_exists($old_photo['photo'])) {
+                    unlink($old_photo['photo']); 
+                }
+
+                $photo_query = ", `photo` = ?";
+                $photo_param[] = $target_file;
+            }
         }
-        // ----------------------------------
-
-        $photo_query = ", `photo` = ?";
-        $photo_param[] = $target_file;
-    }
-}
 
         // --- PREPARE SQL & PARAMS ---
-        // Initial params: identity fields and basic info
         $params = array_merge(
             $password_param, 
             [$login_identity, $email_to_save, $phone_to_save, $lname, $fname, $mi, $age, $sex, $address, $contact, $position, $role, $addedby],
             $photo_param
         );
-        $params[] = $id_user; // WHERE clause ID
+        $params[] = $id_user; 
 
         $sql = "UPDATE tbl_user SET 
                 $password_query
@@ -230,8 +228,11 @@ if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
         $stmt = $connection->prepare($sql);
         $stmt->execute($params);
         
-        echo "<script type='text/javascript'>alert('Staff Account Updated Successfully');</script>";
-        echo "<script type='text/javascript'>window.location.href='admn_staff_crud.php';</script>";
+        // --- THE FIX: Refresh the current page with the ID ---
+        echo "<script type='text/javascript'>
+                alert('Staff Account Updated Successfully');
+                window.location.href = window.location.pathname + window.location.search;
+              </script>";
     }
 }
         public function delete_staff(){

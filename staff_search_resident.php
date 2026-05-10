@@ -68,7 +68,7 @@
 	}else{
 ?>
 
-<table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
+<table class="table table-hover text-center table-bordered" style="responsive"> 
 		<thead class="alert-info">
         <tr>
         <th> Actions</th>

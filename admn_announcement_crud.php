@@ -73,7 +73,7 @@
 <div class="main-container">
     <div class="row mb-5"> 
         <div class="col-md-12"> 
-            <h2 class="text-center fw-bold text-dark">ANNOUNCEMENTS!!!!!!</h2>
+            <h2 class="text-center fw-bold text-dark">Announcements</h2>
             <p class="text-center text-muted">Create and manage announcements for Barangay San Pedro</p>
         </div>
     </div>
@@ -120,8 +120,8 @@
                             <thead> 
                                 <tr>
                                     <th class="ps-4">Content</th>
-                                    <th>Stats</th> <!-- Added column -->
                                     <th>Date</th>
+                                    <th>Posted By</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>

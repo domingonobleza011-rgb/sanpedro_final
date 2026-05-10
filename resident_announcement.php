@@ -38,7 +38,7 @@
         <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body
+        body { margin: 0; padding: 0; background-color: #f0f2f5; }
         .page-wrap{max-width:680px;margin:28px auto 60px;padding:0 12px}
         .page-title{font-size:1.35rem;font-weight:700;color:#1c1e21;margin-bottom:18px;display:flex;align-items:center;gap:10px}
         .post-count-badge{background:#e7f3ff;color:#1877f2;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase}

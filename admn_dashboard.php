@@ -1,7 +1,7 @@
 <?php
     error_reporting(E_ALL ^ E_WARNING);
 define('BMIS_ROLE_REQUIRED', 'admin');
-require_once('secure_header.php'); 
+include('secure_header.php'); 
     include('classes/staff.class.php');
     include('classes/resident.class.php');
     require_once('classes/conn.php'); // needed for complaint counts

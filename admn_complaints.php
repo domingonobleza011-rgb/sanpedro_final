@@ -13,10 +13,10 @@ ini_set('display_errors', 0);
 define('BMIS_ROLE_REQUIRED', 'admin');
 require('secure_header.php');
 // ---------- DB CONFIG — adjust to match your setup ----------
-$host   = 'sql106.infinityfree.com';
-$dbname = 'if0_41514709_bmis';
-$dbuser = 'if0_41514709';
-$dbpass = 'sanpedro011';
+$host   = 'localhost';
+$dbname = 'bmis';
+$dbuser = 'root';
+$dbpass = '';
 // ------------------------------------------------------------
 
 $pdo = null;

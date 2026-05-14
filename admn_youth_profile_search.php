@@ -1,7 +1,7 @@
 <?php
 	// require the database connection
 	require 'classes/conn.php';
-	if(isset($_POST['search_certofres'])){
+	if(isset($_POST['search_youth'])){
 		$keyword = $_POST['keyword'];
 ?>
 <div class="table-responsive" style="width: 100%; overflow-x: auto;">

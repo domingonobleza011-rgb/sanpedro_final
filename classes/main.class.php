@@ -657,38 +657,58 @@ public function isResidentVerified($id_resident) {
         }
     }
 
-    public function create_certofres() {
+   public function create_certofres() {
 
         if(isset($_POST['create_certofres'])) {
-            $id_rescert = $_POST['id_rescert'];
-            $id_resident = $_POST['id_resident'];
-            $lname = $_POST['lname'];
-            $fname = $_POST['fname'];
-            $mi = $_POST['mi'];
-            $age = $_POST['age'];
-            $nationality = $_POST['nationality']; 
-            $houseno = $_POST['houseno'];
-            $street = $_POST['street'];
-            $brgy = $_POST['brgy'];
-            $municipal = $_POST['municipal'];
-            $date = $_POST['date'];
-            $purpose = $_POST['purpose'];
+            // Use null coalescing (?? '') to prevent "Undefined array key" warnings
+            // If id_rescert is AUTO_INCREMENT in DB, we should pass NULL
+            $id_rescert = $_POST['id_rescert'] ?? null; 
+            $id_resident = $_POST['id_resident'] ?? '';
+            $lname = $_POST['lname'] ?? '';
+            $fname = $_POST['fname'] ?? '';
+            $mi = $_POST['mi'] ?? '';
+            $age = $_POST['age'] ?? '';
+            $nationality = $_POST['nationality'] ?? ''; 
+            $houseno = $_POST['houseno'] ?? '';
+            $street = $_POST['street'] ?? '';
+            $brgy = $_POST['brgy'] ?? '';
+            $municipal = $_POST['municipal'] ?? '';
+            $date = $_POST['date'] ?? date("Y-m-d");
+            $purpose = $_POST['purpose'] ?? '';
             
-
+            // Added default value for remarks to fix the "Field 'remarks' doesn't have a default value" error
+            $remarks = "Pending"; 
 
             $connection = $this->openConn();
-            $stmt = $connection->prepare("INSERT INTO tbl_rescert (`id_rescert`, `id_resident`, `lname`, `fname`, `mi`,
-             `age`,`nationality`, `houseno`, `street`,`brgy`, `municipal`, `date`,`purpose`)
-            VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?)");
+            
+            // Added `remarks` to the field list and the VALUES placeholders
+            $stmt = $connection->prepare("INSERT INTO tbl_rescert (`id_rescert`, `id_resident`, `lname`, `fname`, `mi`, `age`, `nationality`, `houseno`, `street`, `brgy`, `municipal`, `date`, `purpose`, `remarks`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-            $stmt->execute([$id_rescert, $id_resident, $lname, $fname, $mi,  $age, $nationality, $houseno,  $street, $brgy,$municipal, $date,$purpose]);
+            try {
+                $stmt->execute([
+                    $id_rescert, 
+                    $id_resident, 
+                    $lname, 
+                    $fname, 
+                    $mi,  
+                    $age, 
+                    $nationality, 
+                    $houseno,  
+                    $street, 
+                    $brgy, 
+                    $municipal, 
+                    $date, 
+                    $purpose, 
+                    $remarks
+                ]);
 
-            $message2 = "Application Applied, you will receive our text message for further details";
-            echo "<script type='text/javascript'>alert('$message2');</script>";
-            header("refresh: 0");
+                $message2 = "Application Applied, you will receive our text message for further details";
+                echo "<script type='text/javascript'>alert('$message2'); window.location.href=window.location.href;</script>";
+            } catch (PDOException $e) {
+                // If the error persists, this will tell you why
+                echo "Error: " . $e->getMessage();
+            }
         }
-        
-        
     }
 
     public function view_certofres(){

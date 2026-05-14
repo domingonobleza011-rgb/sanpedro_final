@@ -31,227 +31,503 @@
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 </head>
     <style>
-        :root {
-            --primary-blue: #007bff;
-            --dark-blue: #0056b3;
-            --text-gray: #6c757d;
-        }
+/* ============================================================
+   BARANGAY SAN PEDRO — INDEX / LOGIN PAGE — IMPROVED CSS
+   Design: Refined civic, warm navy + gold accent, clean serif/sans pairing
+   ============================================================ */
 
-        /* Remove all default margins and padding for true full screen */
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Prevents accidental scrolling */
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            border-bottom: 1px solid #dee2e6;
-            padding: 10px 30px;
-        }
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        .navbar-brand {
-            font-weight: bold;
-            color: var(--primary-blue) !important;
-            font-size: 1.2rem;
-        }
+:root {
+    --navy:       #0f2d5a;
+    --navy-mid:   #1a4480;
+    --navy-light: #2b5ea7;
+    --gold:       #c9943a;
+    --gold-light: #e8b86d;
+    --cream:      #faf8f4;
+    --white:      #ffffff;
+    --text-dark:  #1a1a2e;
+    --text-mid:   #4a5568;
+    --text-light: #718096;
+    --border:     #e2e8f0;
+    --danger:     #dc3545;
 
-        .nav-link {
-            font-weight: 500;
-            color: #333 !important;
-            margin-left: 20px;
-            cursor: pointer;
-        }
+    --shadow-sm:  0 2px 8px rgba(15,45,90,0.08);
+    --shadow-md:  0 8px 32px rgba(15,45,90,0.12);
+    --shadow-lg:  0 20px 60px rgba(15,45,90,0.18);
 
-        .nav-link:hover {
-            color: var(--primary-blue) !important;
-        }
-        .main-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-        }
+    --radius:     14px;
+    --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
 
-        /* Left Section: Information (Branding) */
-        .info-panel {
-            flex: 1;
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 5%;
-            text-align: center;
-            border-right: 1px solid #dee2e6;
-        }
+/* ─── RESET & BASE ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
-        .info-panel img {
-            width: 120px;
-            margin-bottom: 2rem;
-        }
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+}
 
-        .info-panel h1 {
-            color: var(--primary-blue);
-            font-weight: 800;
-            font-size: 2.2rem;
-            margin-bottom: 3rem;
-        }
+/* ─── NAVBAR ────────────────────────────────────────────────── */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    z-index: 1000;
+    border-bottom: 1px solid rgba(201,148,58,0.2);
+    padding: 12px 36px;
+    box-shadow: 0 1px 0 rgba(15,45,90,0.06);
+}
 
-        .content-box {
-            max-width: 450px;
-        }
+.navbar-brand {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    color: var(--navy) !important;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
-        .content-box h6 {
-            font-weight: bold;
-            letter-spacing: 1px;
-            color: #333;
-            text-transform: uppercase;
-        }
+.navbar-brand i {
+    color: var(--gold);
+    font-size: 1.1rem;
+}
 
-        .content-box p {
-            color: var(--text-gray);
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 2rem;
-        }
+.nav-link {
+    font-weight: 500;
+    color: var(--text-mid) !important;
+    margin-left: 8px;
+    cursor: pointer;
+    padding: 8px 14px !important;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    letter-spacing: 0.2px;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
 
-        /* Right Section: Login Form */
-        .login-panel {
-            flex: 1;
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 5%;
-        }
+.nav-link:hover {
+    color: var(--navy) !important;
+    background: rgba(15,45,90,0.06);
+}
 
-        .form-container {
-            width: 100%;
-            max-width: 400px;
-        }
+/* ─── LAYOUT ────────────────────────────────────────────────── */
+.main-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    padding-top: 60px; /* navbar height */
+}
 
-        .login-panel h2 {
-            font-weight: 700;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
+/* ─── INFO PANEL (LEFT) ─────────────────────────────────────── */
+.info-panel {
+    flex: 1;
+    background: linear-gradient(145deg, var(--navy) 0%, var(--navy-mid) 55%, var(--navy-light) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5% 6%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
 
-        .subtitle {
-            color: var(--text-gray);
-            margin-bottom: 2.5rem;
-        }
+/* Decorative geometric layers */
+.info-panel::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: rgba(201,148,58,0.08);
+    pointer-events: none;
+}
 
-        /* Form Styling */
-        .form-label {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
+.info-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: -60px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    pointer-events: none;
+}
 
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
+.info-panel img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 1.8rem;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.3));
+    border-radius: 50%;
+    border: 3px solid rgba(201,148,58,0.5);
+    padding: 4px;
+    background: rgba(255,255,255,0.08);
+}
 
-        .input-group-text {
-            background-color: transparent;
-            color: var(--text-gray);
-            border-right: none;
-        }
+.info-panel h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--white);
+    font-weight: 700;
+    font-size: 1.85rem;
+    line-height: 1.25;
+    margin-bottom: 2.5rem;
+    letter-spacing: -0.3px;
+}
 
-        .form-control {
-            border-left: none;
-            padding: 0.75rem;
-        }
+.content-box {
+    max-width: 420px;
+    position: relative;
+    z-index: 1;
+}
 
-        .form-control:focus {
-            box-shadow: none;
-            border-color: #ced4da;
-        }
+/* Gold divider before sections */
+.content-box h6 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        .btn-signin {
-            background-color: var(--primary-blue);
-            border: none;
-            padding: 0.8rem;
-            font-weight: bold;
-            font-size: 1rem;
-            transition: 0.3s;
-        }
+.content-box h6::before,
+.content-box h6::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(201,148,58,0.3);
+}
 
-        .btn-signin:hover {
-            background-color: var(--dark-blue);
-        }
+.content-box p {
+    color: rgba(255,255,255,0.72);
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
 
-        .reg-text {
-            margin-top: 1.5rem;
-            text-align: center;
-            font-size: 0.9rem;
-        }
+/* Bottom badge */
+.info-panel-footer {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
 
-        .reg-text a {
-            color: #dc3545;
-            text-decoration: none;
-            font-weight: bold;
-        }
+/* ─── LOGIN PANEL (RIGHT) ───────────────────────────────────── */
+.login-panel {
+    flex: 1;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5%;
+    position: relative;
+}
 
-        /* Mobile Responsive */
-        @media (max-width: 992px) {
-            .info-panel {
-                display: none; /* Only show form on mobile */
-            }
-        }
-        .official-card {
-        background: #fff;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* Subtle texture */
+.login-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(201,148,58,0.04) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    z-index: 1;
+    animation: slideUp 0.5s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Welcome tag */
+.login-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(201,148,58,0.1);
+    color: var(--gold);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(201,148,58,0.2);
+}
+
+.login-panel h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: 2.1rem;
+    margin-bottom: 0.4rem;
+    color: var(--text-dark);
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: var(--text-light);
+    margin-bottom: 2.2rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+/* ─── FORM ELEMENTS ─────────────────────────────────────────── */
+.form-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.3px;
+}
+
+.input-group {
+    margin-bottom: 1.4rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid var(--border);
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.input-group:focus-within {
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(27,68,128,0.1);
+}
+
+.input-group-text {
+    background: rgba(15,45,90,0.04);
+    color: var(--text-light);
+    border: none;
+    padding: 0 14px;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    border: none;
+    padding: 0.8rem 1rem;
+    font-size: 0.92rem;
+    background: var(--white);
+    color: var(--text-dark);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.form-control::placeholder {
+    color: #b0bac5;
+    font-weight: 300;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    outline: none;
+    background: #fafcff;
+}
+
+/* Show password checkbox */
+.form-check {
+    margin-bottom: 1.8rem;
+}
+
+.form-check-input:checked {
+    background-color: var(--navy-light);
+    border-color: var(--navy-light);
+}
+
+.form-check-label {
+    font-size: 0.83rem;
+    color: var(--text-mid);
+}
+
+/* Sign in button */
+.btn-signin {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border: none;
+    padding: 0.85rem;
+    font-weight: 600;
+    font-size: 0.92rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+    box-shadow: 0 4px 16px rgba(15,45,90,0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-signin::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.btn-signin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15,45,90,0.35);
+}
+
+.btn-signin:hover::before {
+    opacity: 1;
+}
+
+.btn-signin span {
+    position: relative;
+    z-index: 1;
+}
+
+.btn-signin:active {
+    transform: translateY(0);
+}
+
+/* Register link */
+.reg-text {
+    margin-top: 1.6rem;
+    text-align: center;
+    font-size: 0.87rem;
+    color: var(--text-light);
+}
+
+.reg-text a {
+    color: var(--danger);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity var(--transition);
+}
+
+.reg-text a:hover {
+    opacity: 0.75;
+    text-decoration: underline;
+}
+
+/* ─── OFFICIALS MODAL ───────────────────────────────────────── */
+.modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 28px 28px 20px;
+    background: linear-gradient(135deg, var(--navy), var(--navy-light)) !important;
+}
+
+.modal-header .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    letter-spacing: -0.2px;
+}
+
+.modal-body {
+    padding: 24px 28px;
+    background: var(--cream);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border);
+    background: var(--white);
+    padding: 14px 24px;
+}
+
+/* Official cards */
+.official-card {
+    background: var(--white);
+    border-radius: 16px !important;
+    border: 1px solid var(--border) !important;
+    transition: all var(--transition);
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.official-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md) !important;
+    border-color: var(--gold-light) !important;
+}
+
+.official-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.official-position {
+    font-size: 0.72rem;
+    letter-spacing: 1.2px;
+    color: var(--navy-light);
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.official-card .badge {
+    font-size: 0.65rem !important;
+    background: rgba(15,45,90,0.06) !important;
+    color: var(--navy) !important;
+    border-color: rgba(15,45,90,0.15) !important;
+    padding: 6px 12px !important;
+    letter-spacing: 0.8px;
+}
+
+/* Avatar ring */
+.official-card .rounded-circle.bg-light {
+    background: var(--cream) !important;
+    border-color: var(--border) !important;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 992px) {
+    .info-panel { display: none; }
+    .login-panel { background: var(--cream); }
+
+    .form-container {
+        padding: 0 8px;
     }
-    
-    .official-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-        border-color: #0d6efd !important;
-    }
+}
 
-    .official-name {
-        color: #333;
-        font-size: 1rem;
-    }
-
-    /* Prevents layout shifts if names are long */
-    .official-card h6 {
-        min-height: 2.4em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .official-name {
-        font-size: 1.1rem;
-        color: #2d3436;
-        margin-bottom: 2px;
-        text-transform: capitalize;
-    }
-
-    .official-position {
-        font-size: 0.85rem;
-        letter-spacing: 1px;
-        color: #0d6efd;
-    }
-
-    .modal-content {
-        border: none;
-        border-radius: 20px;
-        overflow: hidden;
-    }
-
-    .modal-header {
-        border-bottom: none;
-        padding: 25px;
-    }
+@media (max-width: 576px) {
+    .navbar { padding: 10px 20px; }
+    .login-panel h2 { font-size: 1.7rem; }
+}
         
   
     </style>

@@ -361,29 +361,39 @@ class BMISClass {
         }
     }
  
-    public function admin_delete_announcement(){
-        if(isset($_POST['delete_announcement'])) {
-            $id_announcement = $_POST['id_announcement'];
-            $connection = $this->openConn();
- 
-            $stmt = $connection->prepare("SELECT image FROM tbl_announcement WHERE id_announcement = ?");
-            $stmt->execute([$id_announcement]);
-            $row = $stmt->fetch();
- 
-            if($row && !empty($row['image'])) {
-                foreach(explode(',', $row['image']) as $img) {
-                    $file_path = "uploads/" . trim($img);
-                    if(file_exists($file_path)) { unlink($file_path); }
+public function admin_delete_announcement(){
+    if(isset($_POST['delete_announcement'])) {
+        $id_announcement = $_POST['id_announcement'];
+        $connection = $this->openConn();
+
+        // Fetch image paths before deleting
+        $stmt = $connection->prepare("SELECT image FROM tbl_announcement WHERE id_announcement = ?");
+        $stmt->execute([$id_announcement]);
+        $row = $stmt->fetch();
+
+        // Delete associated image files
+        if($row && !empty($row['image'])) {
+            foreach(explode(',', $row['image']) as $img) {
+                $file_path = "uploads/" . trim($img);
+                if(file_exists($file_path)) {
+                    unlink($file_path);
                 }
             }
- 
-            $stmt = $connection->prepare("DELETE FROM tbl_announcement WHERE id_announcement = ?");
-            $stmt->execute([$id_announcement]);
- 
-            echo "<script>showNotif('Announcement and all images deleted.', 'success'); setTimeout(() => window.location.href='" . basename($_SERVER['PHP_SELF']) . "', 2000);</script>";
-            exit();
         }
+
+        // Delete the record
+        $stmt = $connection->prepare("DELETE FROM tbl_announcement WHERE id_announcement = ?");
+        $stmt->execute([$id_announcement]);
+
+        // Use session flash message instead of inline script
+        session_start();
+        $_SESSION['notif_message'] = 'Announcement and all images deleted.';
+        $_SESSION['notif_type']    = 'success';
+
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
     }
+}
  
     public function delete_announcement($user_id){
         if(isset($_POST['delete_announcement'])) {

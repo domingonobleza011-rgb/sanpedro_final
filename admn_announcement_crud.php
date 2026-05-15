@@ -2,49 +2,13 @@
    error_reporting(E_ALL);
    ini_set('display_errors', 1);
    require('classes/resident.class.php');
-   
-   // --- FIREBASE INTEGRATION START ---
-   require 'vendor/autoload.php'; 
-   use Kreait\Firebase\Factory;
-   use Kreait\Firebase\Messaging\CloudMessage;
-   use Kreait\Firebase\Messaging\Notification;
-   // --- FIREBASE INTEGRATION END ---
 
    $userdetails = $bmis->get_userdata();
    $bmis->validate_admin();
-   $current_admin_id = $userdetails['id_resident']; 
+   $current_admin_id = $userdetails['id_resident'];
 
-   // Handle Announcement Creation
    if(isset($_POST['create_announce'])) {
        $bmis->create_announcement();
-       
-       // TRIGGER NOTIFICATION AFTER CREATION
-       try {
-           $factory = (new Factory)->withServiceAccount(__DIR__ . '/config/firebase_credentials.json');
-           $messaging = $factory->createMessaging();
-
-           // Fetch all resident tokens from your new table
-           // Ensure you have a global $conn or get it from your $bmis class
-           $tokenQuery = mysqli_query($bmis->conn, "SELECT token FROM resident_tokens");
-
-           if($tokenQuery && mysqli_num_rows($tokenQuery) > 0) {
-               while($tokenRow = mysqli_fetch_assoc($tokenQuery)) {
-                   $deviceToken = $tokenRow['token'];
-                   
-                   $message = CloudMessage::withTarget('token', $deviceToken)
-                       ->withNotification(Notification::create(
-                           'Barangay San Pedro Alert', 
-                           substr($_POST['event'], 0, 100) . '...' // Sends first 100 chars of your message
-                       ))
-                       ->withData(['click_action' => 'OPEN_ANNOUNCEMENTS']);
-
-                   $messaging->send($message);
-               }
-           }
-       } catch (\Exception $e) {
-           // Silently fail or log error so the page doesn't crash if Firebase is down
-           error_log("Firebase Error: " . $e->getMessage());
-       }
    }
 
    $bmis->admin_delete_announcement(); 

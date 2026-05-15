@@ -19,13 +19,26 @@
         'staff'           => ['label' => 'Staff',                 'icon' => 'fa-user-tie',        'color' => 'blue'],
     ];
 
-    // ── Handle permanent delete ──────────────────────────────
+    // ── Handle permanent delete (single) ────────────────────
     if (isset($_POST['permanent_delete']) && !empty($_POST['id_archive'])) {
         $id = (int)$_POST['id_archive'];
         $stmt = $conn->prepare("DELETE FROM tbl_archive WHERE id_archive = ?");
         $stmt->execute([$id]);
         echo "<script>alert('Record permanently deleted.'); window.location.href='admn_archive.php';</script>";
         exit;
+    }
+
+    // ── Handle bulk permanent delete ─────────────────────────
+    if (isset($_POST['bulk_permanent_delete']) && !empty($_POST['selected_archives'])) {
+        $ids = array_filter($_POST['selected_archives'], 'is_numeric');
+        if (!empty($ids)) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = $conn->prepare("DELETE FROM tbl_archive WHERE id_archive IN ($placeholders)");
+            $stmt->execute(array_values($ids));
+            $count = $stmt->rowCount();
+            echo "<script>alert('$count record(s) permanently deleted.'); window.location.href='admn_archive.php';</script>";
+            exit;
+        }
     }
 
     // ── Handle restore (re-insert) ───────────────────────────
@@ -499,6 +512,60 @@
     .filter-bar .filter-search { min-width: auto; }
     .summary-text { max-width: 140px; }
 }
+
+/* ── Bulk select toolbar ── */
+.bulk-toolbar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: #fff5f5;
+    border: 1.5px solid rgba(220,38,38,0.3);
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 1rem;
+}
+
+.bulk-toolbar .bulk-count {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--danger);
+    margin-right: 4px;
+}
+
+.btn-bulk-delete {
+    background: linear-gradient(135deg, var(--danger), #ef4444);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 18px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-bulk-delete:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,0.3); }
+
+.btn-bulk-clear {
+    background: var(--white);
+    color: var(--text-mid);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-bulk-clear:hover { background: var(--cream); color: var(--navy); }
+
+/* Checkbox column */
+.check-col { width: 44px; text-align: center !important; }
 </style>
 
 <!-- ─── BEGIN PAGE CONTENT ─────────────────────────────────── -->
@@ -566,6 +633,21 @@
         </span>
     </div>
 
+    <!-- Bulk Delete Form wraps the table -->
+    <form method="POST" action="admn_archive.php" id="bulkForm">
+
+    <!-- Bulk Toolbar (hidden until rows are checked) -->
+    <div class="bulk-toolbar" id="bulkToolbar">
+        <span class="bulk-count" id="bulkCount">0 selected</span>
+        <button type="submit" name="bulk_permanent_delete" class="btn-bulk-delete"
+            onclick="return confirm('PERMANENTLY delete all selected records? This cannot be undone.');">
+            <i class="fas fa-trash"></i> Delete Selected
+        </button>
+        <button type="button" class="btn-bulk-clear" onclick="clearAllChecks()">
+            <i class="fas fa-times"></i> Clear
+        </button>
+    </div>
+
     <!-- Archive Table -->
     <div class="archive-table-wrap">
         <?php if (empty($records)): ?>
@@ -579,6 +661,10 @@
             <table class="table table-hover" id="archiveTable">
                 <thead>
                     <tr>
+                        <th class="check-col">
+                            <input type="checkbox" id="checkAll" title="Select all"
+                                style="width:16px;height:16px;cursor:pointer;">
+                        </th>
                         <th style="width:40px;">#</th>
                         <th>Type</th>
                         <th>Name</th>
@@ -595,6 +681,12 @@
                         $is_restored = (bool)$rec['is_restored'];
                     ?>
                     <tr>
+                        <td class="check-col">
+                            <input type="checkbox" name="selected_archives[]"
+                                value="<?= $rec['id_archive'] ?>"
+                                class="row-check"
+                                style="width:16px;height:16px;cursor:pointer;">
+                        </td>
                         <td class="date-cell text-muted"><?= $i + 1 ?></td>
 
                         <td>
@@ -670,7 +762,7 @@
 
                     <!-- Expandable JSON detail row -->
                     <tr id="detail-<?= $rec['id_archive'] ?>" style="display:none; background:var(--cream);">
-                        <td colspan="8" class="json-detail">
+                        <td colspan="9" class="json-detail">
                             <strong style="font-size:0.78rem; color:var(--navy); display:block; margin-bottom:6px;">
                                 Full Record Data
                             </strong>
@@ -686,18 +778,50 @@
             </table>
         </div>
         <?php endif; ?>
-    </div>
+    </div><!-- /.archive-table-wrap -->
+
+    </form><!-- /#bulkForm -->
 
     <br><br>
 </div>
 <!-- End of Main Content -->
 
 <script>
+// ── Expand / collapse JSON detail row ─────────────────────────
 function toggleDetail(id) {
-    const row = document.getElementById('detail-' + id);
-    if (row) {
-        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+    var row = document.getElementById('detail-' + id);
+    if (row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+
+// ── Multi-select logic ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var checkAll = document.getElementById('checkAll');
+    if (checkAll) {
+        checkAll.addEventListener('change', function () {
+            document.querySelectorAll('.row-check').forEach(function (cb) {
+                cb.checked = checkAll.checked;
+            });
+            updateToolbar();
+        });
     }
+    document.querySelectorAll('.row-check').forEach(function (cb) {
+        cb.addEventListener('change', updateToolbar);
+    });
+});
+
+function updateToolbar() {
+    var checked = document.querySelectorAll('.row-check:checked');
+    var toolbar  = document.getElementById('bulkToolbar');
+    var counter  = document.getElementById('bulkCount');
+    if (toolbar)  toolbar.style.display  = checked.length > 0 ? 'flex' : 'none';
+    if (counter)  counter.textContent    = checked.length + ' selected';
+}
+
+function clearAllChecks() {
+    document.querySelectorAll('.row-check').forEach(function (cb) { cb.checked = false; });
+    var ca = document.getElementById('checkAll');
+    if (ca) ca.checked = false;
+    updateToolbar();
 }
 </script>
 

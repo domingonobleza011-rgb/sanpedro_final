@@ -144,6 +144,7 @@ header("refresh: 0");
             $id_resident = $_POST['id_resident'];
 
             if(isset($_POST['delete_resident'])) {
+                $this->archive_record('tbl_resident', 'id_resident', $id_resident, 'resident');
                 $connection = $this->openConn();
                 $stmt = $connection->prepare("DELETE FROM tbl_resident where id_resident = ?");
                 $stmt->execute([$id_resident]);

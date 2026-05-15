@@ -245,12 +245,15 @@ public function update_staff() {
         $stmt_find->execute([$id_user]);
         $user = $stmt_find->fetch();
 
-        // 2. Delete the physical file if it exists
+        // 2. Archive before delete
+        $this->archive_record('tbl_user', 'id_user', $id_user, 'staff');
+
+        // 3. Delete the physical file if it exists
         if ($user && !empty($user['photo']) && file_exists($user['photo'])) {
             unlink($user['photo']);
         }
 
-        // 3. Now delete the database record
+        // 4. Now delete the database record
         $stmt = $connection->prepare("DELETE FROM tbl_user WHERE id_user = ?");
         $stmt->execute([$id_user]);
         

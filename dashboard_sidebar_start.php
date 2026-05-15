@@ -536,7 +536,11 @@ hr {
                     <i class="fas fa-archive"></i>
                     <span>Archive</span></a>
             </li>
-
+ <li class="nav-item">
+                <a class="nav-link" href="admn_settings.php">
+                    <i class="bi bi-gear"></i>
+                    <span>Settings</span></a>
+            </li>
             
 
             <!-- Divider -->

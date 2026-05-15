@@ -526,7 +526,6 @@ hr {
                     <i class="fas fa-user-shield"></i>
                     <span>Peace and Order Report</span></a>
             </li>
-
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 

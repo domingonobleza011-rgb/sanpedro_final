@@ -1,6 +1,7 @@
 <?php
     require('classes/staff.class.php');
     include('classes/resident.class.php');
+    require_once('classes/conn.php');
     $userdetails = $bmis->get_userdata();
 
     $rescount = $residentbmis->count_resident();
@@ -14,6 +15,15 @@
     $staffcountm = $staffbmis->count_mstaff();
     $staffcountf = $staffbmis->count_fstaff();
 
+    // ── Complaint counts (uses the shared $conn PDO from conn.php) ──
+    $complaint_pending  = 0;
+    $complaint_resolved = 0;
+    $complaint_total    = 0;
+    try {
+        $complaint_pending  = (int)$conn->query("SELECT COUNT(*) FROM tbl_complaints WHERE status='pending'")->fetchColumn();
+        $complaint_resolved = (int)$conn->query("SELECT COUNT(*) FROM tbl_complaints WHERE status='resolved'")->fetchColumn();
+        $complaint_total    = $complaint_pending + $complaint_resolved;
+    } catch (Exception $e) { /* table may not exist yet */ }
 ?>
 
 
@@ -170,10 +180,96 @@
             </div>
         </div>
     </div>
+        <!-- ══════════════════════════════════════ -->
+    <!--  RESIDENT COMPLAINTS SECTION          -->
+    <!-- ══════════════════════════════════════ -->
+    <br>
+    <hr>
+    <br>
+
+    <div class="row">
+        <div class="col-12">
+            <h4>Resident Complaints</h4>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+
+        <!-- Total Complaints -->
+        <div class="col-md-4 mb-3">
+            <div class="card border-left-danger shadow h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Total Complaints
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-dark"><?= $complaint_total ?></div>
+                            <br>
+                            <a href="staff_complaints.php">View All</a>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-megaphone-fill" style="font-size:2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Complaints -->
+        <div class="col-md-4 mb-3">
+            <div class="card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Complaints
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-dark"><?= $complaint_pending ?></div>
+                            <br>
+                            <a href="staff_complaints.php?status=pending" class="text-warning fw-semibold">Review Now</a>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-clock-history" style="font-size:2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resolved Complaints -->
+        <div class="col-md-4 mb-3">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Resolved Complaints
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-dark"><?= $complaint_resolved ?></div>
+                            <br>
+                            <a href="staff_complaints.php?status=resolved" class="text-success">View Resolved</a>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-check-circle-fill" style="font-size:2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- ══ END COMPLAINTS ══ -->
+
+<!-- /.container-fluid -->
+
 </div>
-<br>
-<hr>
 <!-- End of Main Content -->
+
+<br>
+<br>
+</div>
+
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

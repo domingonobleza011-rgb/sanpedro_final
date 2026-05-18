@@ -6,6 +6,12 @@ $resident = $residentbmis->get_single_brgyid($id_brgyid);
 
 include "classes/conn.php"; 
 
+// Fetch the staff member with position "Punong Barangay"
+$stmt_pb = $conn->prepare("SELECT fname, mi, lname FROM tbl_user WHERE position = 'Punong Barangay' LIMIT 1");
+$stmt_pb->execute();
+$punong = $stmt_pb->fetch(PDO::FETCH_ASSOC);
+$punong_name = $punong ? strtoupper($punong['lname'] . ', ' . $punong['fname'] . ' ' . $punong['mi']) : 'PUNONG BARANGAY';
+
 date_default_timezone_set('Asia/Manila');
 $date_issued = date('F j, Y'); 
 $date_expires = date('F j, Y', strtotime('+1 year')); 
@@ -119,7 +125,7 @@ $date_expires = date('F j, Y', strtotime('+1 year'));
             <div class="address-text">Zone <?= $resident['houseno'];?>, San Pedro, Iriga City</div>
             <span class="data-label">ADDRESS</span>
 
-            <div class="sig-name">JOSEPH B. BEBONIA</div>
+            <div class="sig-name"><?= htmlspecialchars($punong_name); ?></div>
             <div class="sig-title">Punong Barangay</div>
         </div>
 

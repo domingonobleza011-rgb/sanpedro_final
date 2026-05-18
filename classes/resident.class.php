@@ -49,7 +49,38 @@
             
             // Age validation
             if ($age < 18) {
-                echo "<script>alert('Sorry, you are underaged to register an account');</script>";
+                echo "
+                <div id='toast' style='
+                    position:fixed; top:24px; right:24px; z-index:9999;
+                    background:#fff; border-left:4px solid #E24B4A;
+                    border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+                    padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+                    display:flex; align-items:flex-start; gap:14px;
+                    font-family:Georgia,serif;
+                    animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+                '>
+                    <div style='width:36px;height:36px;border-radius:50%;background:#FCEBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;'>
+                        <svg width='18' height='18' fill='none' viewBox='0 0 24 24'>
+                            <circle cx='12' cy='12' r='10' fill='#E24B4A'/>
+                            <path d='M12 7v5M12 16h.01' stroke='#fff' stroke-width='2' stroke-linecap='round'/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style='font-weight:700;color:#501313;font-size:15px;margin-bottom:3px;'>You must be 18 or older</div>
+                        <div style='color:#A32D2D;font-size:13px;'>Sorry, you are underage to register an account.</div>
+                    </div>
+                    <button onclick=\"document.getElementById('toast').remove()\" style='margin-left:auto;background:none;border:none;cursor:pointer;color:#E24B4A;font-size:20px;line-height:1;padding:0;flex-shrink:0;'>&times;</button>
+                </div>
+                <style>
+                    @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+                    @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+                </style>
+                <script>
+                    setTimeout(function(){
+                        var t=document.getElementById('toast');
+                        if(t){ t.style.animation='slideOut .35s ease forwards'; setTimeout(function(){ t&&t.remove(); },350); }
+                    }, 1000);
+                </script>";
                 return(0);
             }
 
@@ -70,9 +101,74 @@
                 $bdate, $bplace, $nationality, $voter, $familyrole, $role, $addedby
             ]);
 
-            echo "<script>alert('Account added! You can now log in.'); window.location.href='index.php';</script>";
+            echo "
+            <div id='toast' style='
+                position:fixed; top:24px; right:24px; z-index:9999;
+                background:#fff; border-left:4px solid #1D9E75;
+                border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+                padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+                display:flex; align-items:flex-start; gap:14px;
+                font-family:Georgia,serif;
+                animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+            '>
+                <div style='width:36px;height:36px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;'>
+                    <svg width='18' height='18' fill='none' viewBox='0 0 24 24'>
+                        <circle cx='12' cy='12' r='10' fill='#1D9E75'/>
+                        <path d='M7.5 12.5l3 3 6-6' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+                    </svg>
+                </div>
+                <div>
+                    <div style='font-weight:700;color:#085041;font-size:15px;margin-bottom:3px;'>Account Created!</div>
+                    <div style='color:#0F6E56;font-size:13px;'>You can now log in to your account.</div>
+                </div>
+                <button onclick=\"document.getElementById('toast').remove()\" style='margin-left:auto;background:none;border:none;cursor:pointer;color:#1D9E75;font-size:20px;line-height:1;padding:0;flex-shrink:0;'>&times;</button>
+            </div>
+            <style>
+                @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+                @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+            </style>
+            <script>
+                setTimeout(function(){
+                    var t=document.getElementById('toast');
+                    if(t){ t.style.animation='slideOut .35s ease forwards'; setTimeout(function(){ window.location.href='index.php'; },350); }
+                }, 1000);
+            </script>";
+
         } else {
-            echo "<script>alert('This Email or Phone Number is already registered.');</script>";
+
+            // ── Already registered ────────────────────────────────────
+            echo "
+            <div id='toast' style='
+                position:fixed; top:24px; right:24px; z-index:9999;
+                background:#fff; border-left:4px solid #E24B4A;
+                border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+                padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+                display:flex; align-items:flex-start; gap:14px;
+                font-family:Georgia,serif;
+                animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+            '>
+                <div style='width:36px;height:36px;border-radius:50%;background:#FCEBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;'>
+                    <svg width='18' height='18' fill='none' viewBox='0 0 24 24'>
+                        <circle cx='12' cy='12' r='10' fill='#E24B4A'/>
+                        <path d='M15 9l-6 6M9 9l6 6' stroke='#fff' stroke-width='2' stroke-linecap='round'/>
+                    </svg>
+                </div>
+                <div>
+                    <div style='font-weight:700;color:#501313;font-size:15px;margin-bottom:3px;'>Already Registered</div>
+                    <div style='color:#A32D2D;font-size:13px;'>This email or phone number is already in use.</div>
+                </div>
+                <button onclick=\"document.getElementById('toast').remove()\" style='margin-left:auto;background:none;border:none;cursor:pointer;color:#E24B4A;font-size:20px;line-height:1;padding:0;flex-shrink:0;'>&times;</button>
+            </div>
+            <style>
+                @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+                @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+            </style>
+            <script>
+                setTimeout(function(){
+                    var t=document.getElementById('toast');
+                    if(t){ t.style.animation='slideOut .35s ease forwards'; setTimeout(function(){ t&&t.remove(); },350); }
+                }, 1000);
+            </script>";
         }
     }
 }

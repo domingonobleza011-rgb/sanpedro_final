@@ -145,7 +145,13 @@ h1 {
 
 </head>
 <body class="skin-black">
-    <?php include "classes/conn.php"; ?>
+    <?php include "classes/conn.php"; 
+    // Fetch the staff member with position "Punong Barangay"
+    $stmt_pb = $conn->prepare("SELECT fname, mi, lname FROM tbl_user WHERE position = 'Punong Barangay' LIMIT 1");
+    $stmt_pb->execute();
+    $punong = $stmt_pb->fetch(PDO::FETCH_ASSOC);
+    $punong_name = $punong ? strtoupper($punong['lname'] . ', ' . $punong['fname'] . ' ' . $punong['mi']) : 'PUNONG BARANGAY';
+    ?>
 
     <div class="certificate">
         <div class="header">
@@ -182,7 +188,7 @@ h1 {
             <div class="signature-block">
                 <p>Certified by:</p>
                 <br><br>
-                <p class="name"><strong>JOSEPH B. BEBONIA</strong></p>
+                <p class="name"><strong><?= htmlspecialchars($punong_name); ?></strong></p>
                 <p>PUNONG BARANGAY</p>
             </div>
         </div>

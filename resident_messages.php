@@ -18,11 +18,77 @@ $is_verified = $bmis->isResidentVerified($userdetails['id_resident']);
 if (isset($_POST['send_to_admin'])) {
     $message_content = $_POST['admin_message_text'];
     if ($main->sendMessageToAdmin($resident_id, $message_content)) {
-        echo "<script>alert('Message sent to Admin!'); window.location.href='resident_messages.php';</script>";
-        exit();
-    } else {
-        echo "<script>alert('Error: Could not send message.');</script>";
-    }
+        // ── Success ───────────────────────────────────────────────
+echo "
+<div id='toast' style='
+    position:fixed; top:24px; right:24px; z-index:9999;
+    background:#fff; border-left:4px solid #1D9E75;
+    border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+    padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+    display:flex; align-items:flex-start; gap:14px;
+    font-family:Georgia,serif;
+    animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+'>
+    <div style='width:36px;height:36px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;'>
+        <svg width='18' height='18' fill='none' viewBox='0 0 24 24'>
+            <circle cx='12' cy='12' r='10' fill='#1D9E75'/>
+            <path d='M7.5 12.5l3 3 6-6' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+        </svg>
+    </div>
+    <div>
+        <div style='font-weight:700;color:#085041;font-size:15px;margin-bottom:3px;'>Message Sent!</div>
+        <div style='color:#0F6E56;font-size:13px;'>Your message has been sent to the Admin.</div>
+    </div>
+    <button onclick=\"document.getElementById('toast').remove()\" style='margin-left:auto;background:none;border:none;cursor:pointer;color:#1D9E75;font-size:20px;line-height:1;padding:0;flex-shrink:0;'>&times;</button>
+</div>
+<style>
+    @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+</style>
+<script>
+    setTimeout(function(){
+        var t=document.getElementById('toast');
+        if(t){ t.style.animation='slideOut .35s ease forwards'; setTimeout(function(){ window.location.href='resident_messages.php'; },350); }
+    }, 1000);
+</script>";
+exit();
+
+} else {
+
+// ── Error ─────────────────────────────────────────────────
+echo "
+<div id='toast-err' style='
+    position:fixed; top:24px; right:24px; z-index:9999;
+    background:#fff; border-left:4px solid #E24B4A;
+    border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+    padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+    display:flex; align-items:flex-start; gap:14px;
+    font-family:Georgia,serif;
+    animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+'>
+    <div style='width:36px;height:36px;border-radius:50%;background:#FCEBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;'>
+        <svg width='18' height='18' fill='none' viewBox='0 0 24 24'>
+            <circle cx='12' cy='12' r='10' fill='#E24B4A'/>
+            <path d='M15 9l-6 6M9 9l6 6' stroke='#fff' stroke-width='2' stroke-linecap='round'/>
+        </svg>
+    </div>
+    <div>
+        <div style='font-weight:700;color:#501313;font-size:15px;margin-bottom:3px;'>Message Failed</div>
+        <div style='color:#A32D2D;font-size:13px;'>Could not send your message. Please try again.</div>
+    </div>
+    <button onclick=\"document.getElementById('toast-err').remove()\" style='margin-left:auto;background:none;border:none;cursor:pointer;color:#E24B4A;font-size:20px;line-height:1;padding:0;flex-shrink:0;'>&times;</button>
+</div>
+<style>
+    @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+</style>
+<script>
+    setTimeout(function(){
+        var t=document.getElementById('toast-err');
+        if(t){ t.style.animation='slideOut .35s ease forwards'; setTimeout(function(){ t&&t.remove(); },350); }
+    }, 1000);
+</script>";
+}
 }
 
 // ---- Handle: Delete message ----
@@ -62,14 +128,110 @@ if (isset($_POST['upload_valid_id'])) {
             if (move_uploaded_file($file['tmp_name'], $dest)) {
                 if ($main->uploadValidID($resident_id, $new_filename, $file['name'], $file['type'], $message_note)) {
                     $main->sendMessageToAdmin($resident_id, "VALID ID SUBMITTED - Please verify my account. Note: " . ($message_note ?: 'none'));
-                    echo "<script>alert('Your valid ID has been submitted! Please wait for admin approval.'); window.location.href='resident_messages.php';</script>";
-                    exit();
-                } else {
-                    $upload_error = 'Could not save the upload record. Please try again.';
-                }
-            } else {
-                $upload_error = 'File upload failed. Please try again.';
-            }
+                    // ── Success ───────────────────────────────────────────────
+echo "
+<div id='toast' style='
+    position:fixed; top:24px; right:24px; z-index:9999;
+    background:#fff; border-left:4px solid #1D9E75;
+    border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+    padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+    display:flex; align-items:flex-start; gap:14px;
+    font-family:Georgia,serif;
+    animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+'>
+    <div style='width:36px;height:36px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;'>
+        <svg width='18' height='18' fill='none' viewBox='0 0 24 24'>
+            <circle cx='12' cy='12' r='10' fill='#1D9E75'/>
+            <path d='M7.5 12.5l3 3 6-6' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+        </svg>
+    </div>
+    <div>
+        <div style='font-weight:700;color:#085041;font-size:15px;margin-bottom:3px;'>ID Submitted!</div>
+        <div style='color:#0F6E56;font-size:13px;'>Your valid ID has been submitted. Please wait for admin approval.</div>
+    </div>
+    <button onclick=\"document.getElementById('toast').remove()\" style='margin-left:auto;background:none;border:none;cursor:pointer;color:#1D9E75;font-size:20px;line-height:1;padding:0;flex-shrink:0;'>&times;</button>
+</div>
+<style>
+    @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+</style>
+<script>
+    setTimeout(function(){
+        var t=document.getElementById('toast');
+        if(t){ t.style.animation='slideOut .35s ease forwards'; setTimeout(function(){ window.location.href='resident_messages.php'; },350); }
+    }, 1500);
+</script>";
+exit();
+
+} else {
+    $upload_error = '
+    <div id="toast-err" style="
+        position:fixed; top:24px; right:24px; z-index:9999;
+        background:#fff; border-left:4px solid #E24B4A;
+        border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+        padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+        display:flex; align-items:flex-start; gap:14px;
+        font-family:Georgia,serif;
+        animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+    ">
+        <div style="width:36px;height:36px;border-radius:50%;background:#FCEBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="#E24B4A"/>
+                <path d="M15 9l-6 6M9 9l6 6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-weight:700;color:#501313;font-size:15px;margin-bottom:3px;">Save Failed</div>
+            <div style="color:#A32D2D;font-size:13px;">Could not save the upload record. Please try again.</div>
+        </div>
+        <button onclick="document.getElementById(\'toast-err\').remove()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#E24B4A;font-size:20px;line-height:1;padding:0;flex-shrink:0;">&times;</button>
+    </div>
+    <style>
+        @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+    </style>
+    <script>
+        setTimeout(function(){
+            var t=document.getElementById("toast-err");
+            if(t){ t.style.animation="slideOut .35s ease forwards"; setTimeout(function(){ t&&t.remove(); },350); }
+        }, 1000);
+    <\/script>';
+}
+
+} else {
+    $upload_error = '
+    <div id="toast-err2" style="
+        position:fixed; top:24px; right:24px; z-index:9999;
+        background:#fff; border-left:4px solid #E24B4A;
+        border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+        padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+        display:flex; align-items:flex-start; gap:14px;
+        font-family:Georgia,serif;
+        animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+    ">
+        <div style="width:36px;height:36px;border-radius:50%;background:#FCEBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="#E24B4A"/>
+                <path d="M15 9l-6 6M9 9l6 6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div>
+            <div style="font-weight:700;color:#501313;font-size:15px;margin-bottom:3px;">Upload Failed</div>
+            <div style="color:#A32D2D;font-size:13px;">File upload failed. Please try again.</div>
+        </div>
+        <button onclick="document.getElementById(\'toast-err2\').remove()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#E24B4A;font-size:20px;line-height:1;padding:0;flex-shrink:0;">&times;</button>
+    </div>
+    <style>
+        @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+    </style>
+    <script>
+        setTimeout(function(){
+            var t=document.getElementById("toast-err2");
+            if(t){ t.style.animation="slideOut .35s ease forwards"; setTimeout(function(){ t&&t.remove(); },350); }
+        }, 1000);
+    <\/script>';
+}
         }
     }
     if ($upload_error) {

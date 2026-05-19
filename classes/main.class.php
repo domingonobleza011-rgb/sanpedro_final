@@ -564,44 +564,140 @@ public function admin_delete_announcement(){
         }
     }
  
-    public function approveResidentVerification($id_resident, $id_upload, $admin_name) {
-        try {
-            $connection = $this->openConn();
- 
-            $stmt1 = $connection->prepare("UPDATE tbl_resident SET is_verified = 1, verified_at = NOW(), verified_by = ? WHERE id_resident = ?");
-            $stmt1->execute([$admin_name, $id_resident]);
- 
-            $stmt2 = $connection->prepare("UPDATE tbl_id_uploads SET status = 'approved' WHERE id_upload = ?");
-            $stmt2->execute([$id_upload]);
- 
-            $notice = "✅ Your account has been verified! You can now request barangay certificates and other services.";
-            $stmt3  = $connection->prepare("INSERT INTO resident_messages (id_resident, message_text, date_sent) VALUES (?, ?, NOW())");
-            $stmt3->execute([$id_resident, $notice]);
- 
-            return true;
-        } catch (PDOException $e) {
-            error_log("approveResidentVerification Error: " . $e->getMessage());
-            return false;
+public function approveResidentVerification($id_resident, $id_upload, $admin_name) {
+    try {
+        $connection = $this->openConn();
+
+        // 1. Mark resident as verified
+        $stmt1 = $connection->prepare(
+            "UPDATE tbl_resident 
+             SET is_verified = 1, verified_at = NOW(), verified_by = ? 
+             WHERE id_resident = ?"
+        );
+        $stmt1->execute([$admin_name, $id_resident]);
+
+        // 2. Mark upload as approved
+        $stmt2 = $connection->prepare(
+            "UPDATE tbl_id_uploads SET status = 'approved' WHERE id_upload = ?"
+        );
+        $stmt2->execute([$id_upload]);
+
+        // 3. Send in-system notification
+        $notice = "✅ Your account has been verified! You can now request barangay certificates and other services.";
+        $stmt3  = $connection->prepare(
+            "INSERT INTO resident_messages (id_resident, message_text, date_sent) 
+             VALUES (?, ?, NOW())"
+        );
+        $stmt3->execute([$id_resident, $notice]);
+
+        // 4. ✅ Send Gmail notification
+        $res = $connection->prepare(
+            "SELECT fname, lname, email FROM tbl_resident WHERE id_resident = ?"
+        );
+        $res->execute([$id_resident]);
+        $resident = $res->fetch(PDO::FETCH_ASSOC);
+
+        if ($resident && !empty($resident['email'])) {
+            require_once __DIR__ . '/mailer.php';
+
+            $body = "
+                <p>Hello <strong>{$resident['fname']} {$resident['lname']}</strong>,</p>
+                <p>Great news! Your account in <strong>Barangay San Pedro BMIS</strong> 
+                has been <span style='color:#198754;font-weight:bold;'>✅ Verified</span>.</p>
+                <p>You can now log in and enjoy the following services:</p>
+                <ul>
+                    <li>Request Barangay Clearance</li>
+                    <li>Request Certificate of Residency</li>
+                    <li>Request Certificate of Indigency</li>
+                    <li>And more barangay services</li>
+                </ul>
+                <p>Thank you for registering with us!</p>
+                <br>
+                <p>— <strong>Barangay San Pedro BMIS Team</strong></p>
+            ";
+
+            sendGmail(
+                $resident['email'],
+                $resident['fname'] . ' ' . $resident['lname'],
+                '✅ Your BMIS Account Has Been Verified',
+                $body
+            );
         }
+
+        return true;
+
+    } catch (PDOException $e) {
+        error_log("approveResidentVerification Error: " . $e->getMessage());
+        return false;
     }
- 
-    public function rejectResidentVerification($id_resident, $id_upload, $admin_name, $reason = '') {
-        try {
-            $connection = $this->openConn();
- 
-            $stmt1 = $connection->prepare("UPDATE tbl_id_uploads SET status = 'rejected' WHERE id_upload = ?");
-            $stmt1->execute([$id_upload]);
- 
-            $notice = "❌ Your valid ID submission was rejected." . ($reason ? " Reason: " . $reason : "") . " Please upload a clearer or valid government-issued ID.";
-            $stmt2  = $connection->prepare("INSERT INTO resident_messages (id_resident, message_text, date_sent) VALUES (?, ?, NOW())");
-            $stmt2->execute([$id_resident, $notice]);
- 
-            return true;
-        } catch (PDOException $e) {
-            error_log("rejectResidentVerification Error: " . $e->getMessage());
-            return false;
+}
+
+public function rejectResidentVerification($id_resident, $id_upload, $admin_name, $reason = '') {
+    try {
+        $connection = $this->openConn();
+
+        // 1. Mark upload as rejected
+        $stmt1 = $connection->prepare(
+            "UPDATE tbl_id_uploads SET status = 'rejected' WHERE id_upload = ?"
+        );
+        $stmt1->execute([$id_upload]);
+
+        // 2. Send in-system notification
+        $notice = "❌ Your valid ID submission was rejected."
+                . ($reason ? " Reason: " . $reason : "")
+                . " Please upload a clearer or valid government-issued ID.";
+        $stmt2  = $connection->prepare(
+            "INSERT INTO resident_messages (id_resident, message_text, date_sent) 
+             VALUES (?, ?, NOW())"
+        );
+        $stmt2->execute([$id_resident, $notice]);
+
+        // 3. ✅ Send Gmail notification
+        $res = $connection->prepare(
+            "SELECT fname, lname, email FROM tbl_resident WHERE id_resident = ?"
+        );
+        $res->execute([$id_resident]);
+        $resident = $res->fetch(PDO::FETCH_ASSOC);
+
+        if ($resident && !empty($resident['email'])) {
+            require_once __DIR__ . '/mailer.php';
+
+            $reason_line = $reason
+                ? "<p><strong>Reason:</strong> " . htmlspecialchars($reason) . "</p>"
+                : "";
+
+            $body = "
+                <p>Hello <strong>{$resident['fname']} {$resident['lname']}</strong>,</p>
+                <p>Unfortunately, your ID submission has been 
+                <span style='color:#dc3545;font-weight:bold;'>❌ Rejected</span>.</p>
+                {$reason_line}
+                <p>Please log in to your account and re-upload a valid government-issued ID. 
+                Make sure it is:</p>
+                <ul>
+                    <li>Clear and readable</li>
+                    <li>Not expired</li>
+                    <li>A government-issued ID (e.g. PhilSys, Driver's License, Passport)</li>
+                </ul>
+                <p>If you have questions, please contact the barangay office.</p>
+                <br>
+                <p>— <strong>Barangay San Pedro BMIS Team</strong></p>
+            ";
+
+            sendGmail(
+                $resident['email'],
+                $resident['fname'] . ' ' . $resident['lname'],
+                '❌ Your BMIS ID Submission Was Rejected',
+                $body
+            );
         }
+
+        return true;
+
+    } catch (PDOException $e) {
+        error_log("rejectResidentVerification Error: " . $e->getMessage());
+        return false;
     }
+}
  
     public function isResidentVerified($id_resident) {
         try {

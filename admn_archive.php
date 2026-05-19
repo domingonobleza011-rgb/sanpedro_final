@@ -46,23 +46,64 @@
         $type = $arc['record_type'];
         switch ($type) {
             case 'staff':
-                $s = $conn->prepare("INSERT IGNORE INTO tbl_user
-                    (id_user,login_identity,email,phone_number,lname,fname,mi,age,sex,address,contact,position,role,addedby,photo)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                $s->execute([
-                    $data['id_user'] ?? null, $data['login_identity'] ?? '', $data['email'] ?? '',
-                    $data['phone_number'] ?? '', $data['lname'] ?? '', $data['fname'] ?? '',
-                    $data['mi'] ?? '', $data['age'] ?? 0, $data['sex'] ?? '',
-                    $data['address'] ?? '', $data['contact'] ?? '', $data['position'] ?? '',
-                    $data['role'] ?? '', $data['addedby'] ?? '', $data['photo'] ?? '',
-                ]);
-                return true;
+    $s = $conn->prepare("INSERT IGNORE INTO tbl_user
+        (id_user, login_identity, email, phone_number, password, lname, fname, mi,
+         age, sex, address, contact, position, role, addedby, photo)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    $s->execute([
+        $data['id_user']        ?? null,
+        $data['login_identity'] ?? '',
+        $data['email']          ?? '',
+        $data['phone_number']   ?? '',
+        $data['password']       ?? '',       // ✅ REQUIRED for login
+        $data['lname']          ?? '',
+        $data['fname']          ?? '',
+        $data['mi']             ?? '',
+        $data['age']            ?? 0,
+        $data['sex']            ?? '',
+        $data['address']        ?? '',
+        $data['contact']        ?? '',
+        $data['position']       ?? '',
+        $data['role']           ?? '',
+        $data['addedby']        ?? '',
+        $data['photo']          ?? '',
+    ]);
+    return true;
             case 'resident':
-                $s = $conn->prepare("INSERT IGNORE INTO tbl_resident
-                    (id_resident,email,lname,fname,mi,age,sex,status,houseno,street,brgy,municipal,contact,bdate,bplace,nationality,voter,family_role,role,addedby)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                $s->execute([$data['id_resident'],$data['email'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['sex'],$data['status'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['contact'],$data['bdate'],$data['bplace'],$data['nationality'],$data['voter'],$data['family_role'],$data['role'],$data['addedby']]);
-                return true;
+    $s = $conn->prepare("INSERT IGNORE INTO tbl_resident
+        (id_resident, email, phone_number, password, lname, fname, mi, age, sex, status,
+         houseno, street, brgy, municipal, address, contact, bdate, bplace, nationality,
+         voter, family_role, role, is_verified, verified_at, verified_by, addedby)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    $s->execute([
+        $data['id_resident']    ?? null,
+        $data['email']          ?? null,
+        $data['phone_number']   ?? null,
+        $data['password']       ?? '',       // ✅ REQUIRED for login
+        $data['lname']          ?? '',
+        $data['fname']          ?? '',
+        $data['mi']             ?? '',
+        $data['age']            ?? 0,
+        $data['sex']            ?? '',
+        $data['status']         ?? '',
+        $data['houseno']        ?? null,
+        $data['street']         ?? null,
+        $data['brgy']           ?? null,
+        $data['municipal']      ?? null,
+        $data['address']        ?? null,
+        $data['contact']        ?? null,
+        $data['bdate']          ?? null,
+        $data['bplace']         ?? '',
+        $data['nationality']    ?? '',
+        $data['voter']          ?? '',
+        $data['family_role']    ?? '',
+        $data['role']           ?? 'resident',
+        $data['is_verified']    ?? 0,        // ✅ REQUIRED for login
+        $data['verified_at']    ?? null,
+        $data['verified_by']    ?? null,
+        $data['addedby']        ?? '',
+    ]);
+    return true;
             case 'certofres':
                 $s = $conn->prepare("INSERT IGNORE INTO tbl_rescert
                     (id_rescert,id_resident,lname,fname,mi,age,nationality,houseno,street,brgy,municipal,date,purpose)

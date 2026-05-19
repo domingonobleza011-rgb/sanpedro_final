@@ -220,6 +220,14 @@
 <?php } ?>
 </tbody>
 	</table>
+    <?php if (!empty($_SESSION['swal'])): ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire(<?= $_SESSION['swal'] ?>);
+    });
+</script>
+<?php unset($_SESSION['swal']); endif; ?>
 <?php
 	}
 $con = null;

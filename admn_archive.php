@@ -40,6 +40,119 @@
         }
     }
 
+    // ── Helper: restore one archive row by its data ─────────
+    function restore_single_row($conn, $arc) {
+        $data = json_decode($arc['record_data'], true);
+        $type = $arc['record_type'];
+        switch ($type) {
+            case 'staff':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_user
+                    (id_user,login_identity,email,phone_number,lname,fname,mi,age,sex,address,contact,position,role,addedby,photo)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([
+                    $data['id_user'] ?? null, $data['login_identity'] ?? '', $data['email'] ?? '',
+                    $data['phone_number'] ?? '', $data['lname'] ?? '', $data['fname'] ?? '',
+                    $data['mi'] ?? '', $data['age'] ?? 0, $data['sex'] ?? '',
+                    $data['address'] ?? '', $data['contact'] ?? '', $data['position'] ?? '',
+                    $data['role'] ?? '', $data['addedby'] ?? '', $data['photo'] ?? '',
+                ]);
+                return true;
+            case 'resident':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_resident
+                    (id_resident,email,lname,fname,mi,age,sex,status,houseno,street,brgy,municipal,contact,bdate,bplace,nationality,voter,family_role,role,addedby)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([$data['id_resident'],$data['email'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['sex'],$data['status'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['contact'],$data['bdate'],$data['bplace'],$data['nationality'],$data['voter'],$data['family_role'],$data['role'],$data['addedby']]);
+                return true;
+            case 'certofres':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_rescert
+                    (id_rescert,id_resident,lname,fname,mi,age,nationality,houseno,street,brgy,municipal,date,purpose)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([$data['id_rescert'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['nationality'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['date'],$data['purpose']]);
+                return true;
+            case 'certofindigency':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_indigency
+                    (id_indigency,id_resident,lname,fname,mi,nationality,houseno,street,brgy,municipal,purpose,date)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([$data['id_indigency'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['nationality'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['purpose'],$data['date']]);
+                return true;
+            case 'clearance':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_clearance
+                    (id_clearance,id_resident,lname,fname,mi,purpose,houseno,street,brgy,municipal,status,age)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([$data['id_clearance'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['purpose'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['status'],$data['age']]);
+                return true;
+            case 'bspermit':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_bspermit
+                    (id_bspermit,id_resident,lname,fname,mi,bsname,houseno,street,brgy,municipal,bsindustry,aoe)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([$data['id_bspermit'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['bsname'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['bsindustry'],$data['aoe']]);
+                return true;
+            case 'blotter':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_blotter
+                    (id_blotter,id_resident,lname,fname,mi,houseno,street,brgy,municipal,contact,narrative)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([$data['id_blotter'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['contact'],$data['narrative']]);
+                return true;
+            case 'youth':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_youth
+                    (id_youth,lname,fname,mi,age,sex,civil_status,contact_number,email_address,educ_attain,emp_status,skill_name)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([$data['id_youth'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['sex'],$data['civil_status'],$data['contact_number'],$data['email_address'],$data['educ_attain'],$data['emp_status'],$data['skill_name']]);
+                return true;
+            case 'brgyid':
+                $s = $conn->prepare("INSERT IGNORE INTO tbl_brgyid
+                    (id_brgyid,id_resident,lname,fname,mi,houseno,street,brgy,municipal,bplace,bdate,contact,relation,inc_lname,inc_fname,inc_contact)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                $s->execute([
+                    $data['id_brgyid'] ?? null, $data['id_resident'] ?? null,
+                    $data['lname'] ?? '', $data['fname'] ?? '', $data['mi'] ?? '',
+                    $data['houseno'] ?? '', $data['street'] ?? '', $data['brgy'] ?? '',
+                    $data['municipal'] ?? '', $data['bplace'] ?? '', $data['bdate'] ?? '',
+                    $data['contact'] ?? '', $data['relation'] ?? '',
+                    $data['inc_lname'] ?? '', $data['inc_fname'] ?? '', $data['inc_contact'] ?? '',
+                ]);
+                return true;
+        }
+        return false;
+    }
+
+    // ── Handle bulk restore ──────────────────────────────────
+    if (isset($_POST['bulk_restore']) && !empty($_POST['selected_archives'])) {
+        $ids = array_filter($_POST['selected_archives'], 'is_numeric');
+        if (!empty($ids)) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $rows_stmt = $conn->prepare("SELECT * FROM tbl_archive WHERE id_archive IN ($placeholders)");
+            $rows_stmt->execute(array_values($ids));
+            $rows = $rows_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $success = 0;
+            $failed  = 0;
+            $restored_ids = [];
+
+            foreach ($rows as $arc) {
+                try {
+                    if (restore_single_row($conn, $arc)) {
+                        $restored_ids[] = $arc['id_archive'];
+                        $success++;
+                    }
+                } catch (Exception $e) {
+                    $failed++;
+                }
+            }
+
+            if (!empty($restored_ids)) {
+                $del_placeholders = implode(',', array_fill(0, count($restored_ids), '?'));
+                $conn->prepare("DELETE FROM tbl_archive WHERE id_archive IN ($del_placeholders)")
+                     ->execute($restored_ids);
+            }
+
+            $msg = "$success record(s) restored successfully.";
+            if ($failed > 0) $msg .= " $failed failed.";
+            echo "<script>alert('$msg'); window.location.href='admn_archive.php';</script>";
+            exit;
+        }
+    }
+
     // ── Handle restore (re-insert) ───────────────────────────
     if (isset($_POST['restore_record']) && !empty($_POST['id_archive'])) {
         $id  = (int)$_POST['id_archive'];
@@ -48,104 +161,13 @@
         $arc = $row->fetch(PDO::FETCH_ASSOC);
 
         $restored = false;
-        if ($arc && !$arc['is_restored']) {
-            $data = json_decode($arc['record_data'], true);
-            $type = $arc['record_type'];
-
+        if ($arc) {
             try {
-                switch ($type) {
-                    case 'staff':
-    $s = $conn->prepare("INSERT IGNORE INTO tbl_user
-        (id_user,login_identity,email,phone_number,lname,fname,mi,age,sex,address,contact,position,role,addedby,photo)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-    $s->execute([
-        $data['id_user']        ?? null,
-        $data['login_identity'] ?? '',
-        $data['email']          ?? '',
-        $data['phone_number']   ?? '',
-        $data['lname']          ?? '',
-        $data['fname']          ?? '',
-        $data['mi']             ?? '',
-        $data['age']            ?? 0,
-        $data['sex']            ?? '',
-        $data['address']        ?? '',
-        $data['contact']        ?? '',
-        $data['position']       ?? '',
-        $data['role']           ?? '',
-        $data['addedby']        ?? '',
-        $data['photo']          ?? '',
-    ]);
-    $restored = true; break;
-                    case 'resident':
-                        $s = $conn->prepare("INSERT IGNORE INTO tbl_resident
-                            (id_resident,email,lname,fname,mi,age,sex,status,houseno,street,brgy,municipal,contact,bdate,bplace,nationality,voter,family_role,role,addedby)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                        $s->execute([$data['id_resident'],$data['email'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['sex'],$data['status'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['contact'],$data['bdate'],$data['bplace'],$data['nationality'],$data['voter'],$data['family_role'],$data['role'],$data['addedby']]);
-                        $restored = true; break;
-                    case 'certofres':
-                        $s = $conn->prepare("INSERT IGNORE INTO tbl_rescert
-                            (id_rescert,id_resident,lname,fname,mi,age,nationality,houseno,street,brgy,municipal,date,purpose)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                        $s->execute([$data['id_rescert'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['nationality'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['date'],$data['purpose']]);
-                        $restored = true; break;
-                    case 'certofindigency':
-                        $s = $conn->prepare("INSERT IGNORE INTO tbl_indigency
-                            (id_indigency,id_resident,lname,fname,mi,nationality,houseno,street,brgy,municipal,purpose,date)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-                        $s->execute([$data['id_indigency'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['nationality'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['purpose'],$data['date']]);
-                        $restored = true; break;
-                    case 'clearance':
-                        $s = $conn->prepare("INSERT IGNORE INTO tbl_clearance
-                            (id_clearance,id_resident,lname,fname,mi,purpose,houseno,street,brgy,municipal,status,age)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-                        $s->execute([$data['id_clearance'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['purpose'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['status'],$data['age']]);
-                        $restored = true; break;
-                    case 'bspermit':
-                        $s = $conn->prepare("INSERT IGNORE INTO tbl_bspermit
-                            (id_bspermit,id_resident,lname,fname,mi,bsname,houseno,street,brgy,municipal,bsindustry,aoe)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-                        $s->execute([$data['id_bspermit'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['bsname'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['bsindustry'],$data['aoe']]);
-                        $restored = true; break;
-                    case 'blotter':
-                        $s = $conn->prepare("INSERT IGNORE INTO tbl_blotter
-                            (id_blotter,id_resident,lname,fname,mi,houseno,street,brgy,municipal,contact,narrative)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?)");
-                        $s->execute([$data['id_blotter'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['contact'],$data['narrative']]);
-                        $restored = true; break;
-                    case 'youth':
-                        $s = $conn->prepare("INSERT IGNORE INTO tbl_youth
-                            (id_youth,lname,fname,mi,age,sex,civil_status,contact_number,email_address,educ_attain,emp_status,skill_name)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-                        $s->execute([$data['id_youth'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['sex'],$data['civil_status'],$data['contact_number'],$data['email_address'],$data['educ_attain'],$data['emp_status'],$data['skill_name']]);
-                        $restored = true; break;
-                    case 'brgyid':
-                        $s = $conn->prepare("INSERT IGNORE INTO tbl_brgyid
-                            (id_brgyid,id_resident,lname,fname,mi,houseno,street,brgy,municipal,bplace,bdate,contact,relation,inc_lname,inc_fname,inc_contact)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                        $s->execute([
-                            $data['id_brgyid']    ?? null,
-                            $data['id_resident']  ?? null,
-                            $data['lname']        ?? '',
-                            $data['fname']        ?? '',
-                            $data['mi']           ?? '',
-                            $data['houseno']      ?? '',
-                            $data['street']       ?? '',
-                            $data['brgy']         ?? '',
-                            $data['municipal']    ?? '',
-                            $data['bplace']       ?? '',
-                            $data['bdate']        ?? '',
-                            $data['contact']      ?? '',
-                            $data['relation']     ?? '',
-                            $data['inc_lname']    ?? '',
-                            $data['inc_fname']    ?? '',
-                            $data['inc_contact']  ?? '',
-                        ]);
-                        $restored = true; break;
-                }
+                $restored = restore_single_row($conn, $arc);
 
                 if ($restored) {
-                    $upd = $conn->prepare("UPDATE tbl_archive SET is_restored=1, restored_at=NOW(), restored_by=? WHERE id_archive=?");
-                    $upd->execute([$userdetails['surname'].', '.$userdetails['firstname'], $id]);
+                    $del = $conn->prepare("DELETE FROM tbl_archive WHERE id_archive = ?");
+                    $del->execute([$id]);
                     echo "<script>alert('Record restored successfully!'); window.location.href='admn_archive.php';</script>";
                     exit;
                 }
@@ -174,12 +196,6 @@
         $params[] = "%$filter_keyword%";
         $params[] = "%$filter_keyword%";
     }
-    if ($filter_status === 'active') {
-        $where[] = "is_restored = 0";
-    } elseif ($filter_status === 'restored') {
-        $where[] = "is_restored = 1";
-    }
-
     $sql = "SELECT * FROM tbl_archive";
     if ($where) $sql .= " WHERE " . implode(" AND ", $where);
     $sql .= " ORDER BY deleted_at DESC";
@@ -189,7 +205,7 @@
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // ── Counts per type ──────────────────────────────────────
-    $counts_stmt = $conn->query("SELECT record_type, COUNT(*) as cnt FROM tbl_archive WHERE is_restored=0 GROUP BY record_type");
+    $counts_stmt = $conn->query("SELECT record_type, COUNT(*) as cnt FROM tbl_archive GROUP BY record_type");
     $counts = [];
     foreach ($counts_stmt->fetchAll(PDO::FETCH_ASSOC) as $c) {
         $counts[$c['record_type']] = $c['cnt'];
@@ -349,7 +365,7 @@
 .status-badge.restored { background: var(--success-pale); color: var(--success); }
 .btn-restore {
     background: linear-gradient(135deg, var(--success), #34d399) !important;
-    color: #fff !important; border: none !important; border-radius: 8px !important;
+    color: #ffffff !important; border: none !important; border-radius: 8px !important;
     padding: 5px 14px !important; font-size: 0.78rem !important; font-weight: 600 !important;
     cursor: pointer; transition: all 0.18s !important;
     display: inline-flex; align-items: center; gap: 4px;
@@ -388,6 +404,14 @@
     border-radius: 12px; padding: 10px 16px; margin-bottom: 1rem;
 }
 .bulk-toolbar .bulk-count { font-weight: 700; font-size: 0.875rem; color: var(--danger); margin-right: 4px; }
+.btn-bulk-restore {
+    background: linear-gradient(135deg, var(--success), #32a30f);
+    color: #fff; border: none; border-radius: 8px;
+    padding: 7px 18px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-bulk-restore:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(60, 255, 0, 0.3); }
 .btn-bulk-delete {
     background: linear-gradient(135deg, var(--danger), #ef4444);
     color: #fff; border: none; border-radius: 8px;
@@ -424,7 +448,7 @@
             </div>
         </div>
         <div class="archive-stats">
-            <a href="admn_archive.php" class="stat-chip <?= $filter_type === '' && $filter_status !== 'restored' ? 'active' : '' ?>">
+            <a href="admn_archive.php" class="stat-chip <?= $filter_type === '' ? 'active' : '' ?>">
                 <span class="chip-count"><?= $total_archived ?></span>
                 <span class="chip-label">All Archived</span>
             </a>
@@ -449,11 +473,6 @@
                 <?php foreach ($type_meta as $key => $meta): ?>
                 <option value="<?= $key ?>" <?= $filter_type === $key ? 'selected' : '' ?>><?= $meta['label'] ?></option>
                 <?php endforeach; ?>
-            </select>
-            <select name="status">
-                <option value="all"      <?= $filter_status === 'all'      ? 'selected' : '' ?>>All Statuses</option>
-                <option value="active"   <?= $filter_status === 'active'   ? 'selected' : '' ?>>Archived Only</option>
-                <option value="restored" <?= $filter_status === 'restored' ? 'selected' : '' ?>>Restored Only</option>
             </select>
             <button type="submit" class="btn-filter-apply"><i class="fas fa-filter"></i> Filter</button>
             <a href="admn_archive.php" class="btn-clear-filter"><i class="fas fa-times"></i> Clear</a>
@@ -481,6 +500,10 @@
         <!-- Bulk Toolbar (hidden until rows are checked) -->
         <div class="bulk-toolbar" id="bulkToolbar">
             <span class="bulk-count" id="bulkCount">0 selected</span>
+            <button type="submit" name="bulk_restore" class="btn-bulk-restore"
+                onclick="return confirm('Restore all selected records back to their source tables?');">
+                <i class="fas fa-undo"></i> Restore Selected
+            </button>
             <button type="submit" name="bulk_permanent_delete" class="btn-bulk-delete"
                 onclick="return confirm('PERMANENTLY delete all selected records? This cannot be undone.');">
                 <i class="fas fa-trash"></i> Delete Selected
@@ -511,7 +534,6 @@
                             <th>Type</th>
                             <th>Name</th>
                             <th>Details</th>
-                            <th>Status</th>
                             <th>Deleted</th>
                             <th>Deleted By</th>
                             <th style="min-width:180px;">Actions</th>
@@ -519,8 +541,7 @@
                     </thead>
                     <tbody>
                         <?php foreach ($records as $i => $rec):
-                            $meta        = $type_meta[$rec['record_type']] ?? ['label' => $rec['record_type'], 'icon' => 'fa-file', 'color' => 'blue'];
-                            $is_restored = (bool)$rec['is_restored'];
+                            $meta = $type_meta[$rec['record_type']] ?? ['label' => $rec['record_type'], 'icon' => 'fa-file', 'color' => 'blue'];
                         ?>
                         <tr>
                             <td class="check-col">
@@ -551,18 +572,6 @@
                                 </span>
                             </td>
 
-                            <td>
-                                <?php if ($is_restored): ?>
-                                    <span class="status-badge restored"><i class="fas fa-check-circle"></i> Restored</span>
-                                    <div style="font-size:0.7rem; color:var(--text-light); margin-top:3px;">
-                                        by <?= htmlspecialchars($rec['restored_by'] ?? '—') ?><br>
-                                        <?= $rec['restored_at'] ? date('M d, Y', strtotime($rec['restored_at'])) : '' ?>
-                                    </div>
-                                <?php else: ?>
-                                    <span class="status-badge archived"><i class="fas fa-archive"></i> Archived</span>
-                                <?php endif; ?>
-                            </td>
-
                             <td class="date-cell">
                                 <?= date('M d, Y', strtotime($rec['deleted_at'])) ?><br>
                                 <span style="color:var(--text-light); font-size:0.7rem;"><?= date('h:i A', strtotime($rec['deleted_at'])) ?></span>
@@ -581,13 +590,11 @@
                                         <i class="fas fa-eye"></i> View
                                     </button>
 
-                                    <!-- Restore (only if not already restored) -->
-                                    <?php if (!$is_restored): ?>
+                                    <!-- Restore -->
                                     <button type="button" class="btn-restore"
                                         onclick="submitSingle('restore_record', <?= $rec['id_archive'] ?>, 'Restore this record to the source table?')">
                                         <i class="fas fa-undo"></i> Restore
                                     </button>
-                                    <?php endif; ?>
 
                                     <!-- Permanent delete -->
                                     <button type="button" class="btn-perma-delete"
@@ -601,7 +608,7 @@
 
                         <!-- Expandable JSON detail row -->
                         <tr id="detail-<?= $rec['id_archive'] ?>" style="display:none; background:var(--cream);">
-                            <td colspan="9" class="json-detail">
+                            <td colspan="8" class="json-detail">
                                 <strong style="font-size:0.78rem; color:var(--navy); display:block; margin-bottom:6px;">
                                     Full Record Data
                                 </strong>

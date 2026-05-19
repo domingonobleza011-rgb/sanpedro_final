@@ -237,20 +237,23 @@ header("refresh: 0");
         }
 
         public function delete_resident(){
-            $id_resident = $_POST['id_resident'];
+    $id_resident = $_POST['id_resident'];
 
-            if(isset($_POST['delete_resident'])) {
-                $this->archive_record('tbl_resident', 'id_resident', $id_resident, 'resident');
-                $connection = $this->openConn();
-                $stmt = $connection->prepare("DELETE FROM tbl_resident where id_resident = ?");
-                $stmt->execute([$id_resident]);
+    if(isset($_POST['delete_resident'])) {
+        $this->archive_record('tbl_resident', 'id_resident', $id_resident, 'resident');
+        $connection = $this->openConn();
+        $stmt = $connection->prepare("DELETE FROM tbl_resident WHERE id_resident = ?");
+        $stmt->execute([$id_resident]);
 
-                $message2 = "Resident Data Deleted";
-                
-                echo "<script type='text/javascript'>alert('$message2');</script>";
-                header("Refresh:0");
-            }
-        }
+        $_SESSION['swal'] = json_encode([
+            'icon'  => 'success',
+            'title' => 'Archived!',
+            'text'  => 'Resident has been moved to archive.'
+        ]);
+        header('Location: admn_resident_crud.php');
+        exit;
+    }
+}
 
     //-------------------------------- EXTRA FUNCTIONS FOR RESIDENT CLASS ---------------------------------
 

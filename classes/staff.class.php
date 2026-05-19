@@ -257,8 +257,14 @@ public function update_staff() {
         $stmt = $connection->prepare("DELETE FROM tbl_user WHERE id_user = ?");
         $stmt->execute([$id_user]);
         
-        echo "<script type='text/javascript'>alert('Staff Account Deleted');</script>";
-        echo "<script type='text/javascript'>window.location.href='admn_staff_crud.php';</script>";
+        session_start(); // only if session not already started globally
+    $_SESSION['swal'] = json_encode([
+        'icon'  => 'success',
+        'title' => 'Archived!',
+        'text'  => 'Staff has been moved to archive.'
+    ]);
+    header('Location: admn_staff_crud.php');
+    exit;
     }
 }
 

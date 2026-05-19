@@ -478,7 +478,7 @@
             <a href="admn_archive.php" class="btn-clear-filter"><i class="fas fa-times"></i> Clear</a>
         </div>
     </form>
-
+7
     <!-- Results count -->
     <div class="results-bar">
         <span class="results-count">

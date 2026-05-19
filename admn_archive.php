@@ -2,11 +2,10 @@
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
     require_once('classes/conn.php');
-       require('classes/resident.class.php');
+    require('classes/resident.class.php');
     $userdetails = $bmis->get_userdata();
     $bmis->validate_admin();
 
-    // ── Type labels & icons ──────────────────────────────────
     $type_meta = [
         'resident'        => ['label' => 'Resident',              'icon' => 'fa-users',          'color' => 'blue'],
         'certofres'       => ['label' => 'Cert. of Residency',    'icon' => 'fa-file-alt',        'color' => 'teal'],
@@ -43,19 +42,40 @@
 
     // ── Handle restore (re-insert) ───────────────────────────
     if (isset($_POST['restore_record']) && !empty($_POST['id_archive'])) {
-        $id   = (int)$_POST['id_archive'];
-        $row  = $conn->prepare("SELECT * FROM tbl_archive WHERE id_archive = ?");
+        $id  = (int)$_POST['id_archive'];
+        $row = $conn->prepare("SELECT * FROM tbl_archive WHERE id_archive = ?");
         $row->execute([$id]);
-        $arc  = $row->fetch(PDO::FETCH_ASSOC);
+        $arc = $row->fetch(PDO::FETCH_ASSOC);
 
         $restored = false;
         if ($arc && !$arc['is_restored']) {
             $data = json_decode($arc['record_data'], true);
             $type = $arc['record_type'];
 
-            // Build restore INSERT per type
             try {
                 switch ($type) {
+                    case 'staff':
+    $s = $conn->prepare("INSERT IGNORE INTO tbl_user
+        (id_user,login_identity,email,phone_number,lname,fname,mi,age,sex,address,contact,position,role,addedby,photo)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    $s->execute([
+        $data['id_user']        ?? null,
+        $data['login_identity'] ?? '',
+        $data['email']          ?? '',
+        $data['phone_number']   ?? '',
+        $data['lname']          ?? '',
+        $data['fname']          ?? '',
+        $data['mi']             ?? '',
+        $data['age']            ?? 0,
+        $data['sex']            ?? '',
+        $data['address']        ?? '',
+        $data['contact']        ?? '',
+        $data['position']       ?? '',
+        $data['role']           ?? '',
+        $data['addedby']        ?? '',
+        $data['photo']          ?? '',
+    ]);
+    $restored = true; break;
                     case 'resident':
                         $s = $conn->prepare("INSERT IGNORE INTO tbl_resident
                             (id_resident,email,lname,fname,mi,age,sex,status,houseno,street,brgy,municipal,contact,bdate,bplace,nationality,voter,family_role,role,addedby)
@@ -98,29 +118,29 @@
                             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
                         $s->execute([$data['id_youth'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['sex'],$data['civil_status'],$data['contact_number'],$data['email_address'],$data['educ_attain'],$data['emp_status'],$data['skill_name']]);
                         $restored = true; break;
-                   case 'brgyid':
-    $s = $conn->prepare("INSERT IGNORE INTO tbl_brgyid (id_brgyid, id_resident, lname, fname, mi, houseno, street, brgy, municipal, bplace, bdate, contact, relation, inc_lname, inc_fname, inc_contact) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-    
-    $s->execute([
-        $data['id_brgyid'] ?? null,
-        $data['id_resident'] ?? null,
-        $data['lname'] ?? '',
-        $data['fname'] ?? '',
-        $data['mi'] ?? '',
-        $data['houseno'] ?? '',
-        $data['street'] ?? '',
-        $data['brgy'] ?? '',
-        $data['municipal'] ?? '',
-        $data['bplace'] ?? '',
-        $data['bdate'] ?? '',
-        $data['contact'] ?? '',
-        $data['relation'] ?? '',
-        $data['inc_lname'] ?? '',   // If missing in JSON, inserts empty string
-        $data['inc_fname'] ?? '',   // If missing in JSON, inserts empty string
-        $data['inc_contact'] ?? ''  // If missing in JSON, inserts empty string
-    ]);
-    $restored = true; 
-    break;
+                    case 'brgyid':
+                        $s = $conn->prepare("INSERT IGNORE INTO tbl_brgyid
+                            (id_brgyid,id_resident,lname,fname,mi,houseno,street,brgy,municipal,bplace,bdate,contact,relation,inc_lname,inc_fname,inc_contact)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        $s->execute([
+                            $data['id_brgyid']    ?? null,
+                            $data['id_resident']  ?? null,
+                            $data['lname']        ?? '',
+                            $data['fname']        ?? '',
+                            $data['mi']           ?? '',
+                            $data['houseno']      ?? '',
+                            $data['street']       ?? '',
+                            $data['brgy']         ?? '',
+                            $data['municipal']    ?? '',
+                            $data['bplace']       ?? '',
+                            $data['bdate']        ?? '',
+                            $data['contact']      ?? '',
+                            $data['relation']     ?? '',
+                            $data['inc_lname']    ?? '',
+                            $data['inc_fname']    ?? '',
+                            $data['inc_contact']  ?? '',
+                        ]);
+                        $restored = true; break;
                 }
 
                 if ($restored) {
@@ -130,28 +150,27 @@
                     exit;
                 }
             } catch (Exception $e) {
-    // This will tell you EXACTLY which ID is the problem
-    $msg = addslashes($e->getMessage());
-    echo "<script>alert('SQL Error: $msg');</script>";
-}
+                $msg = addslashes($e->getMessage());
+                echo "<script>alert('SQL Error: $msg');</script>";
+            }
         }
     }
 
     // ── Filter parameters ────────────────────────────────────
     $filter_type    = isset($_GET['type'])    ? $_GET['type']    : '';
     $filter_keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
-    $filter_status  = isset($_GET['status'])  ? $_GET['status']  : 'all'; // all | active | restored
+    $filter_status  = isset($_GET['status'])  ? $_GET['status']  : 'all';
 
     // ── Build query ──────────────────────────────────────────
     $where  = [];
     $params = [];
 
     if ($filter_type !== '') {
-        $where[] = "record_type = ?";
+        $where[]  = "record_type = ?";
         $params[] = $filter_type;
     }
     if ($filter_keyword !== '') {
-        $where[] = "(full_name LIKE ? OR summary LIKE ?)";
+        $where[]  = "(full_name LIKE ? OR summary LIKE ?)";
         $params[] = "%$filter_keyword%";
         $params[] = "%$filter_keyword%";
     }
@@ -161,11 +180,11 @@
         $where[] = "is_restored = 1";
     }
 
-    $sql   = "SELECT * FROM tbl_archive";
+    $sql = "SELECT * FROM tbl_archive";
     if ($where) $sql .= " WHERE " . implode(" AND ", $where);
-    $sql  .= " ORDER BY deleted_at DESC";
+    $sql .= " ORDER BY deleted_at DESC";
 
-    $stmt  = $conn->prepare($sql);
+    $stmt = $conn->prepare($sql);
     $stmt->execute($params);
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -180,11 +199,9 @@
 
 <?php include('dashboard_sidebar_start.php'); ?>
 
-<!-- Shared admin pages theme -->
 <link href="css/admn_pages.css" rel="stylesheet">
 
 <style>
-/* ── Archive-specific styles ── */
 .archive-header {
     display: flex;
     align-items: flex-start;
@@ -195,9 +212,7 @@
     border-bottom: 1px solid var(--border);
     margin-bottom: 1.6rem;
 }
-
 .archive-title-group { display: flex; align-items: center; gap: 14px; }
-
 .archive-title-icon {
     width: 48px; height: 48px;
     border-radius: 12px;
@@ -207,29 +222,19 @@
     flex-shrink: 0;
     box-shadow: 0 2px 8px rgba(201,148,58,0.2);
 }
-
 .archive-title-group h1 {
     font-size: 1.35rem !important;
     font-weight: 700 !important;
     color: var(--navy) !important;
     margin: 0 !important;
 }
-
 .archive-title-group h1::before { display: none !important; }
-
 .archive-title-group .subtitle {
     font-size: 0.8rem;
     color: var(--text-light);
     margin: 2px 0 0;
 }
-
-/* Stat chips */
-.archive-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
+.archive-stats { display: flex; flex-wrap: wrap; gap: 10px; }
 .stat-chip {
     display: flex;
     align-items: center;
@@ -244,22 +249,13 @@
     text-decoration: none !important;
     color: var(--text-mid) !important;
 }
-
 .stat-chip:hover, .stat-chip.active {
     border-color: var(--navy-light);
     background: var(--navy-pale);
     color: var(--navy) !important;
 }
-
-.stat-chip .chip-count {
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--navy);
-}
-
+.stat-chip .chip-count { font-weight: 700; font-size: 0.95rem; color: var(--navy); }
 .stat-chip .chip-label { font-size: 0.75rem; }
-
-/* Filter bar */
 .filter-bar {
     display: flex;
     align-items: center;
@@ -272,23 +268,12 @@
     margin-bottom: 1.4rem;
     box-shadow: 0 2px 8px rgba(15,45,90,0.05);
 }
-
-.filter-bar .filter-search {
-    flex: 1;
-    min-width: 200px;
-    position: relative;
-}
-
+.filter-bar .filter-search { flex: 1; min-width: 200px; position: relative; }
 .filter-bar .filter-search i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
+    position: absolute; left: 12px; top: 50%;
     transform: translateY(-50%);
-    color: var(--text-light);
-    font-size: 0.85rem;
-    pointer-events: none;
+    color: var(--text-light); font-size: 0.85rem; pointer-events: none;
 }
-
 .filter-bar .filter-search input {
     width: 100%;
     border: 1.5px solid var(--border);
@@ -299,14 +284,12 @@
     font-family: 'DM Sans', sans-serif;
     transition: all 0.2s;
 }
-
 .filter-bar .filter-search input:focus {
     outline: none;
     border-color: var(--navy-light);
     box-shadow: 0 0 0 3px rgba(43,94,167,0.1);
     background: var(--white);
 }
-
 .filter-bar select {
     border: 1.5px solid var(--border);
     border-radius: 10px;
@@ -318,254 +301,114 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-
 .filter-bar select:focus {
     outline: none;
     border-color: var(--navy-light);
     box-shadow: 0 0 0 3px rgba(43,94,167,0.1);
 }
-
 .btn-filter-apply {
     background: linear-gradient(135deg, var(--navy), var(--navy-light));
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 9px 20px;
-    font-size: 0.845rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
+    color: #fff; border: none; border-radius: 10px;
+    padding: 9px 20px; font-size: 0.845rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
 }
-
 .btn-filter-apply:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,45,90,0.25); }
-
 .btn-clear-filter {
-    background: var(--white);
-    color: var(--text-mid);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 9px 16px;
-    font-size: 0.845rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    white-space: nowrap;
+    background: var(--white); color: var(--text-mid);
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 9px 16px; font-size: 0.845rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; text-decoration: none; white-space: nowrap;
 }
-
 .btn-clear-filter:hover { background: var(--cream); color: var(--navy); }
-
-/* Results count */
 .results-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.8rem;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.8rem; flex-wrap: wrap; gap: 8px;
 }
-
-.results-count {
-    font-size: 0.82rem;
-    color: var(--text-light);
-    font-weight: 500;
-}
-
+.results-count { font-size: 0.82rem; color: var(--text-light); font-weight: 500; }
 .results-count strong { color: var(--navy); }
-
-/* Table wrapper */
 .archive-table-wrap {
-    border-radius: 14px;
-    overflow: hidden;
+    border-radius: 14px; overflow: hidden;
     box-shadow: 0 2px 16px rgba(15,45,90,0.08);
-    border: 1px solid var(--border);
-    background: var(--white);
+    border: 1px solid var(--border); background: var(--white);
 }
-
 .archive-table-wrap .table-responsive { border-radius: 0; box-shadow: none; border: none; }
-
-/* Type badge */
 .type-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 20px; white-space: nowrap;
 }
-
-.type-badge.blue    { background: var(--navy-pale);   color: var(--navy-mid); }
-.type-badge.teal    { background: var(--teal-pale);   color: var(--teal);     }
-.type-badge.gold    { background: #fdf3e3;             color: var(--gold);     }
-.type-badge.red     { background: var(--danger-pale); color: var(--danger);   }
-
-/* Status badge */
+.type-badge.blue  { background: var(--navy-pale);   color: var(--navy-mid); }
+.type-badge.teal  { background: var(--teal-pale);   color: var(--teal);     }
+.type-badge.gold  { background: #fdf3e3;             color: var(--gold);     }
+.type-badge.red   { background: var(--danger-pale); color: var(--danger);   }
 .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 20px;
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 20px;
 }
-
 .status-badge.archived { background: #fff3cd; color: #92400e; }
 .status-badge.restored { background: var(--success-pale); color: var(--success); }
-
-/* Action buttons in archive */
 .btn-restore {
     background: linear-gradient(135deg, var(--success), #34d399) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 5px 14px !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-    cursor: pointer;
-    transition: all 0.18s !important;
+    color: #fff !important; border: none !important; border-radius: 8px !important;
+    padding: 5px 14px !important; font-size: 0.78rem !important; font-weight: 600 !important;
+    cursor: pointer; transition: all 0.18s !important;
     display: inline-flex; align-items: center; gap: 4px;
 }
-
 .btn-restore:hover { transform: translateY(-1px) !important; box-shadow: 0 3px 10px rgba(5,150,105,0.3) !important; }
-
 .btn-perma-delete {
-    background: var(--white) !important;
-    color: var(--danger) !important;
-    border: 1.5px solid rgba(220,38,38,0.3) !important;
-    border-radius: 8px !important;
-    padding: 5px 12px !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-    cursor: pointer;
-    transition: all 0.18s !important;
+    background: var(--white) !important; color: var(--danger) !important;
+    border: 1.5px solid rgba(220,38,38,0.3) !important; border-radius: 8px !important;
+    padding: 5px 12px !important; font-size: 0.78rem !important; font-weight: 600 !important;
+    cursor: pointer; transition: all 0.18s !important;
     display: inline-flex; align-items: center; gap: 4px;
 }
-
-.btn-perma-delete:hover {
-    background: var(--danger-pale) !important;
-    border-color: var(--danger) !important;
-}
-
-/* Summary text */
+.btn-perma-delete:hover { background: var(--danger-pale) !important; border-color: var(--danger) !important; }
 .summary-text {
-    font-size: 0.78rem;
-    color: var(--text-light);
-    max-width: 260px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.78rem; color: var(--text-light);
+    max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-
-/* Date cell */
 .date-cell { font-size: 0.78rem; color: var(--text-mid); white-space: nowrap; }
-
-/* Empty state */
-.archive-empty {
-    text-align: center;
-    padding: 4rem 1rem;
-    color: var(--text-light);
-}
-
+.archive-empty { text-align: center; padding: 4rem 1rem; color: var(--text-light); }
 .archive-empty .empty-icon {
-    width: 72px; height: 72px;
-    background: var(--cream);
-    border-radius: 50%;
+    width: 72px; height: 72px; background: var(--cream); border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 2rem;
-    color: var(--text-light);
-    margin: 0 auto 1.2rem;
+    font-size: 2rem; color: var(--text-light); margin: 0 auto 1.2rem;
 }
-
-.archive-empty h5 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-mid);
-    margin-bottom: 0.4rem;
-}
-
+.archive-empty h5 { font-size: 1rem; font-weight: 600; color: var(--text-mid); margin-bottom: 0.4rem; }
 .archive-empty p { font-size: 0.85rem; margin: 0; }
-
-/* Full JSON detail row */
 .json-detail pre {
-    background: var(--cream);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 0.78rem;
-    max-height: 220px;
-    overflow-y: auto;
-    color: var(--text-dark);
-    text-align: left;
-    margin: 0;
+    background: var(--cream); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; font-size: 0.78rem; max-height: 220px; overflow-y: auto;
+    color: var(--text-dark); text-align: left; margin: 0;
 }
-
-/* Responsive */
+/* Bulk toolbar */
+.bulk-toolbar {
+    display: none; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: #fff5f5; border: 1.5px solid rgba(220,38,38,0.3);
+    border-radius: 12px; padding: 10px 16px; margin-bottom: 1rem;
+}
+.bulk-toolbar .bulk-count { font-weight: 700; font-size: 0.875rem; color: var(--danger); margin-right: 4px; }
+.btn-bulk-delete {
+    background: linear-gradient(135deg, var(--danger), #ef4444);
+    color: #fff; border: none; border-radius: 8px;
+    padding: 7px 18px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-bulk-delete:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,0.3); }
+.btn-bulk-clear {
+    background: var(--white); color: var(--text-mid);
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 7px 14px; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+.btn-bulk-clear:hover { background: var(--cream); color: var(--navy); }
+.check-col { width: 44px; text-align: center !important; }
 @media (max-width: 768px) {
     .archive-header { flex-direction: column; }
     .filter-bar { flex-direction: column; align-items: stretch; }
     .filter-bar .filter-search { min-width: auto; }
     .summary-text { max-width: 140px; }
 }
-
-/* ── Bulk select toolbar ── */
-.bulk-toolbar {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    background: #fff5f5;
-    border: 1.5px solid rgba(220,38,38,0.3);
-    border-radius: 12px;
-    padding: 10px 16px;
-    margin-bottom: 1rem;
-}
-
-.bulk-toolbar .bulk-count {
-    font-weight: 700;
-    font-size: 0.875rem;
-    color: var(--danger);
-    margin-right: 4px;
-}
-
-.btn-bulk-delete {
-    background: linear-gradient(135deg, var(--danger), #ef4444);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 7px 18px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-bulk-delete:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,0.3); }
-
-.btn-bulk-clear {
-    background: var(--white);
-    color: var(--text-mid);
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-bulk-clear:hover { background: var(--cream); color: var(--navy); }
-
-/* Checkbox column */
-.check-col { width: 44px; text-align: center !important; }
 </style>
 
 <!-- ─── BEGIN PAGE CONTENT ─────────────────────────────────── -->
@@ -574,16 +417,12 @@
     <!-- Archive Header -->
     <div class="archive-header">
         <div class="archive-title-group">
-            <div class="archive-title-icon">
-                <i class="fas fa-archive"></i>
-            </div>
+            <div class="archive-title-icon"><i class="fas fa-archive"></i></div>
             <div>
                 <h1>Archive</h1>
                 <p class="subtitle">Deleted records — restore or permanently remove</p>
             </div>
         </div>
-
-        <!-- Stats chips -->
         <div class="archive-stats">
             <a href="admn_archive.php" class="stat-chip <?= $filter_type === '' && $filter_status !== 'restored' ? 'active' : '' ?>">
                 <span class="chip-count"><?= $total_archived ?></span>
@@ -605,20 +444,17 @@
                 <i class="fas fa-search"></i>
                 <input type="text" name="keyword" placeholder="Search by name or details…" value="<?= htmlspecialchars($filter_keyword) ?>">
             </div>
-
             <select name="type">
                 <option value="">All Types</option>
                 <?php foreach ($type_meta as $key => $meta): ?>
                 <option value="<?= $key ?>" <?= $filter_type === $key ? 'selected' : '' ?>><?= $meta['label'] ?></option>
                 <?php endforeach; ?>
             </select>
-
             <select name="status">
                 <option value="all"      <?= $filter_status === 'all'      ? 'selected' : '' ?>>All Statuses</option>
                 <option value="active"   <?= $filter_status === 'active'   ? 'selected' : '' ?>>Archived Only</option>
                 <option value="restored" <?= $filter_status === 'restored' ? 'selected' : '' ?>>Restored Only</option>
             </select>
-
             <button type="submit" class="btn-filter-apply"><i class="fas fa-filter"></i> Filter</button>
             <a href="admn_archive.php" class="btn-clear-filter"><i class="fas fa-times"></i> Clear</a>
         </div>
@@ -633,152 +469,155 @@
         </span>
     </div>
 
-    <!-- Bulk Delete Form wraps the table -->
+    <!-- ══ Single-action form: lives OUTSIDE the bulk form ══ -->
+    <form method="POST" action="admn_archive.php" id="singleActionForm">
+        <input type="hidden" name="id_archive" id="singleActionId">
+        <input type="hidden" id="singleActionName">
+    </form>
+
+    <!-- ══ Bulk form: wraps toolbar + table ══ -->
     <form method="POST" action="admn_archive.php" id="bulkForm">
 
-    <!-- Bulk Toolbar (hidden until rows are checked) -->
-    <div class="bulk-toolbar" id="bulkToolbar">
-        <span class="bulk-count" id="bulkCount">0 selected</span>
-        <button type="submit" name="bulk_permanent_delete" class="btn-bulk-delete"
-            onclick="return confirm('PERMANENTLY delete all selected records? This cannot be undone.');">
-            <i class="fas fa-trash"></i> Delete Selected
-        </button>
-        <button type="button" class="btn-bulk-clear" onclick="clearAllChecks()">
-            <i class="fas fa-times"></i> Clear
-        </button>
-    </div>
+        <!-- Bulk Toolbar (hidden until rows are checked) -->
+        <div class="bulk-toolbar" id="bulkToolbar">
+            <span class="bulk-count" id="bulkCount">0 selected</span>
+            <button type="submit" name="bulk_permanent_delete" class="btn-bulk-delete"
+                onclick="return confirm('PERMANENTLY delete all selected records? This cannot be undone.');">
+                <i class="fas fa-trash"></i> Delete Selected
+            </button>
+            <button type="button" class="btn-bulk-clear" onclick="clearAllChecks()">
+                <i class="fas fa-times"></i> Clear
+            </button>
+        </div>
 
-    <!-- Archive Table -->
-    <div class="archive-table-wrap">
-        <?php if (empty($records)): ?>
-            <div class="archive-empty">
-                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
-                <h5>No archived records found</h5>
-                <p>Records appear here after they are deleted from any module.</p>
-            </div>
-        <?php else: ?>
-        <div class="table-responsive">
-            <table class="table table-hover" id="archiveTable">
-                <thead>
-                    <tr>
-                        <th class="check-col">
-                            <input type="checkbox" id="checkAll" title="Select all"
-                                style="width:16px;height:16px;cursor:pointer;">
-                        </th>
-                        <th style="width:40px;">#</th>
-                        <th>Type</th>
-                        <th>Name</th>
-                        <th>Details</th>
-                        <th>Status</th>
-                        <th>Deleted</th>
-                        <th>Deleted By</th>
-                        <th style="min-width:180px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($records as $i => $rec):
-                        $meta = $type_meta[$rec['record_type']] ?? ['label' => $rec['record_type'], 'icon' => 'fa-file', 'color' => 'blue'];
-                        $is_restored = (bool)$rec['is_restored'];
-                    ?>
-                    <tr>
-                        <td class="check-col">
-                            <input type="checkbox" name="selected_archives[]"
-                                value="<?= $rec['id_archive'] ?>"
-                                class="row-check"
-                                style="width:16px;height:16px;cursor:pointer;">
-                        </td>
-                        <td class="date-cell text-muted"><?= $i + 1 ?></td>
+        <!-- Archive Table -->
+        <div class="archive-table-wrap">
+            <?php if (empty($records)): ?>
+                <div class="archive-empty">
+                    <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                    <h5>No archived records found</h5>
+                    <p>Records appear here after they are deleted from any module.</p>
+                </div>
+            <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover" id="archiveTable">
+                    <thead>
+                        <tr>
+                            <th class="check-col">
+                                <input type="checkbox" id="checkAll" title="Select all"
+                                    style="width:16px;height:16px;cursor:pointer;">
+                            </th>
+                            <th style="width:40px;">#</th>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Details</th>
+                            <th>Status</th>
+                            <th>Deleted</th>
+                            <th>Deleted By</th>
+                            <th style="min-width:180px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($records as $i => $rec):
+                            $meta        = $type_meta[$rec['record_type']] ?? ['label' => $rec['record_type'], 'icon' => 'fa-file', 'color' => 'blue'];
+                            $is_restored = (bool)$rec['is_restored'];
+                        ?>
+                        <tr>
+                            <td class="check-col">
+                                <input type="checkbox" name="selected_archives[]"
+                                    value="<?= $rec['id_archive'] ?>"
+                                    class="row-check"
+                                    style="width:16px;height:16px;cursor:pointer;">
+                            </td>
+                            <td class="date-cell text-muted"><?= $i + 1 ?></td>
 
-                        <td>
-                            <span class="type-badge <?= $meta['color'] ?>">
-                                <i class="fas <?= $meta['icon'] ?>"></i>
-                                <?= $meta['label'] ?>
-                            </span>
-                        </td>
+                            <td>
+                                <span class="type-badge <?= $meta['color'] ?>">
+                                    <i class="fas <?= $meta['icon'] ?>"></i>
+                                    <?= $meta['label'] ?>
+                                </span>
+                            </td>
 
-                        <td>
-                            <div style="font-weight:600; font-size:0.875rem; color:var(--text-dark);">
-                                <?= htmlspecialchars($rec['full_name']) ?>
-                            </div>
-                            <div style="font-size:0.72rem; color:var(--text-light);">ID #<?= $rec['record_id'] ?></div>
-                        </td>
-
-                        <td>
-                            <span class="summary-text" title="<?= htmlspecialchars($rec['summary']) ?>">
-                                <?= htmlspecialchars($rec['summary'] ?? '—') ?>
-                            </span>
-                        </td>
-
-                        <td>
-                            <?php if ($is_restored): ?>
-                                <span class="status-badge restored"><i class="fas fa-check-circle"></i> Restored</span>
-                                <div style="font-size:0.7rem; color:var(--text-light); margin-top:3px;">
-                                    by <?= htmlspecialchars($rec['restored_by'] ?? '—') ?><br>
-                                    <?= $rec['restored_at'] ? date('M d, Y', strtotime($rec['restored_at'])) : '' ?>
+                            <td>
+                                <div style="font-weight:600; font-size:0.875rem; color:var(--text-dark);">
+                                    <?= htmlspecialchars($rec['full_name']) ?>
                                 </div>
-                            <?php else: ?>
-                                <span class="status-badge archived"><i class="fas fa-archive"></i> Archived</span>
-                            <?php endif; ?>
-                        </td>
+                                <div style="font-size:0.72rem; color:var(--text-light);">ID #<?= $rec['record_id'] ?></div>
+                            </td>
 
-                        <td class="date-cell">
-                            <?= date('M d, Y', strtotime($rec['deleted_at'])) ?><br>
-                            <span style="color:var(--text-light); font-size:0.7rem;"><?= date('h:i A', strtotime($rec['deleted_at'])) ?></span>
-                        </td>
+                            <td>
+                                <span class="summary-text" title="<?= htmlspecialchars($rec['summary']) ?>">
+                                    <?= htmlspecialchars($rec['summary'] ?? '—') ?>
+                                </span>
+                            </td>
 
-                        <td class="date-cell"><?= htmlspecialchars($rec['deleted_by'] ?? '—') ?></td>
+                            <td>
+                                <?php if ($is_restored): ?>
+                                    <span class="status-badge restored"><i class="fas fa-check-circle"></i> Restored</span>
+                                    <div style="font-size:0.7rem; color:var(--text-light); margin-top:3px;">
+                                        by <?= htmlspecialchars($rec['restored_by'] ?? '—') ?><br>
+                                        <?= $rec['restored_at'] ? date('M d, Y', strtotime($rec['restored_at'])) : '' ?>
+                                    </div>
+                                <?php else: ?>
+                                    <span class="status-badge archived"><i class="fas fa-archive"></i> Archived</span>
+                                <?php endif; ?>
+                            </td>
 
-                        <td>
-                            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                            <td class="date-cell">
+                                <?= date('M d, Y', strtotime($rec['deleted_at'])) ?><br>
+                                <span style="color:var(--text-light); font-size:0.7rem;"><?= date('h:i A', strtotime($rec['deleted_at'])) ?></span>
+                            </td>
 
-                                <!-- View Details toggle -->
-                                <button type="button"
-                                        class="btn-perma-delete"
-                                        style="border-color:rgba(15,45,90,0.2) !important; color:var(--navy-mid) !important;"
-                                        onclick="toggleDetail(<?= $rec['id_archive'] ?>)">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
+                            <td class="date-cell"><?= htmlspecialchars($rec['deleted_by'] ?? '—') ?></td>
 
-                                <!-- Restore (only if not already restored) -->
-                                <?php if (!$is_restored): ?>
-                                <form method="POST" style="display:inline;" onsubmit="return confirm('Restore this record to the source table?');">
-                                    <input type="hidden" name="id_archive"      value="<?= $rec['id_archive'] ?>">
-                                    <button type="submit" name="restore_record" class="btn-restore">
+                            <td>
+                                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+
+                                    <!-- View Details toggle -->
+                                    <button type="button"
+                                            class="btn-perma-delete"
+                                            style="border-color:rgba(15,45,90,0.2) !important; color:var(--navy-mid) !important;"
+                                            onclick="toggleDetail(<?= $rec['id_archive'] ?>)">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+
+                                    <!-- Restore (only if not already restored) -->
+                                    <?php if (!$is_restored): ?>
+                                    <button type="button" class="btn-restore"
+                                        onclick="submitSingle('restore_record', <?= $rec['id_archive'] ?>, 'Restore this record to the source table?')">
                                         <i class="fas fa-undo"></i> Restore
                                     </button>
-                                </form>
-                                <?php endif; ?>
+                                    <?php endif; ?>
 
-                                <!-- Permanent delete -->
-                                <form method="POST" style="display:inline;" onsubmit="return confirm('PERMANENTLY delete this record? This cannot be undone.');">
-                                    <input type="hidden" name="id_archive"       value="<?= $rec['id_archive'] ?>">
-                                    <button type="submit" name="permanent_delete" class="btn-perma-delete">
+                                    <!-- Permanent delete -->
+                                    <button type="button" class="btn-perma-delete"
+                                        onclick="submitSingle('permanent_delete', <?= $rec['id_archive'] ?>, 'PERMANENTLY delete this record? This cannot be undone.')">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
 
-                    <!-- Expandable JSON detail row -->
-                    <tr id="detail-<?= $rec['id_archive'] ?>" style="display:none; background:var(--cream);">
-                        <td colspan="9" class="json-detail">
-                            <strong style="font-size:0.78rem; color:var(--navy); display:block; margin-bottom:6px;">
-                                Full Record Data
-                            </strong>
-                            <pre><?php
-                                $json_data = json_decode($rec['record_data'], true);
-                                echo htmlspecialchars(json_encode($json_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                            ?></pre>
-                        </td>
-                    </tr>
+                                </div>
+                            </td>
+                        </tr>
 
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php endif; ?>
-    </div><!-- /.archive-table-wrap -->
+                        <!-- Expandable JSON detail row -->
+                        <tr id="detail-<?= $rec['id_archive'] ?>" style="display:none; background:var(--cream);">
+                            <td colspan="9" class="json-detail">
+                                <strong style="font-size:0.78rem; color:var(--navy); display:block; margin-bottom:6px;">
+                                    Full Record Data
+                                </strong>
+                                <pre><?php
+                                    $json_data = json_decode($rec['record_data'], true);
+                                    echo htmlspecialchars(json_encode($json_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                                ?></pre>
+                            </td>
+                        </tr>
+
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php endif; ?>
+        </div><!-- /.archive-table-wrap -->
 
     </form><!-- /#bulkForm -->
 
@@ -787,6 +626,14 @@
 <!-- End of Main Content -->
 
 <script>
+// ── Single-record action (restore or delete) ───────────────────
+function submitSingle(actionName, archiveId, confirmMsg) {
+    if (!confirm(confirmMsg)) return;
+    document.getElementById('singleActionId').value  = archiveId;
+    document.getElementById('singleActionName').name = actionName;
+    document.getElementById('singleActionForm').submit();
+}
+
 // ── Expand / collapse JSON detail row ─────────────────────────
 function toggleDetail(id) {
     var row = document.getElementById('detail-' + id);
@@ -813,8 +660,8 @@ function updateToolbar() {
     var checked = document.querySelectorAll('.row-check:checked');
     var toolbar  = document.getElementById('bulkToolbar');
     var counter  = document.getElementById('bulkCount');
-    if (toolbar)  toolbar.style.display  = checked.length > 0 ? 'flex' : 'none';
-    if (counter)  counter.textContent    = checked.length + ' selected';
+    if (toolbar) toolbar.style.display = checked.length > 0 ? 'flex' : 'none';
+    if (counter) counter.textContent   = checked.length + ' selected';
 }
 
 function clearAllChecks() {

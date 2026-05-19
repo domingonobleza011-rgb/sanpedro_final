@@ -576,10 +576,10 @@ require('secure_header.php');
     <!-- Added 'btn-block' for older Bootstrap or 'w-100' for Bootstrap 4/5 -->
     <!-- Added 'py-3' for extra vertical height and 'mb-4' for spacing -->
     <button type="button" 
-            class="btn btn-primary btn-lg w-100 w-md-auto py-3 px-5 shadow-sm" 
-            style="font-weight: 600; font-size: 1.2rem;"
-            data-toggle="modal" 
-            data-target="#exampleModalCenter">
+        class="btn btn-primary btn-lg w-100 w-md-auto py-3 px-5 shadow-sm" 
+        style="font-weight: 600; font-size: 1.25rem; border-radius: 10px;"
+        data-bs-toggle="modal" 
+        data-bs-target="#exampleModalCenter">
         <i class="fas fa-edit mr-2"></i> Request Form
     </button>
 </div>
@@ -590,7 +590,7 @@ require('secure_header.php');
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="exampleModalCenterTitle">Barangay ID Form</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -729,7 +729,7 @@ require('secure_header.php');
 
                 <div class="modal-footer bg-light">
                     <input name="id_resident" type="hidden" value="<?= $userdetails['id_resident']?>">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
                     <button name="create_brgyid" type="submit" class="btn btn-primary px-4">Submit Request</button>
                 </div> 
                 </form>
@@ -797,14 +797,8 @@ require('secure_header.php');
             });
             });
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     </body>
 </html>

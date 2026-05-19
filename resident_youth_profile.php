@@ -15,13 +15,15 @@ require('secure_header.php');
 <html>
   <head> 
     <title> Barangay Management System </title>
- <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <!-- responsive tags for screen compatibility -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- custom css --> 
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+        <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <style>
 
             /* Navbar Buttons */
@@ -560,10 +562,10 @@ require('secure_header.php');
     <!-- Added 'btn-block' for older Bootstrap or 'w-100' for Bootstrap 4/5 -->
     <!-- Added 'py-3' for extra vertical height and 'mb-4' for spacing -->
     <button type="button" 
-            class="btn btn-primary btn-lg w-100 w-md-auto py-3 px-5 shadow-sm" 
-            style="font-weight: 600; font-size: 1.2rem;"
-            data-toggle="modal" 
-            data-target="#exampleModalCenter">
+        class="btn btn-primary btn-lg w-100 w-md-auto py-3 px-5 shadow-sm" 
+        style="font-weight: 600; font-size: 1.25rem; border-radius: 10px;"
+        data-bs-toggle="modal" 
+        data-bs-target="#exampleModalCenter">
         <i class="fas fa-edit mr-2"></i> Youth Profiling
     </button>
 </div>
@@ -577,7 +579,7 @@ require('secure_header.php');
                     <h5 class="modal-title font-weight-bold" id="exampleModalCenterTitle">
                         <i class="fas fa-id-card mr-2"></i> Youth Profile Registration
                     </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -694,7 +696,7 @@ require('secure_header.php');
 
                     <div class="modal-footer bg-light p-3">
                         <input name="id_youth" type="hidden" value="<?= isset($userdetails['id_resident']) ? $userdetails['id_resident'] : ''; ?>">
-                        <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
                         <button name="create_youth" type="submit" class="btn btn-primary px-5 shadow-sm font-weight-bold">
                             Save Profile
                         </button>
@@ -773,9 +775,7 @@ require('secure_header.php');
             });
         </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     </body>
 </html>

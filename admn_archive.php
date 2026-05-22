@@ -45,112 +45,172 @@
         $data = json_decode($arc['record_data'], true);
         $type = $arc['record_type'];
         switch ($type) {
+
             case 'staff':
-    $s = $conn->prepare("INSERT IGNORE INTO tbl_user
-        (id_user, login_identity, email, phone_number, password, lname, fname, mi,
-         age, sex, address, contact, position, role, addedby, photo)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-    $s->execute([
-        $data['id_user']        ?? null,
-        $data['login_identity'] ?? '',
-        $data['email']          ?? '',
-        $data['phone_number']   ?? '',
-        $data['password']       ?? '',       // ✅ REQUIRED for login
-        $data['lname']          ?? '',
-        $data['fname']          ?? '',
-        $data['mi']             ?? '',
-        $data['age']            ?? 0,
-        $data['sex']            ?? '',
-        $data['address']        ?? '',
-        $data['contact']        ?? '',
-        $data['position']       ?? '',
-        $data['role']           ?? '',
-        $data['addedby']        ?? '',
-        $data['photo']          ?? '',
-    ]);
-    return true;
+                $s = $conn->prepare("
+                    INSERT INTO tbl_user
+                        (id_user, login_identity, email, phone_number, password,
+                         lname, fname, mi, age, sex, address, contact,
+                         position, role, addedby, photo)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    ON DUPLICATE KEY UPDATE
+                        login_identity = VALUES(login_identity),
+                        email          = VALUES(email),
+                        phone_number   = VALUES(phone_number),
+                        password       = VALUES(password),
+                        lname          = VALUES(lname),
+                        fname          = VALUES(fname),
+                        mi             = VALUES(mi),
+                        age            = VALUES(age),
+                        sex            = VALUES(sex),
+                        address        = VALUES(address),
+                        contact        = VALUES(contact),
+                        position       = VALUES(position),
+                        role           = VALUES(role),
+                        addedby        = VALUES(addedby),
+                        photo          = VALUES(photo)
+                ");
+                $s->execute([
+                    $data['id_user']        ?? null,
+                    $data['login_identity'] ?? '',
+                    $data['email']          ?? '',
+                    $data['phone_number']   ?? '',
+                    $data['password']       ?? '',
+                    $data['lname']          ?? '',
+                    $data['fname']          ?? '',
+                    $data['mi']             ?? '',
+                    $data['age']            ?? 0,
+                    $data['sex']            ?? '',
+                    $data['address']        ?? '',
+                    $data['contact']        ?? '',
+                    $data['position']       ?? '',
+                    $data['role']           ?? '',
+                    $data['addedby']        ?? '',
+                    $data['photo']          ?? '',
+                ]);
+                return true;
+
             case 'resident':
-    $s = $conn->prepare("INSERT IGNORE INTO tbl_resident
-        (id_resident, email, phone_number, password, lname, fname, mi, age, sex, status,
-         houseno, street, brgy, municipal, address, contact, bdate, bplace, nationality,
-         voter, family_role, role, is_verified, verified_at, verified_by, addedby)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-    $s->execute([
-        $data['id_resident']    ?? null,
-        $data['email']          ?? null,
-        $data['phone_number']   ?? null,
-        $data['password']       ?? '',       // ✅ REQUIRED for login
-        $data['lname']          ?? '',
-        $data['fname']          ?? '',
-        $data['mi']             ?? '',
-        $data['age']            ?? 0,
-        $data['sex']            ?? '',
-        $data['status']         ?? '',
-        $data['houseno']        ?? null,
-        $data['street']         ?? null,
-        $data['brgy']           ?? null,
-        $data['municipal']      ?? null,
-        $data['address']        ?? null,
-        $data['contact']        ?? null,
-        $data['bdate']          ?? null,
-        $data['bplace']         ?? '',
-        $data['nationality']    ?? '',
-        $data['voter']          ?? '',
-        $data['family_role']    ?? '',
-        $data['role']           ?? 'resident',
-        $data['is_verified']    ?? 0,        // ✅ REQUIRED for login
-        $data['verified_at']    ?? null,
-        $data['verified_by']    ?? null,
-        $data['addedby']        ?? '',
-    ]);
-    return true;
+                $s = $conn->prepare("
+                    INSERT INTO tbl_resident
+                        (id_resident, email, phone_number, password,
+                         lname, fname, mi, age, sex, status,
+                         houseno, street, brgy, municipal, address, contact,
+                         bdate, bplace, nationality, voter, family_role, role,
+                         is_verified, verified_at, verified_by, addedby)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    ON DUPLICATE KEY UPDATE
+                        email        = VALUES(email),
+                        phone_number = VALUES(phone_number),
+                        password     = VALUES(password),
+                        lname        = VALUES(lname),
+                        fname        = VALUES(fname),
+                        mi           = VALUES(mi),
+                        age          = VALUES(age),
+                        sex          = VALUES(sex),
+                        status       = VALUES(status),
+                        houseno      = VALUES(houseno),
+                        street       = VALUES(street),
+                        brgy         = VALUES(brgy),
+                        municipal    = VALUES(municipal),
+                        address      = VALUES(address),
+                        contact      = VALUES(contact),
+                        bdate        = VALUES(bdate),
+                        bplace       = VALUES(bplace),
+                        nationality  = VALUES(nationality),
+                        voter        = VALUES(voter),
+                        family_role  = VALUES(family_role),
+                        role         = VALUES(role),
+                        is_verified  = VALUES(is_verified),
+                        verified_at  = VALUES(verified_at),
+                        verified_by  = VALUES(verified_by),
+                        addedby      = VALUES(addedby)
+                ");
+                $s->execute([
+                    $data['id_resident']    ?? null,
+                    $data['email']          ?? null,
+                    $data['phone_number']   ?? null,
+                    $data['password']       ?? '',
+                    $data['lname']          ?? '',
+                    $data['fname']          ?? '',
+                    $data['mi']             ?? '',
+                    $data['age']            ?? 0,
+                    $data['sex']            ?? '',
+                    $data['status']         ?? '',
+                    $data['houseno']        ?? null,
+                    $data['street']         ?? null,
+                    $data['brgy']           ?? null,
+                    $data['municipal']      ?? null,
+                    $data['address']        ?? null,
+                    $data['contact']        ?? null,
+                    $data['bdate']          ?? null,
+                    $data['bplace']         ?? '',
+                    $data['nationality']    ?? '',
+                    $data['voter']          ?? '',
+                    $data['family_role']    ?? '',
+                    $data['role']           ?? 'resident',
+                    $data['is_verified'] ?? 0,      // preserve original — must re-verify after restore
+                    $data['verified_at']    ?? null,
+                    $data['verified_by']    ?? null,
+                    $data['addedby']        ?? '',
+                ]);
+                return true;
+
             case 'certofres':
                 $s = $conn->prepare("INSERT IGNORE INTO tbl_rescert
                     (id_rescert,id_resident,lname,fname,mi,age,nationality,houseno,street,brgy,municipal,date,purpose)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 $s->execute([$data['id_rescert'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['nationality'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['date'],$data['purpose']]);
                 return true;
+
             case 'certofindigency':
                 $s = $conn->prepare("INSERT IGNORE INTO tbl_indigency
                     (id_indigency,id_resident,lname,fname,mi,nationality,houseno,street,brgy,municipal,purpose,date)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
                 $s->execute([$data['id_indigency'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['nationality'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['purpose'],$data['date']]);
                 return true;
+
             case 'clearance':
                 $s = $conn->prepare("INSERT IGNORE INTO tbl_clearance
                     (id_clearance,id_resident,lname,fname,mi,purpose,houseno,street,brgy,municipal,status,age)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
                 $s->execute([$data['id_clearance'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['purpose'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['status'],$data['age']]);
                 return true;
+
             case 'bspermit':
                 $s = $conn->prepare("INSERT IGNORE INTO tbl_bspermit
                     (id_bspermit,id_resident,lname,fname,mi,bsname,houseno,street,brgy,municipal,bsindustry,aoe)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
                 $s->execute([$data['id_bspermit'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['bsname'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['bsindustry'],$data['aoe']]);
                 return true;
+
             case 'blotter':
                 $s = $conn->prepare("INSERT IGNORE INTO tbl_blotter
                     (id_blotter,id_resident,lname,fname,mi,houseno,street,brgy,municipal,contact,narrative)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?)");
                 $s->execute([$data['id_blotter'],$data['id_resident'],$data['lname'],$data['fname'],$data['mi'],$data['houseno'],$data['street'],$data['brgy'],$data['municipal'],$data['contact'],$data['narrative']]);
                 return true;
+
             case 'youth':
                 $s = $conn->prepare("INSERT IGNORE INTO tbl_youth
                     (id_youth,lname,fname,mi,age,sex,civil_status,contact_number,email_address,educ_attain,emp_status,skill_name)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
                 $s->execute([$data['id_youth'],$data['lname'],$data['fname'],$data['mi'],$data['age'],$data['sex'],$data['civil_status'],$data['contact_number'],$data['email_address'],$data['educ_attain'],$data['emp_status'],$data['skill_name']]);
                 return true;
+
             case 'brgyid':
                 $s = $conn->prepare("INSERT IGNORE INTO tbl_brgyid
                     (id_brgyid,id_resident,lname,fname,mi,houseno,street,brgy,municipal,bplace,bdate,contact,relation,inc_lname,inc_fname,inc_contact)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 $s->execute([
-                    $data['id_brgyid'] ?? null, $data['id_resident'] ?? null,
-                    $data['lname'] ?? '', $data['fname'] ?? '', $data['mi'] ?? '',
-                    $data['houseno'] ?? '', $data['street'] ?? '', $data['brgy'] ?? '',
-                    $data['municipal'] ?? '', $data['bplace'] ?? '', $data['bdate'] ?? '',
-                    $data['contact'] ?? '', $data['relation'] ?? '',
-                    $data['inc_lname'] ?? '', $data['inc_fname'] ?? '', $data['inc_contact'] ?? '',
+                    $data['id_brgyid']    ?? null, $data['id_resident']  ?? null,
+                    $data['lname']        ?? '',   $data['fname']         ?? '',
+                    $data['mi']           ?? '',   $data['houseno']       ?? '',
+                    $data['street']       ?? '',   $data['brgy']          ?? '',
+                    $data['municipal']    ?? '',   $data['bplace']        ?? '',
+                    $data['bdate']        ?? '',   $data['contact']       ?? '',
+                    $data['relation']     ?? '',   $data['inc_lname']     ?? '',
+                    $data['inc_fname']    ?? '',   $data['inc_contact']   ?? '',
                 ]);
                 return true;
         }
@@ -519,7 +579,7 @@
             <a href="admn_archive.php" class="btn-clear-filter"><i class="fas fa-times"></i> Clear</a>
         </div>
     </form>
-7
+
     <!-- Results count -->
     <div class="results-bar">
         <span class="results-count">

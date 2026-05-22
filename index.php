@@ -595,13 +595,13 @@ body, html {
             </div>
         </div>
 <!-- Modal -->
-<div class="modal fade" id="officialsModal<?= $view['id_user'];?>" tabindex="-1">
+<div class="modal fade" id="officialsModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <!-- Header with a slight gradient for a premium look -->
-            <div class="modal-header bg-primary text-white py-3" style="background: linear-gradient(45deg, #0d6efd, #0a58ca);">
+            <div class="modal-header bg-primary text-white py-3" style="background: linear-gradient(45deg, #0f2d5a, #1a4480);">
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-users-cog me-3 fa-2x"></i>
+                    <i class="fas fa-users-cog me-3 fa-2x" style="color: var(--gold);"></i>
                     <div>
                         <h5 class="modal-title fw-bold mb-0">Sangguniang Barangay Members</h5>
                         <small class="opacity-75">San Pedro, Iriga City</small>
@@ -614,6 +614,38 @@ body, html {
                 <div class="row g-4 justify-content-center">
                     <?php 
                     if(!empty($view) && is_array($view)) { 
+                        // Define your explicit target order from the list mode options
+                        $positionOrder = [
+                            "Punong Barangay",
+                            "Secretary",
+                            "Treasurer",
+                            "Clerk",
+                            "Book Keeper",
+                            "Committee on Appropriation",
+                            "Committee on Health",
+                            "Committee on Women and Children",
+                            "Committee on Education",
+                            "Committee on Peace and Order",
+                            "Committee on Infrastructure",
+                            "Committee on Ways and Means",
+                            "Committee on Agriculture",
+                            "Committee on Tourism",
+                            "IPMRR Representative",
+                            "Sk Chairperson"
+                        ];
+
+                        // Sort the $view data based on our position array sequence
+                        usort($view, function($a, $b) use ($positionOrder) {
+                            $posA = array_search($a['position'], $positionOrder);
+                            $posB = array_search($b['position'], $positionOrder);
+                            
+                            // If a position isn't in our array list, send it to the bottom
+                            $posA = ($posA === false) ? 999 : $posA;
+                            $posB = ($posB === false) ? 999 : $posB;
+                            
+                            return $posA <=> $posB;
+                        });
+
                         foreach($view as $row) { 
                     ?>
                         <div class="col-md-4 col-sm-6">

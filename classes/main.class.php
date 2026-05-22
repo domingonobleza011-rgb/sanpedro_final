@@ -507,7 +507,7 @@ public function admin_delete_announcement(){
         }
     }
  
-    public function uploadValidID($id_resident, $file_name, $original_name, $file_type, $message_note = '') {
+public function uploadValidID($id_resident, $file_name, $original_name, $file_type, $message_note = '') {
         try {
             $connection = $this->openConn();
             $sql  = "INSERT INTO tbl_id_uploads (id_resident, file_name, original_name, file_type, message_note, upload_date, status) VALUES (?, ?, ?, ?, ?, NOW(), 'pending')";
@@ -515,6 +515,52 @@ public function admin_delete_announcement(){
             return $stmt->execute([$id_resident, $file_name, $original_name, $file_type, $message_note]);
         } catch (PDOException $e) {
             error_log("uploadValidID Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verifies an ID upload, updates its status, and deletes the physical file from storage.
+     */
+public function verifyIDUpload($id_upload) {
+        try {
+            $con = $this->openConn();
+            
+            // 1. Fetch the file name
+            $stmt = $con->prepare("SELECT file_name FROM tbl_id_uploads WHERE id_upload = ?");
+            $stmt->execute([$id_upload]);
+            $file = $stmt->fetch();
+
+            if ($file && !empty($file['file_name'])) {
+                // Construct path using the root directory fallback
+                $filename = $file['file_name'];
+                
+                // Try target paths (relative and absolute)
+                $relative_path = "uploads/valid_ids/" . $filename;
+                $absolute_path = $_SERVER['DOCUMENT_ROOT'] . "/uploads/valid_ids/" . $filename; 
+
+                // Attempt deletion via relative path
+                if (file_exists($relative_path)) {
+                    unlink($relative_path);
+                    error_log("SUCCESS: Deleted file via relative path: " . $relative_path);
+                } 
+                // Attempt deletion via absolute path alternative
+                elseif (file_exists($absolute_path)) {
+                    unlink($absolute_path);
+                    error_log("SUCCESS: Deleted file via absolute path: " . $absolute_path);
+                } 
+                else {
+                    // This log will reveal the exact directory PHP is checking
+                    error_log("ERROR: File not found on server. Tried: " . realpath($relative_path) . " AND " . $absolute_path);
+                }
+            }
+
+            // 2. Complete status update
+            $stmt = $con->prepare("UPDATE tbl_id_uploads SET status = 'verified' WHERE id_upload = ?");
+            return $stmt->execute([$id_upload]);
+            
+        } catch (PDOException $e) {
+            error_log("verifyIDUpload Error: " . $e->getMessage());
             return false;
         }
     }
@@ -542,7 +588,8 @@ public function admin_delete_announcement(){
     public function getPendingIDUploads() {
         try {
             $connection = $this->openConn();
-            $sql  = "SELECT u.*, r.fname, r.lname, r.email, r.phone_number FROM tbl_id_uploads u JOIN tbl_resident r ON u.id_resident = r.id_resident ORDER BY u.upload_date DESC";
+            // Filter added to show only 'pending' items so verified/deleted files don't crowd the admin dashboard
+            $sql  = "SELECT u.*, r.fname, r.lname, r.email, r.phone_number FROM tbl_id_uploads u JOIN tbl_resident r ON u.id_resident = r.id_resident WHERE u.status = 'pending' ORDER BY u.upload_date DESC";
             $stmt = $connection->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

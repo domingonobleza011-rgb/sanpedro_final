@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 19, 2026 at 09:20 AM
+-- Generation Time: May 22, 2026 at 09:05 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -45,7 +45,18 @@ INSERT INTO `admin_messages` (`id_admin_msg`, `id_resident`, `message_text`, `da
 (19, 78, 'VALID ID SUBMITTED - Please verify my account. Note: rgh23rthj', '2026-05-18 22:47:05', 'unread'),
 (20, 77, 'VALID ID SUBMITTED - Please verify my account. Note: 123r4tyhj', '2026-05-18 22:48:51', 'unread'),
 (21, 76, 'VALID ID SUBMITTED - Please verify my account. Note: 5tyhjmnhgr', '2026-05-18 22:52:03', 'unread'),
-(22, 76, '3r4tjhm', '2026-05-18 22:52:30', 'unread');
+(22, 76, '3r4tjhm', '2026-05-18 22:52:30', 'unread'),
+(26, 82, 'VALID ID SUBMITTED - Please verify my account. Note: e3rtgyhujikl;', '2026-05-19 18:18:00', 'unread'),
+(27, 83, 'VALID ID SUBMITTED - Please verify my account. Note: 2w3erftghj', '2026-05-19 19:20:56', 'unread'),
+(28, 85, 'VALID ID SUBMITTED - Please verify my account. Note: asdfbn', '2026-05-19 19:24:03', 'unread'),
+(29, 86, 'VALID ID SUBMITTED - Please verify my account. Note: rtyuiopip[;iulyktjhgfds', '2026-05-19 19:31:56', 'unread'),
+(30, 87, 'VALID ID SUBMITTED - Please verify my account. Note: fghjngdd', '2026-05-19 19:39:20', 'unread'),
+(31, 88, 'VALID ID SUBMITTED - Please verify my account. Note: QWERGHJM,K.DSD', '2026-05-19 19:44:39', 'unread'),
+(32, 89, 'VALID ID SUBMITTED - Please verify my account. Note: 2wertgyhjmk;//', '2026-05-19 21:00:29', 'unread'),
+(33, 90, 'VALID ID SUBMITTED - Please verify my account. Note: 23r4tyuik;\';ljhgfdsa', '2026-05-21 09:34:32', 'unread'),
+(34, 95, 'VALID ID SUBMITTED - Please verify my account. Note: rtyuikujkhgfvcdssghjnnhg', '2026-05-21 12:30:03', 'unread'),
+(35, 96, 'VALID ID SUBMITTED - Please verify my account. Note: 234r5tyuilkjtr', '2026-05-22 17:00:58', 'unread'),
+(36, 97, 'VALID ID SUBMITTED - Please verify my account. Note: eryujnh.l/kjhgtfdre', '2026-05-22 17:04:37', 'unread');
 
 -- --------------------------------------------------------
 
@@ -131,7 +142,18 @@ INSERT INTO `resident_messages` (`id_message`, `id_resident`, `message_text`, `d
 (30, 73, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-18 22:48:15', 'sent'),
 (31, 77, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-18 22:51:41', 'sent'),
 (32, 76, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-18 22:58:41', 'sent'),
-(33, 58, 'WGHJIKJHGFDSA', '2026-05-19 13:39:12', 'sent');
+(33, 58, 'WGHJIKJHGFDSA', '2026-05-19 13:39:12', 'sent'),
+(34, 82, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 18:18:14', 'sent'),
+(35, 82, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 18:20:43', 'sent'),
+(36, 83, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 19:21:16', 'sent'),
+(37, 85, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 19:24:27', 'sent'),
+(38, 86, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 19:32:10', 'sent'),
+(39, 87, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 19:39:38', 'sent'),
+(40, 88, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 19:44:58', 'sent'),
+(41, 89, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 21:00:43', 'sent'),
+(42, 95, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-21 12:30:32', 'sent'),
+(43, 96, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-22 17:01:20', 'sent'),
+(44, 97, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-22 17:04:57', 'sent');
 
 -- --------------------------------------------------------
 
@@ -157,6 +179,7 @@ CREATE TABLE `tbl_admin` (
   `email` varchar(255) NOT NULL,
   `phone_number` varchar(20) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
+  `must_change_password` tinyint(1) NOT NULL DEFAULT '0',
   `lname` varchar(255) NOT NULL,
   `fname` varchar(255) NOT NULL,
   `mi` varchar(255) NOT NULL,
@@ -167,10 +190,10 @@ CREATE TABLE `tbl_admin` (
 -- Dumping data for table `tbl_admin`
 --
 
-INSERT INTO `tbl_admin` (`id_admin`, `email`, `phone_number`, `password`, `lname`, `fname`, `mi`, `role`) VALUES
-(5, 'sanpedroiriga@gmail.com', NULL, '$2y$10$EUyPeW.y.WUjSb590jMBjO/cyHo0H0/EKMQdugVbjd0Plv6UWPKMG', 'This', 'Is', 'Admin', 'administrator'),
-(10, 'dominge@gmail.com', NULL, '$2y$10$0kaMFdn8NAzSkm3vxCQdDOQq1a4rMXo.jaVorWc96xgScaEfiNJCa', 'nobleza', 'domingo', 'b', 'administrator'),
-(11, 'jeanrosenosipeda@gmail.com', NULL, '$2y$10$jxMdSDhpJZQ17JGwQHgunu1GVhkPLsBqb381P3kxFmIGXoM/dtkiW', 'x 11\")', 'US-Letter', '(', 'administrator');
+INSERT INTO `tbl_admin` (`id_admin`, `email`, `phone_number`, `password`, `must_change_password`, `lname`, `fname`, `mi`, `role`) VALUES
+(5, 'sanpedroiriga@gmail.com', NULL, '$2y$10$EUyPeW.y.WUjSb590jMBjO/cyHo0H0/EKMQdugVbjd0Plv6UWPKMG', 0, 'This', 'Is', 'Admin', 'administrator'),
+(10, 'dominge@gmail.com', NULL, '$2y$10$0kaMFdn8NAzSkm3vxCQdDOQq1a4rMXo.jaVorWc96xgScaEfiNJCa', 0, 'nobleza', 'domingo', 'b', 'administrator'),
+(11, 'jeanrosenosipeda@gmail.com', NULL, '$2y$10$jxMdSDhpJZQ17JGwQHgunu1GVhkPLsBqb381P3kxFmIGXoM/dtkiW', 0, 'x 11\")', 'US-Letter', '(', 'administrator');
 
 -- --------------------------------------------------------
 
@@ -250,6 +273,13 @@ CREATE TABLE `tbl_archive` (
   `restored_by` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_restored` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tbl_archive`
+--
+
+INSERT INTO `tbl_archive` (`id_archive`, `record_type`, `record_id`, `full_name`, `summary`, `record_data`, `deleted_by`, `deleted_at`, `restored_at`, `restored_by`, `is_restored`) VALUES
+(225, 'staff', 41, 'x 11\"), US-Letter (.', 'Role: user | Email: sanpedroiriga@gmail.com', '{\"mi\": \"(\", \"age\": 122, \"sex\": \"Male\", \"role\": \"user\", \"email\": \"sanpedroiriga@gmail.com\", \"fname\": \"US-Letter\", \"lname\": \"x 11\\\")\", \"photo\": \"uploads/1779183163_Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg\", \"addedby\": \"This, Is\", \"address\": \"jeanrosenosipeda@gmail.com\", \"contact\": \"09070560963\", \"id_user\": 41, \"password\": \"$2y$10$KRhS3aOZ5BjtSlLng4v2f.Lwkn2/BdGwzUTvQ9mWfPMCCiLoKm5gy\", \"position\": \"Punong Barangay\", \"phone_number\": \"\", \"login_identity\": \"sanpedroiriga@gmail.com\", \"must_change_password\": 0}', NULL, '2026-05-22 13:34:27', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -649,7 +679,18 @@ CREATE TABLE `tbl_id_uploads` (
 --
 
 INSERT INTO `tbl_id_uploads` (`id_upload`, `id_resident`, `file_name`, `original_name`, `file_type`, `message_note`, `upload_date`, `status`) VALUES
-(11, 44, 'validid_44_1777644510.jpg', 'b97485c7-e6d6-4b17-a79e-eae059e1cb6f.jpg', 'image/jpeg', 'hanep pa validate po', '2026-05-01 22:08:30', 'approved');
+(11, 44, 'validid_44_1777644510.jpg', 'b97485c7-e6d6-4b17-a79e-eae059e1cb6f.jpg', 'image/jpeg', 'hanep pa validate po', '2026-05-01 22:08:30', 'approved'),
+(17, 82, 'validid_82_1779185880.jpeg', 'Screenshot_4-5-2026_154117_barangaysanpedro.gt.tc.jpeg', 'image/jpeg', 'e3rtgyhujikl;', '2026-05-19 18:18:00', 'approved'),
+(18, 83, 'validid_83_1779189656.jpeg', 'Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg', 'image/jpeg', '2w3erftghj', '2026-05-19 19:20:56', 'approved'),
+(19, 85, 'validid_85_1779189843.jpeg', 'Screenshot_4-5-2026_154127_barangaysanpedro.gt.tc.jpeg', 'image/jpeg', 'asdfbn', '2026-05-19 19:24:03', 'approved'),
+(20, 86, 'validid_86_1779190316.jpeg', 'Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg', 'image/jpeg', 'rtyuiopip[;iulyktjhgfds', '2026-05-19 19:31:56', 'approved'),
+(21, 87, 'validid_87_1779190760.png', '07319ee9-ec0e-4048-ac6f-42a7d0326623-removebg-preview.png', 'image/png', 'fghjngdd', '2026-05-19 19:39:20', 'approved'),
+(22, 88, 'validid_88_1779191079.png', '07319ee9-ec0e-4048-ac6f-42a7d0326623-removebg-preview.png', 'image/png', 'QWERGHJM,K.DSD', '2026-05-19 19:44:39', 'approved'),
+(23, 89, 'validid_89_1779195629.png', '07319ee9-ec0e-4048-ac6f-42a7d0326623-removebg-preview.png', 'image/png', '2wertgyhjmk;//', '2026-05-19 21:00:29', 'approved'),
+(24, 90, 'validid_90_1779327272.jpg', 'RISK-REGISTER_page-0001.jpg', 'image/jpeg', '23r4tyuik;\';ljhgfdsa', '2026-05-21 09:34:32', 'pending'),
+(25, 95, 'validid_95_1779337803.jpg', 'RISK-REGISTER_page-0002.jpg', 'image/jpeg', 'rtyuikujkhgfvcdssghjnnhg', '2026-05-21 12:30:03', 'approved'),
+(26, 96, 'validid_96_1779440458.jpg', '2d5dd467-c773-4493-a511-93b405c52dfd.jpg', 'image/jpeg', '234r5tyuilkjtr', '2026-05-22 17:00:58', 'approved'),
+(27, 97, 'validid_97_1779440677.jpg', '2d5dd467-c773-4493-a511-93b405c52dfd.jpg', 'image/jpeg', 'eryujnh.l/kjhgtfdre', '2026-05-22 17:04:37', 'approved');
 
 -- --------------------------------------------------------
 
@@ -805,6 +846,38 @@ CREATE TABLE `tbl_program_registrations` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tbl_pw_requests`
+--
+
+CREATE TABLE `tbl_pw_requests` (
+  `id` int NOT NULL,
+  `req_lname` varchar(100) NOT NULL,
+  `req_fname` varchar(100) NOT NULL,
+  `req_mi` varchar(10) DEFAULT NULL,
+  `req_bdate` date NOT NULL,
+  `req_email` varchar(255) DEFAULT NULL,
+  `req_phone` varchar(20) DEFAULT NULL,
+  `req_address` varchar(255) DEFAULT NULL,
+  `account_type` varchar(20) NOT NULL DEFAULT 'resident',
+  `status` varchar(20) NOT NULL DEFAULT 'pending',
+  `temp_password` varchar(255) DEFAULT NULL,
+  `admin_note` varchar(500) DEFAULT NULL,
+  `handled_by` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `tbl_pw_requests`
+--
+
+INSERT INTO `tbl_pw_requests` (`id`, `req_lname`, `req_fname`, `req_mi`, `req_bdate`, `req_email`, `req_phone`, `req_address`, `account_type`, `status`, `temp_password`, `admin_note`, `handled_by`, `created_at`, `updated_at`) VALUES
+(1, 'x 11\")', 'US-Letter', '(', '2026-05-19', 'domingonobleza011@gmail.com', '09070560963', '1qwertyuhjikl;\'', 'resident', 'approved', '$2y$10$96EqpznZdAoTMj4GnY6GX.E5F6yva44OPIn2sM6URJHTvSrfnsKLe', 'this is your new password', ',', '2026-05-22 04:13:01', '2026-05-22 04:22:25'),
+(2, 'x 11\")', 'US-Letter', '(', '2026-05-19', 'jeanrosenosipeda@gmail.com', '09070560963', '1qwertyuhjikl;\'', 'resident', 'approved', '$2y$10$W9EGJxrzuk/qRXj/8Eejx.omD6UI3Lz/hnyOWtzgIMIX0Ztxfo0zq', 'erfbghjnhgre', ',', '2026-05-22 04:36:37', '2026-05-22 04:37:23');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tbl_rescert`
 --
 
@@ -883,6 +956,7 @@ CREATE TABLE `tbl_resident` (
   `email` varchar(255) DEFAULT NULL,
   `phone_number` varchar(20) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
+  `must_change_password` tinyint(1) NOT NULL DEFAULT '0',
   `lname` varchar(255) NOT NULL,
   `fname` varchar(255) NOT NULL,
   `mi` varchar(255) NOT NULL,
@@ -913,34 +987,11 @@ CREATE TABLE `tbl_resident` (
 -- Dumping data for table `tbl_resident`
 --
 
-INSERT INTO `tbl_resident` (`id_resident`, `res_photo`, `email`, `phone_number`, `password`, `lname`, `fname`, `mi`, `contact`, `age`, `sex`, `status`, `houseno`, `street`, `brgy`, `municipal`, `address`, `bdate`, `bplace`, `nationality`, `family_role`, `voter`, `role`, `is_verified`, `verified_at`, `verified_by`, `addedby`, `is_archived`, `archived_at`) VALUES
-(47, NULL, 'jeanrose@gmail.com', NULL, '', 'x 11\")', 'US-Letter', '(', NULL, 18, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', '11xc', NULL, '2026-04-01', 'hibago', 'rety', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(49, NULL, 'jeanrosenosipeda@gmail.com', NULL, '', 'x 11\")', 'US-Letter', '(', NULL, 18, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', '11xc', NULL, '2026-04-01', 'hibago', 'rety', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(50, NULL, 'jean@gmail.com', NULL, '', 'x 11\")', 'US-Letter', '(', NULL, 18, 'Female', 'Single', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', '11xc', NULL, '2026-04-01', 'hibago', 'rety', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(51, NULL, 'jenay@gmail.com', NULL, '', 'x 11\")', 'US-Letter', '(', NULL, 18, 'Female', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'xw', '11xc', NULL, '2026-04-08', 'hibago', 'rety', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(52, NULL, NULL, NULL, '', 'x 11\")', 'US-Letter', '(', NULL, 18, 'Female', 'Single', 'Blk. 14 Lot 25', '222', 'San Pedro', 'iriga', NULL, '2026-04-01', 'hibago', 'batman', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(53, NULL, 'domingonobleza011@gmail.com', NULL, '', 'x 11\")', 'US-Letter', '(', NULL, 18, 'Female', 'Married', 'Blk. 14 Lot 25', '222', 'San Pedro', 'iriga', NULL, '2026-04-08', 'hibago', 'Filipino', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(54, NULL, NULL, NULL, '', 'tttbtg', 'efegr', 'egr', NULL, 23, 'Male', 'Married', 'efvsb', 'tntnuyu', 'San Pedro', 'tyntyny', NULL, '2026-04-07', 'Antipolo, Rizal', 'rety', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(55, NULL, NULL, NULL, '', 'tttbtg', 'efegr', 'egr', NULL, 23, 'Female', 'Single', 'efvsb', 'tntnuyu', 'San Pedro', 'tyntyny', NULL, '2026-04-07', 'Antipolo, Rizal', 'rety', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(57, NULL, 'domdom@gmail.com', NULL, '', 'nobleza', 'domingo', 'bendal', NULL, 23, 'Male', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'tyntyny', NULL, '2026-04-07', 'Antipolo, Rizal', 'Filipino', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(58, NULL, NULL, NULL, '', 'DOmingo', 'nobleza', 'bendal', NULL, 122, 'Male', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-03-31', 'hibago', 'batman', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(64, NULL, 'dom@gmail.com', NULL, '$2y$10$mfXInKxO5tJYWWcpur5i5u9pLTT6LG/0YaPwcOeeIj98G6J5.lp2C', 'DOmingo', 'nobleza', 'bendal', NULL, 122, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-03-31', 'hibago', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-04-27 20:37:48', 'Admin', 'Resident', 0, NULL),
-(65, NULL, 'doma@gmail.com', NULL, '$2y$10$7L2ZeEiQOA/MjAQvhPSS/.cXvOIEh/D8gthvAndbYAkebEDkwIbWu', 'DOmingo', 'nobleza', 'bendal', NULL, 122, 'Male', 'Divorced', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-03-31', 'hibago', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-04-27 21:20:14', 'Admin', 'Resident', 0, NULL),
-(66, NULL, NULL, '090706569634', '$2y$10$g6CmSida60tvPQWo61DZoeqU36BMEdP5j5c9FaTigy1GwEX/1.g5O', 'DOmingo', 'nobleza', 'bendal', '', 122, 'Male', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-03-31', 'hibago', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-04-29 21:59:20', 'Admin', 'Resident', 0, NULL),
-(67, NULL, NULL, '09070659634', '$2y$10$u3V2BFa5C4F4.R8dewGoK.wu6RtenXHGqcMXpyswMpsduGD/ZjDIm', 'DOmingo', 'nobleza', 'bendal', NULL, 122, 'Male', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-03-31', 'hibago', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-04-28 18:16:23', 'Admin', 'Resident', 0, NULL),
-(68, NULL, NULL, '09867543332', '$2y$10$G2fXtS1FynnCUAuB.3hp0.56ZLOJLt4qSnoDlj7Xa8QWowTAy0ixK', 'Nobleza', 'Domingo', 'B', NULL, 23, 'Male', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-04-30', 'hibago', 'superman', 'Yes', 'Yes', 'resident', 0, NULL, NULL, NULL, 0, NULL),
-(69, NULL, NULL, '09867543335', '$2y$10$RjfLtYTdjZ9uLkPSGFrZFeWHK0iQdxATccGUcVtKM8qvY.yzxyKKy', 'Nobleza', 'Domingo', 'B', NULL, 23, 'Male', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-04-30', 'hibago', 'batman', 'Yes', 'No', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(70, NULL, NULL, 'mnobleza75', '$2y$10$EWkKLUKKVa8h4mP4lZnwKOYb2esvvP82oKHcC3E.vTLPiUDOPlbhy', 'Nobleza', 'Domingo', 'B', '09070560963', 23, 'Male', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-04-30', 'hibago', 'batman', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(71, NULL, NULL, 'mnobleza@75', '$2y$10$Kht2x0lQUi63kb8PFd1vyuIIKf3vC4vOflKo03qmgsbxC/nGstwJq', 'Nobleza', 'Domingo', 'B', '09070560963', 23, 'Male', 'Single', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', NULL, '2026-04-30', 'hibago', 'batman', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 1, '2026-05-14 20:23:01'),
-(72, NULL, NULL, 'US-Letter', '$2y$10$s59zdT.eFEChk2asj2zvKO5peulmBS8D9q2Ili6x.Zv5BH6MlebG2', 'x 11\")', 'US-Letter', '(', '09070560963', 565, 'Male', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-06', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-05-15 10:15:03', 'Admin', 'Resident', 0, NULL),
-(73, NULL, NULL, '09070560963', '$2y$10$KPgo7f1BkRLKDNVQnx80LeTNYkodDI5OJLvnpzddyua6xtSFZlXdq', 'x 11\")', 'US-Letter', '(', '09070560963', 565, 'Male', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-06', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-05-18 22:48:15', 'Admin', 'Resident', 0, NULL),
-(74, NULL, NULL, '09090987654', '$2y$10$cnkib3fk/wcqaI7QN0mxZOyjx.rKqHNV9kp4hVm2pRYxfh8Psgv9O', 'x 11\")', 'US-Letter', '(', '09090987654', 565, 'Female', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(75, NULL, NULL, '09090987655', '$2y$10$5LmXdQ8HN/bfaI5odXQSl.aYOmQSJTf2eZUSdjY2WBlJimcox57FG', 'x 11\")', 'US-Letter', '(', '09090987655', 565, 'Female', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'No', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(76, NULL, NULL, '09090987656', '$2y$10$Hpu8zK5UNxQgahR5fjzsW.CvQK5Vm3cTMFq4SSuIO/IL4m7.T.kJK', 'x 11\")', 'US-Letter', '(', '09090987656', 565, 'Female', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'No', 'resident', 1, '2026-05-18 22:58:41', 'Admin', 'Resident', 0, NULL),
-(77, NULL, NULL, '09090987657', '$2y$10$5WZnm0tmzYs3N0c1ipdzH.XLQ8Z5AbYk6igzIhfegseV8vbtnVL5e', 'x 11\")', 'US-Letter', '(', '09090987657', 565, 'Female', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'No', 'resident', 1, '2026-05-18 22:51:41', 'Admin', 'Resident', 0, NULL),
-(78, NULL, NULL, NULL, '', 'x 11\")', 'US-Letter', '(', '09090987658', 565, 'Female', 'Divorced', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'No', 'No', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(79, NULL, NULL, NULL, '', 'x 11\")', 'US-Letter', '(', '09345678998', 565, 'Female', 'Divorced', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(80, NULL, NULL, NULL, '', 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Male', 'Married', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'No', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL);
+INSERT INTO `tbl_resident` (`id_resident`, `res_photo`, `email`, `phone_number`, `password`, `must_change_password`, `lname`, `fname`, `mi`, `contact`, `age`, `sex`, `status`, `houseno`, `street`, `brgy`, `municipal`, `address`, `bdate`, `bplace`, `nationality`, `family_role`, `voter`, `role`, `is_verified`, `verified_at`, `verified_by`, `addedby`, `is_archived`, `archived_at`) VALUES
+(94, NULL, 'domingonobleza011@gmail.com', NULL, '$2y$10$L6TNI/FTWrSnrp8vREoEUeJUzc17yc.4ip6gztg3NgT5KrnZhc4XG', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'No', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
+(95, NULL, 'jeanrosenosipeda@gmail.com', NULL, '$2y$10$aRSP3P3fgG4rpXjJIYoOvOa0UNKjC4d1aUfubOVWrLr0jhyFLytO2', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-05-21 12:30:32', 'Admin', 'Resident', 0, NULL),
+(96, NULL, 'sanpedro1@gmail.com', NULL, '$2y$10$KPoBCGRhEh4R7rH/MWunBuXEnYd/DzbJ2odnTHH4MGKKPYi7KbJEC', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Female', 'Single', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'No', 'Yes', 'resident', 1, '2026-05-22 17:01:20', 'Admin', 'Resident', 0, NULL),
+(97, NULL, 'testing@gmail.com', NULL, '$2y$10$nfbhqxyrLkNNNiIn2Vh.1eGSh7yRPXNj9EliK3yQuHjycPodZcj.G', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Male', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-05-22 17:04:57', 'Admin', 'Resident', 0, NULL);
 
 --
 -- Triggers `tbl_resident`
@@ -1030,6 +1081,7 @@ CREATE TABLE `tbl_user` (
   `email` varchar(255) DEFAULT NULL,
   `phone_number` varchar(20) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
+  `must_change_password` tinyint(1) NOT NULL DEFAULT '0',
   `lname` varchar(255) NOT NULL,
   `fname` varchar(255) NOT NULL,
   `mi` varchar(255) NOT NULL,
@@ -1047,11 +1099,9 @@ CREATE TABLE `tbl_user` (
 -- Dumping data for table `tbl_user`
 --
 
-INSERT INTO `tbl_user` (`id_user`, `login_identity`, `email`, `phone_number`, `password`, `lname`, `fname`, `mi`, `age`, `sex`, `address`, `contact`, `position`, `role`, `addedby`, `photo`) VALUES
-(37, 'techosquad@gmail.com', 'techosquad@gmail.com', '', '', 'x 11\")', 'US-Letter', '(', 23, 'Male', 'Sagrada, Iriga', '09345678998', 'IPMRR Representative', 'user', 'This, Is', 'uploads/1777876743_ef558819-e415-4eb8-a1e2-2384de50af15.jpg'),
-(38, 'techosquad@gmail.com', 'techosquad@gmail.com', '', '', 'x 11\")', 'US-Letter', '(', 23, 'Male', 'Sagrada, Iriga', '09345678998', 'Committee on Agriculture', 'user', 'This, Is', 'uploads/1777894241_Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg'),
-(39, 'sanpedro@gmail.com', 'sanpedro@gmail.com', '', '', 'x 11\")', 'US-Letter', '(', 23, 'Male', 'Sagrada, Iriga', '09070560963', 'Punong Barangay', 'user', 'This, Is', 'uploads/1778241702_Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg'),
-(40, 'sanpedroiriga@gmail.com', 'sanpedroiriga@gmail.com', '', '', 'x 11\")', 'US-Letter', '(', 122, 'Male', 'jeanrosenosipeda@gmail.com', '09070560963', 'IPMRR Representative', 'user', 'This, Is', 'uploads/1779181811_Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg');
+INSERT INTO `tbl_user` (`id_user`, `login_identity`, `email`, `phone_number`, `password`, `must_change_password`, `lname`, `fname`, `mi`, `age`, `sex`, `address`, `contact`, `position`, `role`, `addedby`, `photo`) VALUES
+(42, 'sanpedro@gmail.com', 'sanpedro@gmail.com', '', '$2y$10$uhHMpTzCEF5vuagpFbgDLutCLaa7.gZXVH4VsLUupuLHNWEH8BUsi', 0, 'x 11\")', 'US-Letter', '(', 122, 'Male', 'jeanrosenosipeda@gmail.com', '09070560963', 'Committee on Ways and Means', 'user', 'This, Is', 'uploads/1779428098_2d5dd467-c773-4493-a511-93b405c52dfd.jpg'),
+(43, 'sansan@gmail.com', 'sansan@gmail.com', '', '$2y$10$R8J.dPfXjRb8lqrYDwGjIusiCjaIMYJs8VcglFWzzKpl72URVRCbi', 0, 'x 11\")', 'US-Letter', '(', 122, 'Male', 'jeanrosenosipeda@gmail.com', '09070560963', 'Punong Barangay', 'user', 'This, Is', 'uploads/1779428142_2d5dd467-c773-4493-a511-93b405c52dfd.jpg');
 
 --
 -- Triggers `tbl_user`
@@ -1074,6 +1124,7 @@ CREATE TRIGGER `trg_archive_staff` BEFORE DELETE ON `tbl_user` FOR EACH ROW BEGI
                 'login_identity', OLD.login_identity,
                 'email',          OLD.email,
                 'phone_number',   OLD.phone_number,
+                'password',       OLD.password,   -- ✅ ADDED
                 'lname',          OLD.lname,
                 'fname',          OLD.fname,
                 'mi',             OLD.mi,
@@ -1396,6 +1447,12 @@ ALTER TABLE `tbl_program_registrations`
   ADD UNIQUE KEY `unique_registration` (`program_id`,`user_id`);
 
 --
+-- Indexes for table `tbl_pw_requests`
+--
+ALTER TABLE `tbl_pw_requests`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `tbl_rescert`
 --
 ALTER TABLE `tbl_rescert`
@@ -1454,7 +1511,7 @@ ALTER TABLE `tbl_youth_programs`
 -- AUTO_INCREMENT for table `admin_messages`
 --
 ALTER TABLE `admin_messages`
-  MODIFY `id_admin_msg` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id_admin_msg` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -1466,7 +1523,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `resident_messages`
 --
 ALTER TABLE `resident_messages`
-  MODIFY `id_message` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id_message` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `resident_tokens`
@@ -1502,7 +1559,7 @@ ALTER TABLE `tbl_announcement_reactions`
 -- AUTO_INCREMENT for table `tbl_archive`
 --
 ALTER TABLE `tbl_archive`
-  MODIFY `id_archive` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=174;
+  MODIFY `id_archive` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=226;
 
 --
 -- AUTO_INCREMENT for table `tbl_blotter`
@@ -1550,7 +1607,7 @@ ALTER TABLE `tbl_hidden_announcements`
 -- AUTO_INCREMENT for table `tbl_id_uploads`
 --
 ALTER TABLE `tbl_id_uploads`
-  MODIFY `id_upload` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id_upload` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `tbl_indigency`
@@ -1583,6 +1640,12 @@ ALTER TABLE `tbl_program_registrations`
   MODIFY `id_registration` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `tbl_pw_requests`
+--
+ALTER TABLE `tbl_pw_requests`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `tbl_rescert`
 --
 ALTER TABLE `tbl_rescert`
@@ -1592,7 +1655,7 @@ ALTER TABLE `tbl_rescert`
 -- AUTO_INCREMENT for table `tbl_resident`
 --
 ALTER TABLE `tbl_resident`
-  MODIFY `id_resident` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `id_resident` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
 
 --
 -- AUTO_INCREMENT for table `tbl_sms_log`
@@ -1604,7 +1667,7 @@ ALTER TABLE `tbl_sms_log`
 -- AUTO_INCREMENT for table `tbl_user`
 --
 ALTER TABLE `tbl_user`
-  MODIFY `id_user` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id_user` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `tbl_youth`

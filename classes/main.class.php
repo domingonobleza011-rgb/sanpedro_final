@@ -518,7 +518,7 @@ public function uploadValidID($id_resident, $file_name, $original_name, $file_ty
             return false;
         }
     }
-
+ 
     /**
      * Verifies an ID upload, updates its status, and deletes the physical file from storage.
      */
@@ -530,7 +530,7 @@ public function verifyIDUpload($id_upload) {
             $stmt = $con->prepare("SELECT file_name FROM tbl_id_uploads WHERE id_upload = ?");
             $stmt->execute([$id_upload]);
             $file = $stmt->fetch();
-
+ 
             if ($file && !empty($file['file_name'])) {
                 // Construct path using the root directory fallback
                 $filename = $file['file_name'];
@@ -538,7 +538,7 @@ public function verifyIDUpload($id_upload) {
                 // Try target paths (relative and absolute)
                 $relative_path = "uploads/valid_ids/" . $filename;
                 $absolute_path = $_SERVER['DOCUMENT_ROOT'] . "/uploads/valid_ids/" . $filename; 
-
+ 
                 // Attempt deletion via relative path
                 if (file_exists($relative_path)) {
                     unlink($relative_path);
@@ -554,7 +554,7 @@ public function verifyIDUpload($id_upload) {
                     error_log("ERROR: File not found on server. Tried: " . realpath($relative_path) . " AND " . $absolute_path);
                 }
             }
-
+ 
             // 2. Complete status update
             $stmt = $con->prepare("UPDATE tbl_id_uploads SET status = 'verified' WHERE id_upload = ?");
             return $stmt->execute([$id_upload]);
@@ -614,7 +614,7 @@ public function verifyIDUpload($id_upload) {
 public function approveResidentVerification($id_resident, $id_upload, $admin_name) {
     try {
         $connection = $this->openConn();
-
+ 
         // 1. Mark resident as verified
         $stmt1 = $connection->prepare(
             "UPDATE tbl_resident 
@@ -622,13 +622,37 @@ public function approveResidentVerification($id_resident, $id_upload, $admin_nam
              WHERE id_resident = ?"
         );
         $stmt1->execute([$admin_name, $id_resident]);
-
-        // 2. Mark upload as approved
+ 
+        // 2. Fetch the file name before deleting the record
+        $stmtFile = $connection->prepare(
+            "SELECT file_name FROM tbl_id_uploads WHERE id_upload = ?"
+        );
+        $stmtFile->execute([$id_upload]);
+        $fileRow = $stmtFile->fetch(PDO::FETCH_ASSOC);
+ 
+        // 3. Delete the physical file from uploads/valid_ids/
+        if ($fileRow && !empty($fileRow['file_name'])) {
+            $filename      = $fileRow['file_name'];
+            $relative_path = "uploads/valid_ids/" . $filename;
+            $absolute_path = $_SERVER['DOCUMENT_ROOT'] . "/uploads/valid_ids/" . $filename;
+ 
+            if (file_exists($relative_path)) {
+                unlink($relative_path);
+                error_log("approveResidentVerification: Deleted file (relative): " . $relative_path);
+            } elseif (file_exists($absolute_path)) {
+                unlink($absolute_path);
+                error_log("approveResidentVerification: Deleted file (absolute): " . $absolute_path);
+            } else {
+                error_log("approveResidentVerification: File not found for deletion. Tried: " . $relative_path . " AND " . $absolute_path);
+            }
+        }
+ 
+        // 4. Delete the upload record from the database (no longer needed after verification)
         $stmt2 = $connection->prepare(
-            "UPDATE tbl_id_uploads SET status = 'approved' WHERE id_upload = ?"
+            "DELETE FROM tbl_id_uploads WHERE id_upload = ?"
         );
         $stmt2->execute([$id_upload]);
-
+ 
         // 3. Send in-system notification
         $notice = "✅ Your account has been verified! You can now request barangay certificates and other services.";
         $stmt3  = $connection->prepare(
@@ -636,17 +660,17 @@ public function approveResidentVerification($id_resident, $id_upload, $admin_nam
              VALUES (?, ?, NOW())"
         );
         $stmt3->execute([$id_resident, $notice]);
-
+ 
         // 4. ✅ Send Gmail notification
         $res = $connection->prepare(
             "SELECT fname, lname, email FROM tbl_resident WHERE id_resident = ?"
         );
         $res->execute([$id_resident]);
         $resident = $res->fetch(PDO::FETCH_ASSOC);
-
+ 
         if ($resident && !empty($resident['email'])) {
             require_once __DIR__ . '/mailer.php';
-
+ 
             $body = "
                 <p>Hello <strong>{$resident['fname']} {$resident['lname']}</strong>,</p>
                 <p>Great news! Your account in <strong>Barangay San Pedro BMIS</strong> 
@@ -662,7 +686,7 @@ public function approveResidentVerification($id_resident, $id_upload, $admin_nam
                 <br>
                 <p>— <strong>Barangay San Pedro BMIS Team</strong></p>
             ";
-
+ 
             sendGmail(
                 $resident['email'],
                 $resident['fname'] . ' ' . $resident['lname'],
@@ -670,25 +694,25 @@ public function approveResidentVerification($id_resident, $id_upload, $admin_nam
                 $body
             );
         }
-
+ 
         return true;
-
+ 
     } catch (PDOException $e) {
         error_log("approveResidentVerification Error: " . $e->getMessage());
         return false;
     }
 }
-
+ 
 public function rejectResidentVerification($id_resident, $id_upload, $admin_name, $reason = '') {
     try {
         $connection = $this->openConn();
-
+ 
         // 1. Mark upload as rejected
         $stmt1 = $connection->prepare(
             "UPDATE tbl_id_uploads SET status = 'rejected' WHERE id_upload = ?"
         );
         $stmt1->execute([$id_upload]);
-
+ 
         // 2. Send in-system notification
         $notice = "❌ Your valid ID submission was rejected."
                 . ($reason ? " Reason: " . $reason : "")
@@ -698,21 +722,21 @@ public function rejectResidentVerification($id_resident, $id_upload, $admin_name
              VALUES (?, ?, NOW())"
         );
         $stmt2->execute([$id_resident, $notice]);
-
+ 
         // 3. ✅ Send Gmail notification
         $res = $connection->prepare(
             "SELECT fname, lname, email FROM tbl_resident WHERE id_resident = ?"
         );
         $res->execute([$id_resident]);
         $resident = $res->fetch(PDO::FETCH_ASSOC);
-
+ 
         if ($resident && !empty($resident['email'])) {
             require_once __DIR__ . '/mailer.php';
-
+ 
             $reason_line = $reason
                 ? "<p><strong>Reason:</strong> " . htmlspecialchars($reason) . "</p>"
                 : "";
-
+ 
             $body = "
                 <p>Hello <strong>{$resident['fname']} {$resident['lname']}</strong>,</p>
                 <p>Unfortunately, your ID submission has been 
@@ -729,7 +753,7 @@ public function rejectResidentVerification($id_resident, $id_upload, $admin_name
                 <br>
                 <p>— <strong>Barangay San Pedro BMIS Team</strong></p>
             ";
-
+ 
             sendGmail(
                 $resident['email'],
                 $resident['fname'] . ' ' . $resident['lname'],
@@ -737,9 +761,9 @@ public function rejectResidentVerification($id_resident, $id_upload, $admin_name
                 $body
             );
         }
-
+ 
         return true;
-
+ 
     } catch (PDOException $e) {
         error_log("rejectResidentVerification Error: " . $e->getMessage());
         return false;

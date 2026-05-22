@@ -259,5 +259,6 @@ require('secure_header.php');
             });
         });
     </script>
+    <script type="module" src="fcm_init.js"></script>
 </body>
 </html>

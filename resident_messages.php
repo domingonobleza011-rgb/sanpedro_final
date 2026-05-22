@@ -589,6 +589,7 @@ $auto_open_upload = isset($_GET['upload_id']) && $_GET['upload_id'] == 1;
     });
     <?php endif; ?>
     </script>
+    <script type="module" src="fcm_init.js"></script>
 </body>
 </html>
 

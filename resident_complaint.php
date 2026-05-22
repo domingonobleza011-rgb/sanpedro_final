@@ -271,5 +271,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
         }
     }
 </script>
+<script type="module" src="fcm_init.js"></script>
 </body>
 </html>

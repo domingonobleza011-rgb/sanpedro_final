@@ -534,6 +534,6 @@ require('secure_header.php');
 
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
         <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
-
+<script type="module" src="fcm_init.js"></script>
     </body>
 </html>

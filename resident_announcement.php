@@ -648,5 +648,6 @@ function deleteComment(cid,aid){
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 </script>
+<script type="module" src="fcm_init.js"></script>
 </body>
 </html>

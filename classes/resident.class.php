@@ -201,7 +201,7 @@
                 $bplace = $_POST['bplace'];
                 $nationality = $_POST['nationality'];
                 $voter = $_POST['voter'];
-                $familyrole = $_POST['family_role'];
+                $family_role = $_POST['family_role'];
                 $role = $_POST['role'];
                 $addedby = $_POST['addedby'];
 
@@ -227,7 +227,7 @@ if (!empty($password)) {
     
     // Note: $password is removed from the array below
     $stmt->execute([$lname, $fname, $mi, $age, $sex, $status, $email, $houseno, 
-        $street, $brgy, $municipal, $contact, $bdate, $bplace, $nationality, $voter, $familyrole, $role, $addedby, $id_resident]);
+        $street, $brgy, $municipal, $contact, $bdate, $bplace, $nationality, $voter, $family_role, $role, $addedby, $id_resident]);
 }
 
 $message2 = "Resident Data Updated";

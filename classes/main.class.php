@@ -123,6 +123,160 @@ class BMISClass {
     // ─────────────────────────────────────────────────────────────────────────
     // AUTHENTICATION & SESSION HANDLING
     // ─────────────────────────────────────────────────────────────────────────
+    public function log_activity(string $action, string $module, string $description): void {
+        try {
+            if (!isset($_SESSION)) { session_start(); }
+ 
+            $userdata   = $_SESSION['userdata'] ?? [];
+            $id_admin   = $userdata['id_admin']  ?? null;
+            $fname      = $userdata['firstname'] ?? '';
+            $lname      = $userdata['surname']   ?? '';
+            $admin_name = trim("$fname $lname") ?: 'System';
+            $role       = $userdata['role']      ?? '';
+            $ip         = $_SERVER['REMOTE_ADDR']     ?? null;
+            $ua         = $_SERVER['HTTP_USER_AGENT'] ?? null;
+ 
+            $con  = $this->openConn();
+            $stmt = $con->prepare("
+                INSERT INTO tbl_activity_log
+                    (id_admin, admin_name, role, action, module, description, ip_address, user_agent)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([$id_admin, $admin_name, $role, $action, $module, $description, $ip, $ua]);
+        } catch (\Throwable $e) {
+            // Logging must never crash the main flow — fail silently
+            error_log("log_activity error: " . $e->getMessage());
+        }
+    }
+    public function log_login_event(string $event, array $user = [], string $email = ''): void {
+        try {
+            $id_admin   = $user['id_admin'] ?? null;
+            $fname      = $user['fname']    ?? '';
+            $lname      = $user['lname']    ?? '';
+            $admin_name = trim("$fname $lname") ?: ($email ?: 'Unknown');
+            $role       = $user['role']     ?? '';
+            $email_col  = $user['email']    ?? $email;
+            $ip         = $_SERVER['REMOTE_ADDR']     ?? null;
+            $ua         = $_SERVER['HTTP_USER_AGENT'] ?? null;
+ 
+            $con  = $this->openConn();
+            $stmt = $con->prepare("
+                INSERT INTO tbl_login_history
+                    (id_admin, admin_name, role, email, event, ip_address, user_agent)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([$id_admin, $admin_name, $role, $email_col, $event, $ip, $ua]);
+        } catch (\Throwable $e) {
+            error_log("log_login_event error: " . $e->getMessage());
+        }
+    }
+    public function get_activity_logs(array $filters = [], int $page = 1, int $per_page = 20): array {
+        try {
+            $con    = $this->openConn();
+            $where  = ['1=1'];
+            $params = [];
+ 
+            if (!empty($filters['search'])) {
+                $where[]  = '(admin_name LIKE ? OR description LIKE ? OR action LIKE ?)';
+                $s = '%' . $filters['search'] . '%';
+                $params = array_merge($params, [$s, $s, $s]);
+            }
+            if (!empty($filters['module'])) {
+                $where[]  = 'module = ?';
+                $params[] = $filters['module'];
+            }
+            if (!empty($filters['date_from'])) {
+                $where[]  = 'DATE(created_at) >= ?';
+                $params[] = $filters['date_from'];
+            }
+            if (!empty($filters['date_to'])) {
+                $where[]  = 'DATE(created_at) <= ?';
+                $params[] = $filters['date_to'];
+            }
+ 
+            $sql_where = implode(' AND ', $where);
+ 
+            // Total count
+            $count_stmt = $con->prepare("SELECT COUNT(*) FROM tbl_activity_log WHERE $sql_where");
+            $count_stmt->execute($params);
+            $total = (int) $count_stmt->fetchColumn();
+ 
+            // Paginated rows
+            $offset = ($page - 1) * $per_page;
+            $data_stmt = $con->prepare("
+                SELECT * FROM tbl_activity_log
+                WHERE $sql_where
+                ORDER BY created_at DESC
+                LIMIT $per_page OFFSET $offset
+            ");
+            $data_stmt->execute($params);
+            $rows = $data_stmt->fetchAll();
+ 
+            return ['rows' => $rows, 'total' => $total];
+        } catch (\Throwable $e) {
+            error_log("get_activity_logs error: " . $e->getMessage());
+            return ['rows' => [], 'total' => 0];
+        }
+    }
+    public function get_login_history(array $filters = [], int $page = 1, int $per_page = 20): array {
+        try {
+            $con    = $this->openConn();
+            $where  = ['1=1'];
+            $params = [];
+ 
+            if (!empty($filters['search'])) {
+                $where[]  = '(admin_name LIKE ? OR email LIKE ?)';
+                $s = '%' . $filters['search'] . '%';
+                $params = array_merge($params, [$s, $s]);
+            }
+            if (!empty($filters['event'])) {
+                $where[]  = 'event = ?';
+                $params[] = $filters['event'];
+            }
+            if (!empty($filters['date_from'])) {
+                $where[]  = 'DATE(created_at) >= ?';
+                $params[] = $filters['date_from'];
+            }
+            if (!empty($filters['date_to'])) {
+                $where[]  = 'DATE(created_at) <= ?';
+                $params[] = $filters['date_to'];
+            }
+ 
+            $sql_where = implode(' AND ', $where);
+ 
+            $count_stmt = $con->prepare("SELECT COUNT(*) FROM tbl_login_history WHERE $sql_where");
+            $count_stmt->execute($params);
+            $total = (int) $count_stmt->fetchColumn();
+ 
+            $offset = ($page - 1) * $per_page;
+            $data_stmt = $con->prepare("
+                SELECT * FROM tbl_login_history
+                WHERE $sql_where
+                ORDER BY created_at DESC
+                LIMIT $per_page OFFSET $offset
+            ");
+            $data_stmt->execute($params);
+            $rows = $data_stmt->fetchAll();
+ 
+            return ['rows' => $rows, 'total' => $total];
+        } catch (\Throwable $e) {
+            error_log("get_login_history error: " . $e->getMessage());
+            return ['rows' => [], 'total' => 0];
+        }
+    }
+ 
+    /**
+     * Delete log rows older than $days days (optional maintenance).
+     */
+    public function clear_old_logs(int $days = 90): void {
+        try {
+            $con = $this->openConn();
+            $con->prepare("DELETE FROM tbl_activity_log  WHERE created_at < NOW() - INTERVAL ? DAY")->execute([$days]);
+            $con->prepare("DELETE FROM tbl_login_history WHERE created_at < NOW() - INTERVAL ? DAY")->execute([$days]);
+        } catch (\Throwable $e) {
+            error_log("clear_old_logs error: " . $e->getMessage());
+        }
+    }
     public function login() {
         if(isset($_POST['login'])) {
             $identity       = $_POST['login_identity'];
@@ -138,6 +292,7 @@ class BMISClass {
             if($user && password_verify($password_input, $user['password'])) {
                 if($user['role'] == 'Admin' || $user['role'] == 'administrator') {
                     $this->set_userdata($user);
+                    $this->log_login_event('login', $user);           // ← NEW
                     header('Location: admn_dashboard.php');
                     exit();
                 }
@@ -151,6 +306,7 @@ class BMISClass {
             if($user && password_verify($password_input, $user['password'])) {
                 if($user['role'] == 'user') {
                     $this->set_userdata($user);
+                    $this->log_login_event('login', $user);           // ← NEW
                     echo "<script>window.location.href='staff_dashboard.php';</script>";
                     exit();
                 }
@@ -164,18 +320,42 @@ class BMISClass {
             if($user && password_verify($password_input, $user['password'])) {
                 if($user['role'] == 'resident') {
                     $this->set_userdata($user);
+                    // residents are not admins — skip admin log
                     header('Location: resident_homepage.php');
                     exit();
                 }
             }
  
             // Invalid credentials
+            $this->log_login_event('failed', [], $identity);          // ← NEW
             notif('Invalid Credentials. Please check your Email/Phone and Password.', 'error');
         }
     }
  
+// ============================================================
+//  PATCHED logout() — replaces the existing logout() method
+// ============================================================
+ 
     public function logout(){
         if(!isset($_SESSION)) { session_start(); }
+ 
+        // Capture user data BEFORE clearing the session
+        $userdata   = $_SESSION['userdata'] ?? [];
+        $fname      = $userdata['firstname'] ?? '';
+        $lname      = $userdata['surname']   ?? '';
+        $role       = $userdata['role']      ?? '';
+        $email      = $userdata['emailadd']  ?? '';
+        $id_admin   = $userdata['id_admin']  ?? null;
+ 
+        $user_for_log = [
+            'id_admin' => $id_admin,
+            'fname'    => $fname,
+            'lname'    => $lname,
+            'role'     => $role,
+            'email'    => $email,
+        ];
+        $this->log_login_event('logout', $user_for_log);              // ← NEW
+ 
         $_SESSION['userdata'] = null;
         unset($_SESSION['userdata']);
     }
@@ -719,25 +899,44 @@ private function sendFCMNotification(int $id_resident, string $title, string $bo
                 CURLOPT_POSTFIELDS => $payload,
                 CURLOPT_TIMEOUT    => 10,
             ]);
- 
-            $response = curl_exec($ch);
-            $err      = curl_error($ch);
-            curl_close($ch);
- 
-            if ($err) {
-                error_log("sendFCMNotification cURL error: {$err}");
-            } else {
-                $result = json_decode($response, true);
-                if (!empty($result['error'])) {
-                    error_log("sendFCMNotification FCM error: {$response}");
-                }
-            }
+ $response = curl_exec($ch);
+$err      = curl_error($ch);
+// remove: curl_close($ch);   ← just delete this line
+
+if ($err) {
+    error_log("sendFCMNotification cURL error: {$err}");
+} else {
+    $result = json_decode($response, true);
+    if (!empty($result['error'])) {
+        error_log("sendFCMNotification FCM error: {$response}");
+    }
+}
  
         } catch (Exception $e) {
             error_log("sendFCMNotification Exception: " . $e->getMessage());
         }
     }
- 
+private function getFCMAccessToken(): ?string {
+    try {
+        $serviceAccountPath = __DIR__ . '/../firebase-service-account.json';
+        if (!file_exists($serviceAccountPath)) {
+            error_log("FCM: service account file not found at {$serviceAccountPath}");
+            return null;
+        }
+
+        $credentials = new \Google\Auth\Credentials\ServiceAccountCredentials(
+            'https://www.googleapis.com/auth/firebase.messaging',
+            json_decode(file_get_contents($serviceAccountPath), true)
+        );
+
+        $token = $credentials->fetchAuthToken();
+        return $token['access_token'] ?? null;
+
+    } catch (\Exception $e) {
+        error_log("getFCMAccessToken Error: " . $e->getMessage());
+        return null;
+    }
+}
     public function rejectResidentVerification($id_resident, $id_upload, $admin_name, $reason = '') {
         try {
             $connection = $this->openConn();
@@ -858,17 +1057,21 @@ private function sendFCMNotification(int $id_resident, string $title, string $bo
         return $stmt->fetchAll();
     }
  
-    public function delete_certofres(){
-        if(isset($_POST['delete_certofres'])) {
-            $id_rescert = $_POST['id_rescert'];
-            $this->archive_record('tbl_rescert', 'id_rescert', $id_rescert, 'certofres');
-            $connection = $this->openConn();
-            $stmt = $connection->prepare("DELETE FROM tbl_rescert where id_rescert = ?");
-            $stmt->execute([$id_rescert]);
-            header("Refresh:0");
-            exit();
-        }
+public function delete_certofres(){
+    if(isset($_POST['delete_certofres'])) {
+        $id_rescert = $_POST['id_rescert'];
+        $this->archive_record('tbl_rescert', 'id_rescert', $id_rescert, 'certofres');
+
+        $connection = $this->openConn();
+        $stmt = $connection->prepare("DELETE FROM tbl_rescert WHERE id_rescert = ?");
+        $stmt->execute([$id_rescert]);
+
+        $this->log_activity('DELETE_DOCUMENT', 'Document', "Deleted Certificate of Residency #$id_rescert");
+
+        header("Refresh:0");
+        exit();
     }
+}
  
  
     // ─────────────────────────────────────────────────────────────────────────
@@ -1093,15 +1296,13 @@ private function sendFCMNotification(int $id_resident, string $title, string $bo
         }
     }
  
-    public function get_single_youth($id_resident){
-        $id_resident = $_GET['id_youth'];
-        $connection  = $this->openConn();
-        $stmt = $connection->prepare("SELECT * FROM tbl_youth where id_youth = ?");
-        $stmt->execute([$id_youth]);
-        $resident = $stmt->fetch();
-        return ($stmt->rowCount() > 0) ? $youth : false;
-    }
- 
+public function get_single_youth($id_youth) {
+    $connection = $this->openConn();
+    $stmt = $connection->prepare("SELECT * FROM tbl_youth WHERE id_youth = ?");
+    $stmt->execute([$id_youth]);
+    $youth = $stmt->fetch();
+    return ($stmt->rowCount() > 0) ? $youth : false;
+}
     public function create_youth() {
         if(isset($_POST['create_youth'])) {
             $lname          = $_POST['lname'];
@@ -1290,11 +1491,12 @@ private function sendFCMNotification(int $id_resident, string $title, string $bo
         return $stmt->fetchAll();
     }
  
-    public function delete_comment($comment_id, $user_id) {
-        $connection = $this->openConn();
-        $stmt = $connection->prepare("DELETE FROM tbl_announcement_comments WHERE id_comment = ? AND user_id = ?");
-        $stmt->execute([$comment_id, $user_id]);
-    }
+public function delete_comment($comment_id, $user_id) {
+    $connection = $this->openConn();
+    if (!$connection) return;  // ← guard
+    $stmt = $connection->prepare("DELETE FROM tbl_announcement_comments WHERE id_comment = ? AND user_id = ?");
+    $stmt->execute([$comment_id, $user_id]);
+}
  
     public function toggle_reaction($announcement_id, $user_id, $reaction_type) {
         $connection = $this->openConn();

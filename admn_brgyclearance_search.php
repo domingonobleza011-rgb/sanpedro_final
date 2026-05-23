@@ -74,21 +74,21 @@
 </div>
     <tbody>
         <?php if(is_array($view)) {?>
-            <?php foreach($view as $view) {?>
+            <?php foreach($view as $row) {?>
                 <tr>
                     <td>    
                         <form action="" method="post">
-                            <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="brgyclearance_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
-                            <input type="hidden" name="id_clearance" value="<?= $view['id_clearance']; ?>">
+                            <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="brgyclearance_form.php?id_resident=<?= $row['id_resident'];?>">Generate</a> 
+                            <input type="hidden" name="id_clearance" value="<?= $row['id_clearance']; ?>">
                             <button class="btn btn-danger"  style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_clearance"> Archive </button>
                         </form>
                     </td>
-                    <td> <?= $view['id_resident'];?> </td> 
-                <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?>. </td>
-                <td> <?= $view['purpose'];?> </td>
-                <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
-                <td> <?= $view['status'];?> </td>
-                <td> <?= $view['age'];?> </td>
+                    <td> <?= $row['id_resident'];?> </td> 
+                <td> <?= $row['lname'];?>, <?= $row['fname'];?> <?= $row['mi'];?>. </td>
+                <td> <?= $row['purpose'];?> </td>
+                <td> <?= $row['houseno'];?>, <?= $row['street'];?>, <?= $row['brgy'];?>, <?= $row['municipal'];?> </td>
+                <td> <?= $row['status'];?> </td>
+                <td> <?= $row['age'];?> </td>
                 </tr>
             <?php
                 }

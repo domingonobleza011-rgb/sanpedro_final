@@ -23,7 +23,7 @@
         $id = (int)$_POST['id_archive'];
         $stmt = $conn->prepare("DELETE FROM tbl_archive WHERE id_archive = ?");
         $stmt->execute([$id]);
-        echo "<script>alert('Record permanently deleted.'); window.location.href='admn_archive.php';</script>";
+        echo "<script>sessionStorage.setItem('archiveToast', JSON.stringify({type:'delete',msg:'Record permanently deleted.'})); window.location.href='admn_archive.php';</script>";
         exit;
     }
 
@@ -35,7 +35,8 @@
             $stmt = $conn->prepare("DELETE FROM tbl_archive WHERE id_archive IN ($placeholders)");
             $stmt->execute(array_values($ids));
             $count = $stmt->rowCount();
-            echo "<script>alert('$count record(s) permanently deleted.'); window.location.href='admn_archive.php';</script>";
+            $msg = "$count record(s) permanently deleted.";
+            echo "<script>sessionStorage.setItem('archiveToast', JSON.stringify({type:'delete',msg:" . json_encode($msg) . "})); window.location.href='admn_archive.php';</script>";
             exit;
         }
     }
@@ -149,7 +150,7 @@
                     $data['voter']          ?? '',
                     $data['family_role']    ?? '',
                     $data['role']           ?? 'resident',
-                    $data['is_verified'] ?? 0,      // preserve original — must re-verify after restore
+                    $data['is_verified']    ?? 0,
                     $data['verified_at']    ?? null,
                     $data['verified_by']    ?? null,
                     $data['addedby']        ?? '',
@@ -249,7 +250,7 @@
 
             $msg = "$success record(s) restored successfully.";
             if ($failed > 0) $msg .= " $failed failed.";
-            echo "<script>alert('$msg'); window.location.href='admn_archive.php';</script>";
+            echo "<script>sessionStorage.setItem('archiveToast', JSON.stringify({type:'restore',msg:" . json_encode($msg) . "})); window.location.href='admn_archive.php';</script>";
             exit;
         }
     }
@@ -269,7 +270,7 @@
                 if ($restored) {
                     $del = $conn->prepare("DELETE FROM tbl_archive WHERE id_archive = ?");
                     $del->execute([$id]);
-                    echo "<script>alert('Record restored successfully!'); window.location.href='admn_archive.php';</script>";
+                    echo "<script>sessionStorage.setItem('archiveToast', JSON.stringify({type:'restore',msg:'Record restored successfully!'})); window.location.href='admn_archive.php';</script>";
                     exit;
                 }
             } catch (Exception $e) {
@@ -601,12 +602,10 @@
         <!-- Bulk Toolbar (hidden until rows are checked) -->
         <div class="bulk-toolbar" id="bulkToolbar">
             <span class="bulk-count" id="bulkCount">0 selected</span>
-            <button type="submit" name="bulk_restore" class="btn-bulk-restore"
-                onclick="return confirm('Restore all selected records back to their source tables?');">
+            <button type="button" class="btn-bulk-restore" onclick="openBulkModal('restore')">
                 <i class="fas fa-undo"></i> Restore Selected
             </button>
-            <button type="submit" name="bulk_permanent_delete" class="btn-bulk-delete"
-                onclick="return confirm('PERMANENTLY delete all selected records? This cannot be undone.');">
+            <button type="button" class="btn-bulk-delete" onclick="openBulkModal('delete')">
                 <i class="fas fa-trash"></i> Delete Selected
             </button>
             <button type="button" class="btn-bulk-clear" onclick="clearAllChecks()">
@@ -691,15 +690,19 @@
                                         <i class="fas fa-eye"></i> View
                                     </button>
 
-                                    <!-- Restore -->
+                                    <!-- Restore button -->
                                     <button type="button" class="btn-restore"
-                                        onclick="submitSingle('restore_record', <?= $rec['id_archive'] ?>, 'Restore this record to the source table?')">
+                                        onclick="submitSingle('restore_record', <?= $rec['id_archive'] ?>,
+                                        '<?= addslashes(htmlspecialchars($rec['full_name'])) ?>',
+                                        '<?= addslashes($meta['label']) ?> · ID #<?= $rec['record_id'] ?>')">
                                         <i class="fas fa-undo"></i> Restore
                                     </button>
 
-                                    <!-- Permanent delete -->
+                                    <!-- Permanent delete button -->
                                     <button type="button" class="btn-perma-delete"
-                                        onclick="submitSingle('permanent_delete', <?= $rec['id_archive'] ?>, 'PERMANENTLY delete this record? This cannot be undone.')">
+                                        onclick="submitSingle('permanent_delete', <?= $rec['id_archive'] ?>,
+                                        '<?= addslashes(htmlspecialchars($rec['full_name'])) ?>',
+                                        '<?= addslashes($meta['label']) ?> · ID #<?= $rec['record_id'] ?>')">
                                         <i class="fas fa-trash"></i>
                                     </button>
 
@@ -729,39 +732,280 @@
 
     </form><!-- /#bulkForm -->
 
+    <!-- ══ MODALS — declared ONCE, outside the loop and outside the table ══ -->
+
+    <!-- Restore Modal -->
+    <div id="restoreModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:14px; padding:28px 32px; width:100%; max-width:420px; margin:0 16px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:#d1fae5; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fas fa-undo" style="color:#059669; font-size:18px;"></i>
+          </div>
+          <div>
+            <p style="font-size:15px; font-weight:600; margin:0; color:#0f2d5a;">Restore record</p>
+            <p style="font-size:13px; color:#6b7280; margin:0;">This will move the record back to its source table.</p>
+          </div>
+        </div>
+        <hr style="margin:16px 0; border-color:#e5e7eb;">
+        <div style="background:#f9fafb; border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:center; gap:10px;">
+          <i class="fas fa-user" style="color:#9ca3af; font-size:15px;"></i>
+          <div>
+            <p id="restoreRecordName" style="font-size:13px; font-weight:600; margin:0; color:#111827;"></p>
+            <p id="restoreRecordMeta" style="font-size:12px; color:#6b7280; margin:0;"></p>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button onclick="closeModal('restoreModal')" style="padding:8px 18px; font-size:13px; border-radius:8px; cursor:pointer; border:1px solid #d1d5db; background:#fff; color:#6b7280;">Cancel</button>
+          <button id="restoreConfirmBtn" style="padding:8px 18px; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; border:none; background:#d1fae5; color:#065f46;">
+            <i class="fas fa-undo" style="margin-right:5px;"></i>Yes, restore
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:14px; padding:28px 32px; width:100%; max-width:420px; margin:0 16px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:#fee2e2; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fas fa-trash" style="color:#dc2626; font-size:18px;"></i>
+          </div>
+          <div>
+            <p style="font-size:15px; font-weight:600; margin:0; color:#0f2d5a;">Permanently delete</p>
+            <p style="font-size:13px; color:#6b7280; margin:0;">This action cannot be undone.</p>
+          </div>
+        </div>
+        <hr style="margin:16px 0; border-color:#e5e7eb;">
+        <div style="background:#f9fafb; border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:center; gap:10px;">
+          <i class="fas fa-user" style="color:#9ca3af; font-size:15px;"></i>
+          <div>
+            <p id="deleteRecordName" style="font-size:13px; font-weight:600; margin:0; color:#111827;"></p>
+            <p id="deleteRecordMeta" style="font-size:12px; color:#6b7280; margin:0;"></p>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button onclick="closeModal('deleteModal')" style="padding:8px 18px; font-size:13px; border-radius:8px; cursor:pointer; border:1px solid #d1d5db; background:#fff; color:#6b7280;">Cancel</button>
+          <button id="deleteConfirmBtn" style="padding:8px 18px; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; border:none; background:#fee2e2; color:#991b1b;">
+            <i class="fas fa-trash" style="margin-right:5px;"></i>Yes, delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Restore Modal -->
+    <div id="bulkRestoreModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:14px; padding:28px 32px; width:100%; max-width:440px; margin:0 16px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:#d1fae5; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fas fa-undo" style="color:#059669; font-size:18px;"></i>
+          </div>
+          <div>
+            <p style="font-size:15px; font-weight:600; margin:0; color:#0f2d5a;">Restore selected records</p>
+            <p style="font-size:13px; color:#6b7280; margin:0;">All selected records will be moved back to their source tables.</p>
+          </div>
+        </div>
+        <hr style="margin:16px 0; border-color:#e5e7eb;">
+        <div style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:8px; padding:12px 16px; margin-bottom:18px; display:flex; align-items:center; gap:12px;">
+          <i class="fas fa-layer-group" style="color:#059669; font-size:18px; flex-shrink:0;"></i>
+          <div>
+            <p id="bulkRestoreCount" style="font-size:14px; font-weight:700; margin:0; color:#065f46;"></p>
+            <p style="font-size:12px; color:#047857; margin:2px 0 0;">Records will be restored to their original tables.</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button onclick="closeModal('bulkRestoreModal')" style="padding:8px 18px; font-size:13px; border-radius:8px; cursor:pointer; border:1px solid #d1d5db; background:#fff; color:#6b7280;">Cancel</button>
+          <button id="bulkRestoreConfirmBtn" style="padding:8px 20px; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; border:none; background:linear-gradient(135deg,#059669,#34d399); color:#fff;">
+            <i class="fas fa-undo" style="margin-right:5px;"></i>Yes, restore all
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Delete Modal -->
+    <div id="bulkDeleteModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:14px; padding:28px 32px; width:100%; max-width:440px; margin:0 16px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:#fee2e2; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fas fa-trash" style="color:#dc2626; font-size:18px;"></i>
+          </div>
+          <div>
+            <p style="font-size:15px; font-weight:600; margin:0; color:#0f2d5a;">Permanently delete selected</p>
+            <p style="font-size:13px; color:#6b7280; margin:0;">This action cannot be undone.</p>
+          </div>
+        </div>
+        <hr style="margin:16px 0; border-color:#e5e7eb;">
+        <div style="background:#fef2f2; border:1.5px solid #fecaca; border-radius:8px; padding:12px 16px; margin-bottom:18px; display:flex; align-items:center; gap:12px;">
+          <i class="fas fa-exclamation-triangle" style="color:#dc2626; font-size:18px; flex-shrink:0;"></i>
+          <div>
+            <p id="bulkDeleteCount" style="font-size:14px; font-weight:700; margin:0; color:#991b1b;"></p>
+            <p style="font-size:12px; color:#b91c1c; margin:2px 0 0;">These records will be gone forever — there is no way to recover them.</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button onclick="closeModal('bulkDeleteModal')" style="padding:8px 18px; font-size:13px; border-radius:8px; cursor:pointer; border:1px solid #d1d5db; background:#fff; color:#6b7280;">Cancel</button>
+          <button id="bulkDeleteConfirmBtn" style="padding:8px 20px; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; border:none; background:linear-gradient(135deg,#dc2626,#ef4444); color:#fff;">
+            <i class="fas fa-trash" style="margin-right:5px;"></i>Yes, delete all
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SUCCESS TOAST MODAL ══ -->
+    <div id="successToast" style="display:none; position:fixed; bottom:28px; right:28px; z-index:10000; min-width:300px; max-width:400px;">
+      <div id="successToastInner" style="border-radius:14px; padding:16px 20px; box-shadow:0 8px 32px rgba(0,0,0,0.18); display:flex; align-items:flex-start; gap:14px; animation: toastSlideIn 0.3s ease;">
+        <div id="successToastIcon" style="width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">
+          <i id="successToastIconI" style="font-size:16px;"></i>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <p id="successToastTitle" style="font-size:13px; font-weight:700; margin:0 0 2px; color:#111827;"></p>
+          <p id="successToastMsg"   style="font-size:12px; margin:0; color:#6b7280; line-height:1.4;"></p>
+        </div>
+        <button onclick="closeToast()" style="background:none; border:none; cursor:pointer; color:#9ca3af; font-size:16px; padding:0; flex-shrink:0; line-height:1;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <style>
+    @keyframes toastSlideIn {
+        from { opacity:0; transform: translateY(16px); }
+        to   { opacity:1; transform: translateY(0); }
+    }
+    </style>
+
     <br><br>
 </div>
 <!-- End of Main Content -->
 
 <script>
-// ── Single-record action (restore or delete) ───────────────────
-function submitSingle(actionName, archiveId, confirmMsg) {
-    if (!confirm(confirmMsg)) return;
-    document.getElementById('singleActionId').value  = archiveId;
-    document.getElementById('singleActionName').name = actionName;
-    document.getElementById('singleActionForm').submit();
+// ── Success toast ────────────────────────────────────────────
+function closeToast() {
+    var t = document.getElementById('successToast');
+    if (t) { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(function(){ t.style.display = 'none'; }, 300); }
 }
 
-// ── Expand / collapse JSON detail row ─────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var raw = sessionStorage.getItem('archiveToast');
+    if (!raw) return;
+    sessionStorage.removeItem('archiveToast');
+
+    try {
+        var data  = JSON.parse(raw);
+        var isRed = data.type === 'delete';
+
+        var bg        = isRed ? '#fef2f2'  : '#f0fdf4';
+        var border    = isRed ? '#fecaca'  : '#bbf7d0';
+        var iconBg    = isRed ? '#fee2e2'  : '#d1fae5';
+        var iconColor = isRed ? '#dc2626'  : '#059669';
+        var iconCls   = isRed ? 'fa-trash' : 'fa-check';
+        var title     = isRed ? 'Deleted'  : 'Restored';
+
+        var inner = document.getElementById('successToastInner');
+        inner.style.background  = bg;
+        inner.style.border      = '1.5px solid ' + border;
+
+        var iconWrap = document.getElementById('successToastIcon');
+        iconWrap.style.background = iconBg;
+
+        var iconEl = document.getElementById('successToastIconI');
+        iconEl.className    = 'fas ' + iconCls;
+        iconEl.style.color  = iconColor;
+
+        document.getElementById('successToastTitle').textContent = title;
+        document.getElementById('successToastTitle').style.color = iconColor;
+        document.getElementById('successToastMsg').textContent   = data.msg;
+
+        document.getElementById('successToast').style.display = 'block';
+
+        // auto-dismiss after 4 seconds
+        setTimeout(closeToast, 4000);
+    } catch(e) {}
+});
+
+// ── Toggle JSON detail row ───────────────────────────────────
 function toggleDetail(id) {
     var row = document.getElementById('detail-' + id);
-    if (row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+    if (row) row.style.display = (row.style.display === 'none' || row.style.display === '') ? 'table-row' : 'none';
 }
 
-// ── Multi-select logic ─────────────────────────────────────────
+// ── Close modal ──────────────────────────────────────────────
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+// ── Single-action modal trigger ──────────────────────────────
+function submitSingle(actionName, archiveId, fullName, typeMeta) {
+    if (actionName === 'restore_record') {
+        document.getElementById('restoreRecordName').textContent = fullName;
+        document.getElementById('restoreRecordMeta').textContent = typeMeta;
+        document.getElementById('restoreModal').style.display    = 'flex';
+        document.getElementById('restoreConfirmBtn').onclick = function () {
+            document.getElementById('singleActionId').value  = archiveId;
+            document.getElementById('singleActionName').name = 'restore_record';
+            document.getElementById('singleActionForm').submit();
+        };
+    } else {
+        document.getElementById('deleteRecordName').textContent = fullName;
+        document.getElementById('deleteRecordMeta').textContent = typeMeta;
+        document.getElementById('deleteModal').style.display    = 'flex';
+        document.getElementById('deleteConfirmBtn').onclick = function () {
+            document.getElementById('singleActionId').value  = archiveId;
+            document.getElementById('singleActionName').name = 'permanent_delete';
+            document.getElementById('singleActionForm').submit();
+        };
+    }
+}
+
+// ── Bulk modal trigger ───────────────────────────────────────
+function openBulkModal(type) {
+    var count = document.querySelectorAll('.row-check:checked').length;
+    if (count === 0) return;
+    var noun = count === 1 ? 'record' : 'records';
+
+    if (type === 'restore') {
+        document.getElementById('bulkRestoreCount').textContent = count + ' ' + noun + ' selected for restore';
+        document.getElementById('bulkRestoreModal').style.display = 'flex';
+        document.getElementById('bulkRestoreConfirmBtn').onclick = function () {
+            // inject a hidden submit button into the bulk form and click it
+            var btn = document.createElement('button');
+            btn.type = 'submit';
+            btn.name = 'bulk_restore';
+            btn.style.display = 'none';
+            document.getElementById('bulkForm').appendChild(btn);
+            btn.click();
+        };
+    } else {
+        document.getElementById('bulkDeleteCount').textContent = count + ' ' + noun + ' will be permanently deleted';
+        document.getElementById('bulkDeleteModal').style.display = 'flex';
+        document.getElementById('bulkDeleteConfirmBtn').onclick = function () {
+            var btn = document.createElement('button');
+            btn.type = 'submit';
+            btn.name = 'bulk_permanent_delete';
+            btn.style.display = 'none';
+            document.getElementById('bulkForm').appendChild(btn);
+            btn.click();
+        };
+    }
+}
+
+// ── Close modals by clicking backdrop ───────────────────────
+window.addEventListener('click', function (e) {
+    if (e.target.id === 'restoreModal')     closeModal('restoreModal');
+    if (e.target.id === 'deleteModal')      closeModal('deleteModal');
+    if (e.target.id === 'bulkRestoreModal') closeModal('bulkRestoreModal');
+    if (e.target.id === 'bulkDeleteModal')  closeModal('bulkDeleteModal');
+});
+
+// ── Bulk checkbox logic ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
     var checkAll = document.getElementById('checkAll');
     if (checkAll) {
         checkAll.addEventListener('change', function () {
-            document.querySelectorAll('.row-check').forEach(function (cb) {
-                cb.checked = checkAll.checked;
-            });
+            document.querySelectorAll('.row-check').forEach(cb => cb.checked = checkAll.checked);
             updateToolbar();
         });
     }
-    document.querySelectorAll('.row-check').forEach(function (cb) {
-        cb.addEventListener('change', updateToolbar);
-    });
+    document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', updateToolbar));
 });
 
 function updateToolbar() {
@@ -773,7 +1017,7 @@ function updateToolbar() {
 }
 
 function clearAllChecks() {
-    document.querySelectorAll('.row-check').forEach(function (cb) { cb.checked = false; });
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
     var ca = document.getElementById('checkAll');
     if (ca) ca.checked = false;
     updateToolbar();

@@ -1,8 +1,12 @@
-<?php
-    require('classes/resident.class.php');
-    $userdetails = $bmis->get_userdata();
+<?php 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+    require('classes/main.class.php');
     $bmis->create_admin(); 
-    
+    $this->log_activity('CREATE_ADMIN', 'Admin', "Created admin account for $fname $lname ($role)");
+    $userdetails = $bmis->get_userdata();
+
     include('dashboard_sidebar_start.php');
 ?>
 
@@ -35,7 +39,6 @@
             font-family: 'DM Sans', sans-serif;
         }
 
-        /* ── Page heading ── */
         .page-heading {
             display: flex;
             align-items: center;
@@ -63,7 +66,6 @@
             margin: 2px 0 0;
         }
 
-        /* ── Card ── */
         .cp-card {
             background: #fff;
             border-radius: 20px;
@@ -77,7 +79,6 @@
             background: linear-gradient(90deg, var(--blue-deep), var(--blue-bright), var(--gold));
         }
 
-        /* ── Card header ── */
         .cp-header {
             background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-mid) 100%);
             padding: 28px 36px;
@@ -119,12 +120,8 @@
             margin: 0;
         }
 
-        /* ── Body ── */
-        .cp-body {
-            padding: 36px 36px 32px;
-        }
+        .cp-body { padding: 36px 36px 32px; }
 
-        /* ── Section label ── */
         .section-label {
             font-size: 11px;
             font-weight: 600;
@@ -143,10 +140,7 @@
             background: var(--border);
         }
 
-        /* ── Field groups ── */
-        .field-group {
-            margin-bottom: 20px;
-        }
+        .field-group { margin-bottom: 20px; }
         .field-group label {
             display: block;
             font-size: 12px;
@@ -156,9 +150,7 @@
             color: var(--blue-deep);
             margin-bottom: 7px;
         }
-        .field-wrap {
-            position: relative;
-        }
+        .field-wrap { position: relative; }
         .field-wrap .icon {
             position: absolute;
             left: 13px;
@@ -191,7 +183,6 @@
             box-shadow: 0 0 0 3px var(--blue-glow);
         }
         .field-wrap input::placeholder { color: #b0bfd0; }
-        /* select arrow */
         .field-wrap.has-select::after {
             content: '\f078';
             font-family: 'Font Awesome 5 Free';
@@ -204,7 +195,6 @@
             color: #a0b4cc;
             pointer-events: none;
         }
-        /* eye toggle */
         .eye-btn {
             position: absolute;
             right: 12px;
@@ -220,24 +210,14 @@
             transition: color .2s;
         }
         .eye-btn:hover { color: var(--blue-mid); }
-
-        /* M.I. field — no left icon */
-        .field-wrap.no-icon input {
-            padding-left: 14px;
-        }
-
-        /* helper text */
+        .field-wrap.no-icon input { padding-left: 14px; }
         .field-hint {
             font-size: 11.5px;
             color: #8fa5bb;
             margin-top: 5px;
         }
 
-        /* role badge preview */
-        .role-tag {
-            display: none;
-            margin-top: 6px;
-        }
+        .role-tag { display: none; margin-top: 6px; }
         .role-tag span {
             font-size: 11px;
             font-weight: 600;
@@ -248,14 +228,8 @@
         .role-tag.admin span  { display: inline-block; background: #dbe9ff; color: var(--blue-mid); }
         .role-tag.staff span  { display: inline-block; background: #e8f5ec; color: #2e7d4f; }
 
-        /* ── Divider ── */
-        .cp-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 28px 0;
-        }
+        .cp-divider { height: 1px; background: var(--border); margin: 28px 0; }
 
-        /* ── Action row ── */
         .action-row {
             display: flex;
             align-items: center;
@@ -263,7 +237,6 @@
             flex-wrap: wrap;
             gap: 12px;
         }
-
         .btn-changepass {
             display: inline-flex;
             align-items: center;
@@ -285,14 +258,7 @@
             color: var(--blue-deep);
             text-decoration: none;
         }
-        .btn-changepass i { font-size: 13px; }
-
-        .btn-group-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .btn-group-right { display: flex; align-items: center; gap: 10px; }
         .btn-clear {
             padding: 10px 20px;
             border-radius: 10px;
@@ -306,7 +272,6 @@
             transition: background .2s, color .2s;
         }
         .btn-clear:hover { background: #f0f4fa; color: var(--ink); }
-
         .btn-create {
             padding: 11px 28px;
             border-radius: 10px;
@@ -342,7 +307,6 @@
 <body id="page-top">
 <div class="container-fluid mt-4">
 
-    <!-- Page Heading -->
     <div class="page-heading">
         <div class="head-icon"><i class="fas fa-users-cog"></i></div>
         <div>
@@ -355,18 +319,15 @@
         <div class="col-xl-8 col-lg-10">
             <div class="cp-card">
 
-                <!-- Header -->
                 <div class="cp-header">
                     <div class="badge-pill"><i class="fas fa-user-plus"></i> New Account</div>
                     <h2>Register Admin / Staff</h2>
                     <p>Fill in the details below to create a new system account.</p>
                 </div>
 
-                <!-- Form -->
                 <div class="cp-body">
                     <form method="POST" autocomplete="off" id="addAdminForm">
 
-                        <!-- Personal Info -->
                         <div class="section-label"><i class="fas fa-id-card"></i> Personal Information</div>
 
                         <div class="row">
@@ -398,7 +359,6 @@
                             </div>
                         </div>
 
-                        <!-- Account Details -->
                         <div class="section-label mt-2"><i class="fas fa-cog"></i> Account Details</div>
 
                         <div class="row">
@@ -444,7 +404,6 @@
 
                         <div class="cp-divider"></div>
 
-                        <!-- Actions -->
                         <div class="action-row">
                             <a href="admin_changepass.php" class="btn-changepass">
                                 <i class="fas fa-key"></i> Change Existing Password
@@ -453,7 +412,7 @@
                                 <button type="reset" class="btn-clear" onclick="resetExtras()">
                                     <i class="fas fa-undo mr-1"></i> Clear
                                 </button>
-                                <button type="submit" name="add_admin" class="btn-create">
+                                <button type="button" class="btn-create" onclick="openConfirmModal()">
                                     <i class="fas fa-user-plus"></i> Create Account
                                 </button>
                             </div>
@@ -467,7 +426,97 @@
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div id="confirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width:420px; overflow:hidden; margin:1rem; box-shadow:0 24px 60px rgba(0,0,0,.2);">
+
+        <div style="background:linear-gradient(135deg,#1a2e4d,#2e5fa3); padding:22px 24px 18px;">
+            <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#c8dbf5;font-size:11px;padding:3px 10px;border-radius:50px;letter-spacing:.5px;margin-bottom:8px;">
+                <i class="fas fa-user-plus"></i> Confirm Creation
+            </div>
+            <h5 style="color:#fff;font-family:'Playfair Display',serif;font-size:18px;margin:0 0 2px;">Create new account?</h5>
+            <p style="color:rgba(255,255,255,.55);font-size:12px;margin:0;">Please review the details before confirming.</p>
+        </div>
+
+        <div style="padding:20px 24px;">
+            <div style="background:#fdf6ec;border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;border:1px solid #fce8c0;">
+                <i class="fas fa-exclamation-triangle" style="color:#c9a84c;margin-top:2px;"></i>
+                <p style="font-size:12.5px;color:#7a6030;margin:0;line-height:1.5;">This will create a new system account. Make sure all information is correct before proceeding.</p>
+            </div>
+            <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                <tr style="border-bottom:1px solid #eef1f6;">
+                    <td style="padding:9px 0;color:#7a91b0;width:90px;">Full name</td>
+                    <td id="modal_name" style="padding:9px 0;font-weight:600;color:#0f1825;"></td>
+                </tr>
+                <tr style="border-bottom:1px solid #eef1f6;">
+                    <td style="padding:9px 0;color:#7a91b0;">Email</td>
+                    <td id="modal_email" style="padding:9px 0;font-weight:600;color:#0f1825;"></td>
+                </tr>
+                <tr>
+                    <td style="padding:9px 0;color:#7a91b0;">Role</td>
+                    <td style="padding:9px 0;"><span id="modal_role_badge" style="font-size:11px;padding:3px 10px;border-radius:50px;font-weight:600;"></span></td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="padding:14px 24px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eef1f6;">
+            <button onclick="closeConfirmModal()" style="padding:9px 18px;border-radius:10px;border:1.5px solid #d0daea;background:transparent;color:#7a91b0;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
+                <i class="fas fa-times mr-1"></i> Cancel
+            </button>
+            <button onclick="submitAdminForm()" style="padding:9px 22px;border-radius:10px;border:none;background:linear-gradient(135deg,#2e5fa3,#4a90d9);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 14px rgba(46,95,163,.28);">
+                <i class="fas fa-check"></i> Yes, create account
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    function openConfirmModal() {
+        const fname = document.getElementById('fname').value.trim();
+        const mi    = document.getElementById('mi').value.trim();
+        const lname = document.getElementById('lname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const role  = document.getElementById('role').value;
+
+        if (!fname || !lname || !email || !role) {
+            document.getElementById('addAdminForm').reportValidity();
+            return;
+        }
+
+        const fullName = [fname, mi ? mi + '.' : '', lname].filter(Boolean).join(' ');
+        document.getElementById('modal_name').textContent  = fullName;
+        document.getElementById('modal_email').textContent = email;
+
+        const badge = document.getElementById('modal_role_badge');
+        if (role === 'administrator') {
+            badge.textContent = '🛡 Administrator';
+            badge.style.cssText = 'font-size:11px;padding:3px 10px;border-radius:50px;font-weight:600;background:#dbe9ff;color:#2e5fa3;';
+        } else {
+            badge.textContent = '👤 Barangay Staff';
+            badge.style.cssText = 'font-size:11px;padding:3px 10px;border-radius:50px;font-weight:600;background:#e8f5ec;color:#2e7d4f;';
+        }
+
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+
+    function submitAdminForm() {
+        // Add the hidden submit trigger so PHP sees 'add_admin' in $_POST
+        const hidden = document.createElement('input');
+        hidden.type  = 'hidden';
+        hidden.name  = 'add_admin';
+        hidden.value = '1';
+        document.getElementById('addAdminForm').appendChild(hidden);
+        document.getElementById('addAdminForm').submit();
+    }
+
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+        if (e.target === this) closeConfirmModal();
+    });
+
     function toggleVis(fieldId, btn) {
         const input = document.getElementById(fieldId);
         const icon  = btn.querySelector('i');

@@ -11,24 +11,18 @@ if (isset($_POST['approve_resident'])) {
     $id_resident = (int)$_POST['id_resident'];
     $id_upload   = (int)$_POST['id_upload'];
     if ($systemObject->approveResidentVerification($id_resident, $id_upload, $admin_name)) {
-        header("Location: admn_messages.php?status=approved");
+        header("Location: admn_messages.php?toast=approved");
     } else {
-        header("Location: admn_messages.php?status=error");
+        header("Location: admn_messages.php?toast=error");
     }
-    exit();if (isset($_POST['delete_upload'])) {
-    $id_upload = $_POST['id_upload'];
-    if ($bmis->delete_upload_record($id_upload)) {
-        echo "<script>alert('Record deleted successfully'); window.location.href='admin_verification.php';</script>";
-    } else {
-        echo "<script>alert('Error deleting record');</script>";
-    }
+    exit();
 }
-}
-if (isset($_POST['delete_upload'])) { // Make sure this is 'delete_upload'
-    $id_upload = $_POST['id_upload'];
-    $bmis->delete_upload_record($id_upload);
-    // Add a redirect to refresh the page and show changes
-    header("Location: " . $_SERVER['PHP_SELF']); 
+
+// ---- Handle: Delete upload record ----
+if (isset($_POST['delete_upload'])) {
+    $id_upload = (int)$_POST['id_upload'];
+    $systemObject->delete_upload_record($id_upload);
+    header("Location: admn_messages.php?toast=upload_deleted");
     exit();
 }
 
@@ -38,9 +32,9 @@ if (isset($_POST['reject_resident'])) {
     $id_upload   = (int)$_POST['id_upload'];
     $reason      = $_POST['reject_reason'] ?? '';
     if ($systemObject->rejectResidentVerification($id_resident, $id_upload, $admin_name, $reason)) {
-        header("Location: admn_messages.php?status=rejected");
+        header("Location: admn_messages.php?toast=rejected");
     } else {
-        header("Location: admn_messages.php?status=error");
+        header("Location: admn_messages.php?toast=error");
     }
     exit();
 }
@@ -49,13 +43,13 @@ if (isset($_POST['reject_resident'])) {
 if (isset($_POST['delete_msg'])) {
     $id = $_POST['id_admin_msg'];
     $systemObject->deleteMessage($id);
-    header("Location: admn_messages.php?status=deleted");
+    header("Location: admn_messages.php?toast=msg_deleted");
     exit();
 }
 
 // ---- Fetch data ----
-$messages     = $systemObject->viewMessages();
-$id_uploads   = $systemObject->getPendingIDUploads();
+$messages      = $systemObject->viewMessages();
+$id_uploads    = $systemObject->getPendingIDUploads();
 $pending_count = 0;
 foreach ($id_uploads as $up) {
     if ($up['status'] === 'pending') $pending_count++;
@@ -77,23 +71,58 @@ foreach ($id_uploads as $up) {
         .status-rejected { background: #f8d7da; color: #842029; border: 1px solid #dc3545; }
         .nav-tabs .nav-link { font-weight: 600; }
         .id-preview img { max-width: 100%; max-height: 350px; border-radius: 10px; border: 1px solid #dee2e6; }
+
+        /* ── Confirmation modals ── */
+        .bmis-modal-backdrop {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.45); align-items: center; justify-content: center;
+        }
+        .bmis-modal-backdrop.open { display: flex; }
+        .bmis-modal-card {
+            background: #fff; border-radius: 14px; padding: 28px 32px;
+            width: 100%; max-width: 430px; margin: 0 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        }
+        .bmis-modal-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .bmis-modal-title  { font-size: 15px; font-weight: 600; margin: 0; color: #0f2d5a; }
+        .bmis-modal-sub    { font-size: 13px; color: #6b7280; margin: 0; }
+        .bmis-modal-info   { border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
+        .bmis-modal-info p { margin: 0; }
+        .bmis-btn-cancel {
+            padding: 8px 18px; font-size: 13px; border-radius: 8px; cursor: pointer;
+            border: 1px solid #d1d5db; background: #fff; color: #6b7280;
+        }
+        .bmis-btn-confirm {
+            padding: 8px 20px; font-size: 13px; font-weight: 600; border-radius: 8px;
+            cursor: pointer; border: none; color: #fff;
+        }
+
+        /* ── Success toast ── */
+        #bmisToast {
+            display: none; position: fixed; bottom: 28px; right: 28px;
+            z-index: 10000; min-width: 300px; max-width: 400px;
+        }
+        #bmisToastInner {
+            border-radius: 14px; padding: 16px 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            display: flex; align-items: flex-start; gap: 14px;
+            animation: toastIn 0.3s ease;
+        }
+        #bmisToastIcon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; margin-top: 1px;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-
-<?php if(isset($_GET['status'])): ?>
-<div class="alert alert-<?= $_GET['status'] === 'approved' ? 'success' : ($_GET['status'] === 'rejected' ? 'warning' : ($_GET['status'] === 'deleted' ? 'info' : 'danger')) ?> alert-dismissible fade show m-3" role="alert">
-    <?php
-    switch($_GET['status']) {
-        case 'approved': echo '&#x2705; Resident account has been verified successfully.'; break;
-        case 'rejected': echo '&#x274C; ID submission has been rejected. Resident was notified.'; break;
-        case 'deleted':  echo '&#x1F5D1; Message deleted.'; break;
-        default:         echo 'An error occurred. Please try again.';
-    }
-    ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-<?php endif; ?>
 
 <div class="container my-4">
     <h2 class="fw-bold mb-4 text-center">Resident Messages &amp; Verification</h2>
@@ -139,30 +168,31 @@ foreach ($id_uploads as $up) {
                                     <th class="py-3">Date</th>
                                     <th class="py-3">Status</th>
                                     <th class="py-3">Action</th>
-                                    <th class="py-3"> Delete</th>
+                                    <th class="py-3">Delete</th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php if (!empty($id_uploads)): ?>
-                                <?php foreach ($id_uploads as $up): ?>
+                                <?php foreach ($id_uploads as $up):
+                                    $uid      = $up['id_upload'];
+                                    $fullname = htmlspecialchars($up['fname'] . ' ' . $up['lname']);
+                                ?>
                                 <tr>
-                                    <td class="align-middle fw-bold">
-                                        <?= htmlspecialchars($up['fname'] . ' ' . $up['lname']); ?>
+                                    <td class="align-middle fw-bold"><?= $fullname ?></td>
+                                    <td class="align-middle">
+                                        <small><?= htmlspecialchars($up['email'] ?: $up['phone_number'] ?: '—') ?></small>
                                     </td>
                                     <td class="align-middle">
-                                        <small><?= htmlspecialchars($up['email'] ?: $up['phone_number'] ?: '—'); ?></small>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="uploads/valid_ids/<?= htmlspecialchars($up['file_name']); ?>" 
+                                        <a href="uploads/valid_ids/<?= htmlspecialchars($up['file_name']) ?>"
                                            target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                                             <i class="bi bi-eye me-1"></i> View ID
                                         </a>
                                     </td>
                                     <td class="align-middle">
-                                        <small class="text-muted"><?= htmlspecialchars($up['message_note'] ?: '—'); ?></small>
+                                        <small class="text-muted"><?= htmlspecialchars($up['message_note'] ?: '—') ?></small>
                                     </td>
                                     <td class="align-middle">
-                                        <small><?= date('M d, Y', strtotime($up['upload_date'])); ?></small>
+                                        <small><?= date('M d, Y', strtotime($up['upload_date'])) ?></small>
                                     </td>
                                     <td class="align-middle">
                                         <?php if ($up['status'] === 'approved'): ?>
@@ -172,24 +202,18 @@ foreach ($id_uploads as $up) {
                                         <?php else: ?>
                                             <span class="badge rounded-pill status-pending px-3">&#x23F3; Pending</span>
                                         <?php endif; ?>
-
-                        
                                     </td>
                                     <td class="align-middle">
                                         <?php if ($up['status'] === 'pending'): ?>
                                         <div class="d-flex gap-2 justify-content-center">
-                                            <!-- Approve button -->
-                                            <form method="POST" onsubmit="return confirm('Approve this resident\'s account?');">
-                                                <input type="hidden" name="id_resident" value="<?= $up['id_resident'] ?>">
-                                                <input type="hidden" name="id_upload" value="<?= $up['id_upload'] ?>">
-                                                <button type="submit" name="approve_resident" class="btn btn-success btn-sm rounded-pill px-3 fw-bold">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Approve
-                                                </button>
-                                            </form>
-                                            <!-- Reject button opens modal -->
+                                            <!-- Approve -->
+                                            <button type="button" class="btn btn-success btn-sm rounded-pill px-3 fw-bold"
+                                                onclick="openApproveModal(<?= $uid ?>, <?= (int)$up['id_resident'] ?>, '<?= $fullname ?>')">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Approve
+                                            </button>
+                                            <!-- Reject -->
                                             <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#rejectModal<?= $up['id_upload'] ?>">
+                                                onclick="openRejectModal(<?= $uid ?>, <?= (int)$up['id_resident'] ?>, '<?= $fullname ?>')">
                                                 <i class="bi bi-x-circle-fill me-1"></i> Reject
                                             </button>
                                         </div>
@@ -198,48 +222,15 @@ foreach ($id_uploads as $up) {
                                         <?php endif; ?>
                                     </td>
                                     <td class="align-middle">
-                                        <form method="POST" onsubmit="return confirm('Delete this ID submission record?');">
-                                            <input type="hidden" name="id_upload" value="<?= $up['id_upload'] ?>">
-                                            <button type="submit" name="delete_upload" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                                                <i class="bi bi-trash-fill me-1"></i> Delete
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3"
+                                            onclick="openDeleteUploadModal(<?= $uid ?>, '<?= $fullname ?>')">
+                                            <i class="bi bi-trash-fill me-1"></i> Delete
+                                        </button>
+                                    </td>
                                 </tr>
-
-                                <!-- Reject Modal for this upload -->
-                                <div class="modal fade" id="rejectModal<?= $up['id_upload'] ?>" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow rounded-4">
-                                            <form method="POST">
-                                                <input type="hidden" name="id_resident" value="<?= $up['id_resident'] ?>">
-                                                <input type="hidden" name="id_upload" value="<?= $up['id_upload'] ?>">
-                                                <div class="modal-header bg-danger text-white rounded-top-4">
-                                                    <h5 class="modal-title fw-bold"><i class="bi bi-x-circle me-2"></i>Reject ID Submission</h5>
-                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body p-4">
-                                                    <p>You are rejecting the ID submitted by <strong><?= htmlspecialchars($up['fname'] . ' ' . $up['lname']); ?></strong>.</p>
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Reason for Rejection <span class="text-muted fw-normal">(optional)</span></label>
-                                                        <textarea name="reject_reason" class="form-control" rows="3"
-                                                                  placeholder="e.g., ID is blurry, expired, or not a government-issued ID..."></textarea>
-                                                    </div>
-                                                    <p class="text-muted small mb-0">The resident will be notified of this rejection via their messages.</p>
-                                                </div>
-                                                <div class="modal-footer border-0">
-                                                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" name="reject_resident" class="btn btn-danger fw-bold rounded-pill px-4">
-                                                        <i class="bi bi-x-circle me-1"></i> Confirm Rejection
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td colspan="7" class="py-5 text-muted fst-italic">No ID submissions found.</td></tr>
+                                <tr><td colspan="8" class="py-5 text-muted fst-italic">No ID submissions found.</td></tr>
                             <?php endif; ?>
                             </tbody>
                         </table>
@@ -264,51 +255,51 @@ foreach ($id_uploads as $up) {
                         </thead>
                         <tbody>
                             <?php if (!empty($messages)): ?>
-                                <?php foreach ($messages as $msg): ?>
+                                <?php foreach ($messages as $msg):
+                                    $mid      = $msg['id_admin_msg'];
+                                    $mfname   = htmlspecialchars($msg['fname']);
+                                    $mfull    = htmlspecialchars($msg['fname'] . ' ' . $msg['lname']);
+                                ?>
                                     <tr>
-                                        <td class="align-middle fw-bold">
-                                            <?= htmlspecialchars($msg['fname'] . ' ' . $msg['lname']); ?>
-                                        </td>
+                                        <td class="align-middle fw-bold"><?= $mfull ?></td>
                                         <td class="align-middle text-muted">
-                                            <?= htmlspecialchars(substr($msg['message_text'], 0, 50)); ?>...
+                                            <?= htmlspecialchars(substr($msg['message_text'], 0, 50)) ?>...
                                         </td>
                                         <td class="align-middle">
-                                            <?= date('M d, Y | h:i A', strtotime($msg['date_sent'])); ?>
+                                            <?= date('M d, Y | h:i A', strtotime($msg['date_sent'])) ?>
                                         </td>
                                         <td class="align-middle">
                                             <button class="btn btn-info btn-sm rounded-pill px-3 fw-bold"
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#viewMsg<?= $msg['id_admin_msg']; ?>">
+                                                    data-bs-target="#viewMsg<?= $mid ?>">
                                                 <i class="bi bi-eye-fill me-1"></i> View
                                             </button>
                                         </td>
                                         <td class="align-middle">
-                                            <form action="delete_message.php" method="POST" onsubmit="return confirm('Delete this message?');">
-                                                <input type="hidden" name="id_admin_msg" value="<?= $msg['id_admin_msg']; ?>">
-                                                <button type="submit" name="delete_msg" class="btn btn-danger btn-sm rounded-pill px-3">
-                                                    <i class="bi bi-trash-fill me-1"></i> Delete
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-danger btn-sm rounded-pill px-3"
+                                                onclick="openDeleteMsgModal(<?= $mid ?>, '<?= $mfname ?>')">
+                                                <i class="bi bi-trash-fill me-1"></i> Delete
+                                            </button>
                                         </td>
                                     </tr>
 
-                                    <!-- View Message Modal -->
-                                    <div class="modal fade" id="viewMsg<?= $msg['id_admin_msg']; ?>" tabindex="-1" aria-hidden="true">
+                                    <!-- View Message Modal (Bootstrap) -->
+                                    <div class="modal fade" id="viewMsg<?= $mid ?>" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content border-0 shadow-lg rounded-4">
                                                 <div class="modal-header bg-info text-white rounded-top-4">
-                                                    <h5 class="modal-title fw-bold">Message from <?= htmlspecialchars($msg['fname']); ?></h5>
+                                                    <h5 class="modal-title fw-bold">Message from <?= $mfname ?></h5>
                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body p-4 text-start">
                                                     <label class="text-muted small fw-bold">FULL NAME</label>
-                                                    <p class="h6 mb-3"><?= htmlspecialchars($msg['fname'] . ' ' . $msg['lname']); ?></p>
+                                                    <p class="h6 mb-3"><?= $mfull ?></p>
                                                     <label class="text-muted small fw-bold">DATE RECEIVED</label>
-                                                    <p class="h6 mb-3"><?= date('F j, Y, g:i a', strtotime($msg['date_sent'])); ?></p>
+                                                    <p class="h6 mb-3"><?= date('F j, Y, g:i a', strtotime($msg['date_sent'])) ?></p>
                                                     <hr>
                                                     <label class="text-muted small fw-bold">MESSAGE CONTENT</label>
                                                     <div class="bg-light p-3 rounded-3 mt-1">
-                                                        <?= nl2br(htmlspecialchars($msg['message_text'])); ?>
+                                                        <?= nl2br(htmlspecialchars($msg['message_text'])) ?>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer border-0">
@@ -329,7 +320,303 @@ foreach ($id_uploads as $up) {
         </div>
 
     </div><!-- end tab-content -->
+</div><!-- end container -->
+
+
+<!-- ════════════════════════════════════════════════════════
+     HIDDEN FORMS  (submitted programmatically by JS)
+═══════════════════════════════════════════════════════════ -->
+
+<!-- Approve form -->
+<form id="approveForm" method="POST" action="admn_messages.php" style="display:none;">
+    <input type="hidden" name="id_resident" id="approveResidentId">
+    <input type="hidden" name="id_upload"   id="approveUploadId">
+    <input type="hidden" name="approve_resident" value="1">
+</form>
+
+<!-- Reject form -->
+<form id="rejectForm" method="POST" action="admn_messages.php" style="display:none;">
+    <input type="hidden" name="id_resident"  id="rejectResidentId">
+    <input type="hidden" name="id_upload"    id="rejectUploadId">
+    <input type="hidden" name="reject_reason" id="rejectReason">
+    <input type="hidden" name="reject_resident" value="1">
+</form>
+
+<!-- Delete upload form -->
+<form id="deleteUploadForm" method="POST" action="admn_messages.php" style="display:none;">
+    <input type="hidden" name="id_upload"     id="deleteUploadId">
+    <input type="hidden" name="delete_upload" value="1">
+</form>
+
+<!-- Delete message form -->
+<form id="deleteMsgForm" method="POST" action="admn_messages.php" style="display:none;">
+    <input type="hidden" name="id_admin_msg" id="deleteMsgId">
+    <input type="hidden" name="delete_msg"   value="1">
+</form>
+
+
+<!-- ════════════════════════════════════════════════════════
+     APPROVE MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="approveModal" class="bmis-modal-backdrop">
+  <div class="bmis-modal-card">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <div class="bmis-modal-icon" style="background:#d1fae5;">
+        <i class="bi bi-check-circle-fill" style="color:#059669; font-size:18px;"></i>
+      </div>
+      <div>
+        <p class="bmis-modal-title">Approve verification</p>
+        <p class="bmis-modal-sub">This will grant the resident a verified account.</p>
+      </div>
+    </div>
+    <hr style="margin:16px 0; border-color:#e5e7eb;">
+    <div class="bmis-modal-info" style="background:#f0fdf4; border:1.5px solid #bbf7d0;">
+      <i class="bi bi-person-check-fill" style="color:#059669; font-size:20px; flex-shrink:0;"></i>
+      <div>
+        <p id="approveModalName" style="font-size:14px; font-weight:700; color:#065f46;"></p>
+        <p style="font-size:12px; color:#047857;">Resident ID submission will be marked as approved.</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="bmis-btn-cancel" onclick="closeAllModals()">Cancel</button>
+      <button class="bmis-btn-confirm" style="background:linear-gradient(135deg,#059669,#34d399);"
+              onclick="document.getElementById('approveForm').submit();">
+        <i class="bi bi-check-circle-fill me-1"></i> Yes, approve
+      </button>
+    </div>
+  </div>
 </div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     REJECT MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="rejectModal" class="bmis-modal-backdrop">
+  <div class="bmis-modal-card">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <div class="bmis-modal-icon" style="background:#fee2e2;">
+        <i class="bi bi-x-circle-fill" style="color:#dc2626; font-size:18px;"></i>
+      </div>
+      <div>
+        <p class="bmis-modal-title">Reject ID submission</p>
+        <p class="bmis-modal-sub">The resident will be notified of the rejection.</p>
+      </div>
+    </div>
+    <hr style="margin:16px 0; border-color:#e5e7eb;">
+    <div class="bmis-modal-info" style="background:#fef2f2; border:1.5px solid #fecaca;">
+      <i class="bi bi-person-x-fill" style="color:#dc2626; font-size:20px; flex-shrink:0;"></i>
+      <div>
+        <p id="rejectModalName" style="font-size:14px; font-weight:700; color:#991b1b;"></p>
+        <p style="font-size:12px; color:#b91c1c;">Their ID submission will be marked as rejected.</p>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label style="font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:6px;">
+        Reason <span style="font-weight:400; color:#9ca3af;">(optional)</span>
+      </label>
+      <textarea id="rejectReasonInput" rows="3" style="width:100%; border:1.5px solid #d1d5db; border-radius:8px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"
+                placeholder="e.g., ID is blurry, expired, or not a government-issued ID…"></textarea>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="bmis-btn-cancel" onclick="closeAllModals()">Cancel</button>
+      <button class="bmis-btn-confirm" style="background:linear-gradient(135deg,#dc2626,#ef4444);"
+              onclick="submitReject()">
+        <i class="bi bi-x-circle-fill me-1"></i> Confirm rejection
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     DELETE UPLOAD MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="deleteUploadModal" class="bmis-modal-backdrop">
+  <div class="bmis-modal-card">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <div class="bmis-modal-icon" style="background:#fee2e2;">
+        <i class="bi bi-trash-fill" style="color:#dc2626; font-size:18px;"></i>
+      </div>
+      <div>
+        <p class="bmis-modal-title">Delete ID submission</p>
+        <p class="bmis-modal-sub">This action cannot be undone.</p>
+      </div>
+    </div>
+    <hr style="margin:16px 0; border-color:#e5e7eb;">
+    <div class="bmis-modal-info" style="background:#fef2f2; border:1.5px solid #fecaca;">
+      <i class="bi bi-exclamation-triangle-fill" style="color:#dc2626; font-size:20px; flex-shrink:0;"></i>
+      <div>
+        <p id="deleteUploadModalName" style="font-size:14px; font-weight:700; color:#991b1b;"></p>
+        <p style="font-size:12px; color:#b91c1c;">The ID submission record will be permanently removed.</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="bmis-btn-cancel" onclick="closeAllModals()">Cancel</button>
+      <button class="bmis-btn-confirm" style="background:linear-gradient(135deg,#dc2626,#ef4444);"
+              onclick="document.getElementById('deleteUploadForm').submit();">
+        <i class="bi bi-trash-fill me-1"></i> Yes, delete
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     DELETE MESSAGE MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="deleteMsgModal" class="bmis-modal-backdrop">
+  <div class="bmis-modal-card">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <div class="bmis-modal-icon" style="background:#fee2e2;">
+        <i class="bi bi-trash-fill" style="color:#dc2626; font-size:18px;"></i>
+      </div>
+      <div>
+        <p class="bmis-modal-title">Delete message</p>
+        <p class="bmis-modal-sub">This action cannot be undone.</p>
+      </div>
+    </div>
+    <hr style="margin:16px 0; border-color:#e5e7eb;">
+    <div class="bmis-modal-info" style="background:#fef2f2; border:1.5px solid #fecaca;">
+      <i class="bi bi-chat-left-dots-fill" style="color:#dc2626; font-size:20px; flex-shrink:0;"></i>
+      <div>
+        <p id="deleteMsgModalName" style="font-size:14px; font-weight:700; color:#991b1b;"></p>
+        <p style="font-size:12px; color:#b91c1c;">The message will be permanently deleted.</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="bmis-btn-cancel" onclick="closeAllModals()">Cancel</button>
+      <button class="bmis-btn-confirm" style="background:linear-gradient(135deg,#dc2626,#ef4444);"
+              onclick="document.getElementById('deleteMsgForm').submit();">
+        <i class="bi bi-trash-fill me-1"></i> Yes, delete
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     SUCCESS TOAST
+═══════════════════════════════════════════════════════════ -->
+<div id="bmisToast">
+  <div id="bmisToastInner">
+    <div id="bmisToastIcon">
+      <i id="bmisToastIconI"></i>
+    </div>
+    <div style="flex:1; min-width:0;">
+      <p id="bmisToastTitle" style="font-size:13px; font-weight:700; margin:0 0 2px;"></p>
+      <p id="bmisToastMsg"   style="font-size:12px; margin:0; color:#6b7280; line-height:1.4;"></p>
+    </div>
+    <button onclick="closeToast()" style="background:none; border:none; cursor:pointer; color:#9ca3af; font-size:16px; padding:0; flex-shrink:0; line-height:1;">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+</div>
+
+
+<script>
+// ── Modal openers ────────────────────────────────────────────
+function openApproveModal(uploadId, residentId, name) {
+    document.getElementById('approveUploadId').value   = uploadId;
+    document.getElementById('approveResidentId').value = residentId;
+    document.getElementById('approveModalName').textContent = name;
+    document.getElementById('approveModal').classList.add('open');
+}
+
+function openRejectModal(uploadId, residentId, name) {
+    document.getElementById('rejectUploadId').value    = uploadId;
+    document.getElementById('rejectResidentId').value  = residentId;
+    document.getElementById('rejectModalName').textContent = name;
+    document.getElementById('rejectReasonInput').value = '';
+    document.getElementById('rejectModal').classList.add('open');
+}
+
+function openDeleteUploadModal(uploadId, name) {
+    document.getElementById('deleteUploadId').value = uploadId;
+    document.getElementById('deleteUploadModalName').textContent = name;
+    document.getElementById('deleteUploadModal').classList.add('open');
+}
+
+function openDeleteMsgModal(msgId, name) {
+    document.getElementById('deleteMsgId').value = msgId;
+    document.getElementById('deleteMsgModalName').textContent = 'Message from ' + name;
+    document.getElementById('deleteMsgModal').classList.add('open');
+}
+
+function closeAllModals() {
+    document.querySelectorAll('.bmis-modal-backdrop').forEach(m => m.classList.remove('open'));
+}
+
+function submitReject() {
+    document.getElementById('rejectReason').value = document.getElementById('rejectReasonInput').value;
+    document.getElementById('rejectForm').submit();
+}
+
+// Close on backdrop click
+document.querySelectorAll('.bmis-modal-backdrop').forEach(function(m) {
+    m.addEventListener('click', function(e) { if (e.target === m) closeAllModals(); });
+});
+
+
+// ── Toast ────────────────────────────────────────────────────
+var toastConfigs = {
+    approved:      { type: 'success', title: 'Approved',  msg: 'Resident account has been verified successfully.' },
+    rejected:      { type: 'warning', title: 'Rejected',  msg: 'ID submission rejected. Resident has been notified.' },
+    upload_deleted:{ type: 'delete',  title: 'Deleted',   msg: 'ID submission record permanently deleted.' },
+    msg_deleted:   { type: 'delete',  title: 'Deleted',   msg: 'Message permanently deleted.' },
+    error:         { type: 'error',   title: 'Error',     msg: 'Something went wrong. Please try again.' },
+};
+
+function showToast(cfg) {
+    var isSuccess = cfg.type === 'success';
+    var isWarning = cfg.type === 'warning';
+    var isError   = cfg.type === 'error';
+
+    var bg        = isSuccess ? '#f0fdf4' : (isWarning ? '#fffbeb' : (isError ? '#fef2f2' : '#fef2f2'));
+    var border    = isSuccess ? '#bbf7d0' : (isWarning ? '#fde68a' : (isError ? '#fecaca' : '#fecaca'));
+    var iconBg    = isSuccess ? '#d1fae5' : (isWarning ? '#fef3c7' : '#fee2e2');
+    var iconColor = isSuccess ? '#059669' : (isWarning ? '#d97706' : '#dc2626');
+    var iconCls   = isSuccess ? 'bi-check-circle-fill' : (isWarning ? 'bi-exclamation-circle-fill' : 'bi-trash-fill');
+
+    var inner = document.getElementById('bmisToastInner');
+    inner.style.background = bg;
+    inner.style.border     = '1.5px solid ' + border;
+
+    var icon = document.getElementById('bmisToastIcon');
+    icon.style.background  = iconBg;
+
+    var iconI = document.getElementById('bmisToastIconI');
+    iconI.className        = 'bi ' + iconCls;
+    iconI.style.color      = iconColor;
+    iconI.style.fontSize   = '16px';
+
+    var titleEl = document.getElementById('bmisToastTitle');
+    titleEl.textContent    = cfg.title;
+    titleEl.style.color    = iconColor;
+
+    document.getElementById('bmisToastMsg').textContent = cfg.msg;
+    document.getElementById('bmisToast').style.display  = 'block';
+
+    setTimeout(closeToast, 4500);
+}
+
+function closeToast() {
+    var t = document.getElementById('bmisToast');
+    t.style.opacity    = '0';
+    t.style.transition = 'opacity 0.3s';
+    setTimeout(function() { t.style.display = 'none'; t.style.opacity = ''; t.style.transition = ''; }, 300);
+}
+
+// Read ?toast= param and fire toast on load
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    var key    = params.get('toast');
+    if (key && toastConfigs[key]) {
+        showToast(toastConfigs[key]);
+        // Clean URL without reloading
+        history.replaceState(null, '', window.location.pathname);
+    }
+})();
+</script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </body>

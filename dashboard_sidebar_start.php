@@ -532,6 +532,12 @@ hr {
             </li>
             <hr>
             <li class="nav-item">
+    <a class="nav-link" href="admn_activity_logs.php">
+        <i class="fas fa-history"></i>
+        <span>Audit &amp; Logs</span>
+    </a>
+</li>
+            <li class="nav-item">
                 <a class="nav-link" href="admn_archive.php">
                     <i class="fas fa-archive"></i>
                     <span>Archive</span></a>

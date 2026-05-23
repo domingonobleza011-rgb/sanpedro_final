@@ -31,10 +31,11 @@
 
     <tbody>
         <?php
-            $stmnt = $conn->prepare("SELECT * FROM `tbl_resident` WHERE `lname` LIKE '%$keyword%' or  `mi` LIKE '%$keyword%' or  `fname` LIKE '%$keyword%' 
-            or  `age` LIKE '%$keyword%' or  `sex` LIKE '%$keyword%' or  `status` LIKE '%$keyword%' or  `address` LIKE '%$keyword%' or  `contact` LIKE '%$keyword%'
-            or  `bdate` LIKE '%$keyword%' or  `bplace` LIKE '%$keyword%' or  `nationality` LIKE '%$keyword%' or  `family_role` LIKE '%$keyword%' or  `role` LIKE '%$keyword%' or  `email` LIKE '%$keyword%'");
-            $stmnt->execute();
+            $keyword = '%' . $keyword . '%';
+            $stmnt = $conn->prepare("SELECT * FROM `tbl_resident` WHERE `lname` LIKE ? or  `mi` LIKE ? or  `fname` LIKE ? 
+            or  `age` LIKE ? or  `sex` LIKE ? or  `status` LIKE ? or  `address` LIKE ? or  `contact` LIKE ?
+            or  `bdate` LIKE ? or  `bplace` LIKE ? or  `nationality` LIKE ? or  `family_role` LIKE ? or  `role` LIKE ? or  `email` LIKE ?");
+            $stmnt->execute([$keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword]);
             
             while($view = $stmnt->fetch()){
         ?>
@@ -88,22 +89,22 @@
 
     <tbody>
         <?php if(is_array($view)) {?>
-            <?php foreach($view as $view) {?>
+            <?php foreach($view as $resident) {?>
                 <tr>
                    
-                    <td> <?= $view['lname'];?> </td>
-                    <td> <?= $view['fname'];?> </td>
-                    <td> <?= $view['mi'];?> </td>
-                    <td> <?= $view['age'];?> </td>
-                    <td> <?= $view['sex'];?> </td>
-                    <td> <?= $view['status'];?> </td>
-                    <td> <?= $view['houseno'];?> </td>
-                    <td> <?= $view['street'];?> </td>
-                    <td> <?= $view['brgy'];?> </td>
-                    <td> <?= $view['contact'];?> </td>
-                    <td> <?= $view['bdate'];?> </td>
-                    <td> <?= $view['bplace'];?> </td>
-                    <td> <?= $view['nationality'];?> </td>
+                    <td> <?= $resident['lname'];?> </td>
+                    <td> <?= $resident['fname'];?> </td>
+                    <td> <?= $resident['mi'];?> </td>
+                    <td> <?= $resident['age'];?> </td>
+                    <td> <?= $resident['sex'];?> </td>
+                    <td> <?= $resident['status'];?> </td>
+                    <td> <?= $resident['houseno'];?> </td>
+                    <td> <?= $resident['street'];?> </td>
+                    <td> <?= $resident['brgy'];?> </td>
+                    <td> <?= $resident['contact'];?> </td>
+                    <td> <?= $resident['bdate'];?> </td>
+                    <td> <?= $resident['bplace'];?> </td>
+                    <td> <?= $resident['nationality'];?> </td>
                 </tr>
             <?php
                 }

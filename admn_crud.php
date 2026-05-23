@@ -9,7 +9,7 @@ require_once('secure_header.php');
     $bmis->validate_admin();
     $view = $staffbmis->view_staff();
     $staffbmis->create_staff();
-    $upstaff = $staffbmis->update_staff();
+    $staffbmis->update_staff();
     $staffbmis->delete_staff();
     $staffcount = $staffbmis->count_staff();
     

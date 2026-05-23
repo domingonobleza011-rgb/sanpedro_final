@@ -4,7 +4,6 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
     require('classes/main.class.php');
     $bmis->create_admin(); 
-    $this->log_activity('CREATE_ADMIN', 'Admin', "Created admin account for $fname $lname ($role)");
     $userdetails = $bmis->get_userdata();
 
     include('dashboard_sidebar_start.php');

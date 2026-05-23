@@ -10,7 +10,7 @@ require('secure_header.php');
     $bmis->delete_brgyid();
     $view = $bmis->view_brgyid();
     $id_resident = $_GET['id_resident'];
-    $resident = $residentbmis->get_single_brgyid($id_resident);
+    $residentbmis->get_single_brgyid($id_resident);
    
 ?>
 

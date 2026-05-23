@@ -78,24 +78,24 @@
     
     <tbody>
         <?php if(is_array($view)) {?>
-            <?php foreach($view as $view) {?>
+            <?php foreach($view as $row) {?>
                 <tr>
                     <td>    
                         <form action="" method="post">
-                            <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="barangayid_form.php?id_brgyid=<?= $view['id_brgyid'];?>">Generate</a> 
-                            <input type="hidden" name="id_brgyid" value="<?= $view['id_brgyid']; ?>">
+                            <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="barangayid_form.php?id_brgyid=<?= $row['id_brgyid'];?>">Generate</a> 
+                            <input type="hidden" name="id_brgyid" value="<?= $row['id_brgyid']; ?>">
                             <button class="btn btn-danger" style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_brgyid"> Delete </button>
                         </form>
                     </td>
-                                    <td> <?= $view['id_resident'];?> </td> 
-                <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?></td>
-                <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
-                <td> <?= $view['bdate'];?> </td>
-                <td> <?= $view['bplace'];?> </td>
-                <td> <?= $view['contact'];?> </td>
-                <td> <?= $view['inc_lname'];?>, <?= $view['inc_fname'];?> </td>
-                <td> <?= $view['inc_contact'];?> </td>
-                <td> <?= $view['relation'];?> </td>
+                                    <td> <?= $row['id_resident'];?> </td> 
+                <td> <?= $row['lname'];?>, <?= $row['fname'];?> <?= $row['mi'];?></td>
+                <td> <?= $row['houseno'];?>, <?= $row['street'];?>, <?= $row['brgy'];?>, <?= $row['municipal'];?> </td>
+                <td> <?= $row['bdate'];?> </td>
+                <td> <?= $row['bplace'];?> </td>
+                <td> <?= $row['contact'];?> </td>
+                <td> <?= $row['inc_lname'];?>, <?= $row['inc_fname'];?> </td>
+                <td> <?= $row['inc_contact'];?> </td>
+                <td> <?= $row['relation'];?> </td>
                 </tr>
             <?php
                 }

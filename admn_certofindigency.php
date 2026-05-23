@@ -10,7 +10,7 @@ require('secure_header.php');
     $bmis->delete_certofindigency();
     $view = $bmis->view_certofindigency();
     $id_resident = $_GET['id_resident'];
-    $resident = $residentbmis->get_single_certofindigency($id_resident);
+    $residentbmis->get_single_certofindigency($id_resident);
    
 ?>
 

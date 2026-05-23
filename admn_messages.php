@@ -48,8 +48,26 @@ if (isset($_POST['delete_msg'])) {
 }
 
 // ---- Fetch data ----
-$messages      = $systemObject->viewMessages();
-$id_uploads    = $systemObject->getPendingIDUploads();
+$messages   = $systemObject->viewMessages();
+$id_uploads = [];
+$systemObject->getPendingIDUploads();
+
+// If the method is declared void and populates uploads on the object,
+// attempt to retrieve the pending uploads from the object's properties.
+try {
+    $reflect = new ReflectionObject($systemObject);
+    foreach ($reflect->getProperties() as $property) {
+        $property->setAccessible(true);
+        $value = $property->getValue($systemObject);
+        if (is_array($value) && isset($value[0]['id_upload'])) {
+            $id_uploads = $value;
+            break;
+        }
+    }
+} catch (ReflectionException $e) {
+    // ignore and continue with empty uploads list
+}
+
 $pending_count = 0;
 foreach ($id_uploads as $up) {
     if ($up['status'] === 'pending') $pending_count++;

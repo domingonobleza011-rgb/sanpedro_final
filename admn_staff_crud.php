@@ -8,7 +8,7 @@ require_once('secure_header.php');
     $bmis->validate_admin();
     $view = $staffbmis->view_staff();
     $staffbmis->create_staff();
-    $upstaff = $staffbmis->update_staff();
+    $staffbmis->update_staff();
     $staffbmis->delete_staff();
     $staffcount = $staffbmis->count_staff();
     
@@ -666,23 +666,23 @@ hr {
 
                     <tbody>
                         <?php if(is_array($view)) {?>
-                            <?php foreach($view as $view) {?>
+                            <?php foreach($view as $staff) {?>
                                 <tr>
                                     <td>    
                                         <form action="" method="post">
-                                            <a href="update_staff_form.php?id_user=<?= $view['id_user'];?>" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" class="btn btn-success"> Update </a>
-                                            <input type="hidden" name="id_user" value="<?= $view['id_user'];?>">
+                                            <a href="update_staff_form.php?id_user=<?= $staff['id_user'];?>" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" class="btn btn-success"> Update </a>
+                                            <input type="hidden" name="id_user" value="<?= $staff['id_user'];?>">
                                             <button class="btn btn-danger" type="submit" name="delete_staff"style="width: 90px; font-size: 17px; border-radius:30px;"> Archive </button>
                                         </form>
                                     </td>
-                                    <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
-                                    <td> <?= $view['age'];?> </td>
-                                    <td> <?= $view['sex'];?> </td>
-                                    <td> <?= $view['address'];?> </td>
-                                    <td> <?= $view['contact'];?> </td>
-                                    <td> <?= $view['position'];?> </td>
-                                    <td> <?= $view['role'];?> </td>
-                                    <td> <?= $view['addedby'];?> </td>   
+                                    <td> <?= $staff['lname'];?>, <?= $staff['fname'];?> <?= $staff['mi'];?> </td>
+                                    <td> <?= $staff['age'];?> </td>
+                                    <td> <?= $staff['sex'];?> </td>
+                                    <td> <?= $staff['address'];?> </td>
+                                    <td> <?= $staff['contact'];?> </td>
+                                    <td> <?= $staff['position'];?> </td>
+                                    <td> <?= $staff['role'];?> </td>
+                                    <td> <?= $staff['addedby'];?> </td>   
                                 </tr>
                             <?php }?>
                         <?php } ?>

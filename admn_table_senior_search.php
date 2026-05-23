@@ -74,19 +74,19 @@
 	</thead>
 	<tbody>
 		<?php if(is_array($view)) {?>
-			<?php foreach($view as $view) {?>
+			<?php foreach($view as $resident) {?>
 				<tr>
 					
-					<td> <?= $view['lname'];?> </td>
-					<td> <?= $view['fname'];?> </td>
-					<td> <?= $view['mi'];?> </td>
-					<td> <?= $view['age'];?> </td>
-					<td> <?= $view['sex'];?> </td>
-					<td> <?= $view['houseno'];?> </td>
-					<td> <?= $view['street'];?> </td>
-					<td> <?= $view['brgy'];?> </td>
-					<td> <?= $view['municipal'];?> </td>
-					<td> <?= $view['contact'];?> </td>
+					<td> <?= $resident['lname'];?> </td>
+					<td> <?= $resident['fname'];?> </td>
+					<td> <?= $resident['mi'];?> </td>
+					<td> <?= $resident['age'];?> </td>
+					<td> <?= $resident['sex'];?> </td>
+					<td> <?= $resident['houseno'];?> </td>
+					<td> <?= $resident['street'];?> </td>
+					<td> <?= $resident['brgy'];?> </td>
+					<td> <?= $resident['municipal'];?> </td>
+					<td> <?= $resident['contact'];?> </td>
 				</tr>
 			<?php
 				}

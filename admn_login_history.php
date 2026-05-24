@@ -2,6 +2,29 @@
     require('classes/main.class.php');
     $userdetails = $bmis->get_userdata();
 
+    // ==========================================
+    // BACKEND: Handle Bulk Deletion Action
+    // ==========================================
+    $delete_message = '';
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete'])) {
+        $ids_to_delete = isset($_POST['selected_ids']) ? array_map('intval', $_POST['selected_ids']) : [];
+        
+        if (!empty($ids_to_delete)) {
+            if (method_exists($bmis, 'delete_login_history')) {
+                $success = $bmis->delete_login_history($ids_to_delete);
+            } else {
+                $success = false; 
+            }
+
+            if ($success) {
+                $delete_message = '<div class="alert alert-success" style="background:#e3f3e9; color:#1e6e3e; padding:12px 20px; border-radius:8px; margin-bottom:20px; font-size:14px; font-weight:500;"><i class="fas fa-check-circle mr-2"></i> Successfully deleted ' . count($ids_to_delete) . ' record(s).</div>';
+            }
+        }
+    }
+
+    // ==========================================
+    // DATA FETCHING & FILTERS
+    // ==========================================
     $page     = max(1, (int)($_GET['page']     ?? 1));
     $per_page = 20;
     $filters  = [
@@ -11,6 +34,7 @@
         'date_to'   => trim($_GET['date_to']   ?? ''),
     ];
 
+    // Re-run fetching after a successful post statement to update the table immediately
     $result      = $bmis->get_login_history($filters, $page, $per_page);
     $logs        = $result['rows'];
     $total       = $result['total'];
@@ -130,7 +154,6 @@
         .log-table td { padding:11px 16px; font-size:13px; color:var(--ink); vertical-align:middle; }
         .log-table td.muted { color:#7a91b0; }
 
-        /* Event badges */
         .ev-badge {
             display:inline-flex; align-items:center; gap:5px;
             font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px;
@@ -159,6 +182,12 @@
         .pagination-links .current { background:var(--blue-mid); color:#fff; border-color:var(--blue-mid); }
         .pagination-links .disabled { color:#c0cdd8; pointer-events:none; }
 
+        .btn-bulk-delete {
+            background: linear-gradient(135deg, #d9534f, #c9302c);
+            box-shadow: 0 4px 12px rgba(217, 83, 79, 0.25);
+            display: none;
+        }
+
         @media(max-width:768px) {
             .filter-card { flex-direction:column; }
             .fg-search { min-width:100%; }
@@ -167,6 +196,8 @@
 </head>
 <body id="page-top">
 <div class="container-fluid mt-4">
+
+    <?php echo $delete_message; ?>
 
     <div class="page-heading">
         <div class="head-icon"><i class="fas fa-history"></i></div>
@@ -181,9 +212,7 @@
         <a href="admn_login_history.php" class="active"><i class="fas fa-sign-in-alt mr-1"></i> Login History</a>
     </div>
 
-    <!-- Quick stats -->
     <?php
-    // Quick counts (no filter applied for the stat row)
     $all = $bmis->get_login_history([], 1, 999999);
     $count_login  = count(array_filter($all['rows'], fn($r) => $r['event']==='login'));
     $count_logout = count(array_filter($all['rows'], fn($r) => $r['event']==='logout'));
@@ -220,7 +249,6 @@
         </div>
     </div>
 
-    <!-- Filters -->
     <form method="GET" action="">
         <div class="filter-card">
             <div class="fg fg-search">
@@ -254,94 +282,148 @@
         </div>
     </form>
 
-    <!-- Table -->
-    <div class="main-card">
-        <div class="card-header-strip">
-            <h2><i class="fas fa-sign-in-alt mr-2"></i>Login History</h2>
-            <span><?php echo number_format($total); ?> record<?php echo $total!=1?'s':''; ?></span>
-        </div>
-
-        <?php if(empty($logs)): ?>
-        <div class="empty-state">
-            <i class="fas fa-user-clock"></i>
-            <p>No login history found<?php echo array_filter($filters)?' matching your filters.':' yet.'; ?></p>
-        </div>
-        <?php else: ?>
-        <div style="overflow-x:auto;">
-        <table class="log-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Admin / User</th>
-                    <th>Role</th>
-                    <th>Email</th>
-                    <th>Event</th>
-                    <th>IP Address</th>
-                    <th>Date &amp; Time</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php
-            $row_num = ($page - 1) * $per_page + 1;
-            foreach($logs as $log):
-                $ev = $log['event'];
-                $ev_class = match($ev) { 'login'=>'ev-login','logout'=>'ev-logout',default=>'ev-failed' };
-                $ev_icon  = match($ev) { 'login'=>'fa-sign-in-alt','logout'=>'fa-sign-out-alt',default=>'fa-times-circle' };
-            ?>
-            <tr>
-                <td class="muted"><?php echo $row_num++; ?></td>
-                <td>
-                    <div style="font-weight:600;"><?php echo htmlspecialchars($log['admin_name']); ?></div>
-                </td>
-                <td class="muted" style="font-size:12px;"><?php echo htmlspecialchars($log['role'] ?: '—'); ?></td>
-                <td class="muted" style="font-size:12px;"><?php echo htmlspecialchars($log['email'] ?? '—'); ?></td>
-                <td>
-                    <span class="ev-badge <?php echo $ev_class; ?>">
-                        <i class="fas <?php echo $ev_icon; ?>"></i>
-                        <?php echo ucfirst($ev); ?>
-                    </span>
-                </td>
-                <td class="muted" style="font-size:12px;font-family:monospace;"><?php echo htmlspecialchars($log['ip_address'] ?? '—'); ?></td>
-                <td class="muted" style="white-space:nowrap;">
-                    <?php
-                        $dt = new DateTime($log['created_at']);
-                        echo $dt->format('M j, Y') . '<br><span style="font-size:11px;">' . $dt->format('h:i A') . '</span>';
-                    ?>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-        </div>
-
-        <div class="pagination-row">
-            <span>Showing <?php echo min(($page-1)*$per_page+1,$total); ?>–<?php echo min($page*$per_page,$total); ?> of <?php echo number_format($total); ?></span>
-            <div class="pagination-links">
-                <?php
-                $base_url = '?' . http_build_query(array_merge($filters, ['page'=>'']));
-                if($page > 1): ?>
-                    <a href="<?php echo $base_url.($page-1); ?>"><i class="fas fa-chevron-left"></i></a>
-                <?php else: ?>
-                    <span class="disabled"><i class="fas fa-chevron-left"></i></span>
-                <?php endif;
-
-                $start = max(1,$page-2); $end = min($total_pages,$page+2);
-                for($i=$start;$i<=$end;$i++):
-                    if($i===$page): ?><span class="current"><?php echo $i; ?></span>
-                    <?php else: ?><a href="<?php echo $base_url.$i; ?>"><?php echo $i; ?></a>
-                    <?php endif;
-                endfor;
-
-                if($page < $total_pages): ?>
-                    <a href="<?php echo $base_url.($page+1); ?>"><i class="fas fa-chevron-right"></i></a>
-                <?php else: ?>
-                    <span class="disabled"><i class="fas fa-chevron-right"></i></span>
-                <?php endif; ?>
+    <form method="POST" action="" id="bulkDeleteForm" onsubmit="return confirm('Are you sure you want to permanently delete the selected login history entries?');">
+        <div class="main-card">
+            <div class="card-header-strip">
+                <h2><i class="fas fa-sign-in-alt mr-2"></i>Login History</h2>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <button type="submit" name="bulk_delete" id="btnBulkDelete" class="btn-filter btn-bulk-delete">
+                        <i class="fas fa-trash"></i> Delete Selected
+                    </button>
+                    <span><?php echo number_format($total); ?> record<?php echo $total!=1?'s':''; ?></span>
+                </div>
             </div>
+
+            <?php if(empty($logs)): ?>
+            <div class="empty-state">
+                <i class="fas fa-user-clock"></i>
+                <p>No login history found<?php echo array_filter($filters)?' matching your filters.':' yet.'; ?></p>
+            </div>
+            <?php else: ?>
+            <div style="overflow-x:auto;">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th style="width: 45px; text-align: center;">
+                            <input type="checkbox" id="selectAll" style="transform: scale(1.2); cursor: pointer;">
+                        </th>
+                        <th>#</th>
+                        <th>Admin / User</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Event</th>
+                        <th>IP Address</th>
+                        <th>Date &amp; Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                $row_num = ($page - 1) * $per_page + 1;
+                foreach($logs as $log):
+                    $ev = $log['event'];
+                    $ev_class = match($ev) { 'login'=>'ev-login','logout'=>'ev-logout',default=>'ev-failed' };
+                    $ev_icon  = match($ev) { 'login'=>'fa-sign-in-alt','logout'=>'fa-sign-out-alt',default=>'fa-times-circle' };
+                    
+                    // FIXED: Maps to your actual primary database key column name
+                    $log_id = $log['id_history'] ?? $log['id'] ?? $log['log_id'] ?? 0;
+                ?>
+                <tr>
+                    <td style="text-align: center;">
+                        <input type="checkbox" name="selected_ids[]" value="<?php echo $log_id; ?>" class="log-checkbox" style="transform: scale(1.1); cursor: pointer;">
+                    </td>
+                    <td class="muted"><?php echo $row_num++; ?></td>
+                    <td>
+                        <div style="font-weight:600;"><?php echo htmlspecialchars($log['admin_name']); ?></div>
+                    </td>
+                    <td class="muted" style="font-size:12px;"><?php echo htmlspecialchars($log['role'] ?: '—'); ?></td>
+                    <td class="muted" style="font-size:12px;"><?php echo htmlspecialchars($log['email'] ?? '—'); ?></td>
+                    <td>
+                        <span class="ev-badge <?php echo $ev_class; ?>">
+                            <i class="fas <?php echo $ev_icon; ?>"></i>
+                            <?php echo ucfirst($ev); ?>
+                        </span>
+                    </td>
+                    <td class="muted" style="font-size:12px;font-family:monospace;"><?php echo htmlspecialchars($log['ip_address'] ?? '—'); ?></td>
+                    <td class="muted" style="white-space:nowrap;">
+                        <?php
+                            $dt = new DateTime($log['created_at']);
+                            echo $dt->format('M j, Y') . '<br><span style="font-size:11px;">' . $dt->format('h:i A') . '</span>';
+                        ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+            </div>
+
+            <div class="pagination-row">
+                <span>Showing <?php echo min(($page-1)*$per_page+1,$total); ?>–<?php echo min($page*$per_page,$total); ?> of <?php echo number_format($total); ?></span>
+                <div class="pagination-links">
+                    <?php
+                    $base_url = '?' . http_build_query(array_merge($filters, ['page'=>'']));
+                    if($page > 1): ?>
+                        <a href="<?php echo $base_url.($page-1); ?>"><i class="fas fa-chevron-left"></i></a>
+                    <?php else: ?>
+                        <span class="disabled"><i class="fas fa-chevron-left"></i></span>
+                    <?php endif;
+
+                    $start = max(1,$page-2); $end = min($total_pages,$page+2);
+                    for($i=$start;$i<=$end;$i++):
+                        if($i===$page): ?><span class="current"><?php echo $i; ?></span>
+                        <?php else: ?><a href="<?php echo $base_url.$i; ?>"><?php echo $i; ?></a>
+                        <?php endif;
+                    endfor;
+
+                    if($page < $total_pages): ?>
+                        <a href="<?php echo $base_url.($page+1); ?>"><i class="fas fa-chevron-right"></i></a>
+                    <?php else: ?>
+                        <span class="disabled"><i class="fas fa-chevron-right"></i></span>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
-    </div>
+    </form>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const selectAllBox = document.getElementById('selectAll');
+    const rowBoxes = document.querySelectorAll('.log-checkbox');
+    const deleteBtn = document.getElementById('btnBulkDelete');
+
+    function refreshDeleteButtonState() {
+        const checkCount = document.querySelectorAll('.log-checkbox:checked').length;
+        if (checkCount > 0) {
+            deleteBtn.style.display = 'inline-flex';
+            deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Delete Selected (${checkCount})`;
+        } else {
+            deleteBtn.style.display = 'none';
+        }
+    }
+
+    if (selectAllBox) {
+        selectAllBox.addEventListener('change', function () {
+            rowBoxes.forEach(box => {
+                box.checked = selectAllBox.checked;
+            });
+            refreshDeleteButtonState();
+        });
+    }
+
+    rowBoxes.forEach(box => {
+        box.addEventListener('change', function () {
+            if (!this.checked) {
+                selectAllBox.checked = false;
+            } else {
+                const totalRowsChecked = Array.from(rowBoxes).every(cb => cb.checked);
+                selectAllBox.checked = totalRowsChecked;
+            }
+            refreshDeleteButtonState();
+        });
+    });
+});
+</script>
 </body>
 </html>

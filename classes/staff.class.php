@@ -256,7 +256,8 @@ public function update_staff() {
         // 4. Now delete the database record
         $stmt = $connection->prepare("DELETE FROM tbl_user WHERE id_user = ?");
         $stmt->execute([$id_user]);
-        
+
+        $this->log_activity('DELETE_Staff', 'Staff', "Deleted Staff Record #$id_user");
         session_start(); // only if session not already started globally
     $_SESSION['swal'] = json_encode([
         'icon'  => 'success',

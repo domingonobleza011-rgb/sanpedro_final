@@ -1,5 +1,6 @@
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
+require_once('secure_header.php');
 require('secure_header.php'); 
     error_reporting(E_ALL ^ E_WARNING);
     include('classes/resident.class.php');
@@ -584,7 +585,7 @@ require('secure_header.php');
 
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?>
+ if (!$is_verified): ?>
 <!-- VERIFICATION NOTICE BANNER -->
 <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 p-4" role="alert" style="border-left: 6px solid #ffc107 !important;">
     <div class="d-flex align-items-start gap-3">
@@ -601,13 +602,13 @@ require_once('secure_header.php'); if (!$is_verified): ?>
 </div>
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
+ else: ?>
 <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 py-2 px-4" role="alert">
     <i class="bi bi-patch-check-fill me-2"></i> <strong>Account Verified</strong> &mdash; You have full access to all barangay services.
 </div>
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
+ endif; ?>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
 
@@ -616,21 +617,21 @@ require_once('secure_header.php'); endif; ?>
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
+ if ($is_verified): ?>
             <a href="services_business.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
+ else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
+ endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+ if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-file-earmark-medical-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Business Permit</h4>
                         </div>
@@ -642,21 +643,21 @@ require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-s
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
+ if ($is_verified): ?>
             <a href="services_brgyid.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
+ else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
+ endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+ if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-person-vcard-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Barangay ID</h4>
                         </div>
@@ -668,21 +669,21 @@ require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-s
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
+ if ($is_verified): ?>
             <a href="services_certofindigency.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
+ else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
+ endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+ if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-briefcase-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Certificate of Indigency</h4>
                         </div>
@@ -694,21 +695,21 @@ require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-s
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
+ if ($is_verified): ?>
             <a href="services_certofres.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
+ else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
+ endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+ if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-house-check-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Certificate of Residency</h4>
                         </div>
@@ -720,21 +721,21 @@ require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-s
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
+ if ($is_verified): ?>
             <a href="services_brgyclearance.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
+ else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
+ endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+ if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-shield-lock-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Barangay Clearance</h4>
                         </div>
@@ -778,12 +779,12 @@ require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-s
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-warning text-dark float-end">Action Needed</span><?php endif; ?>
+ if (!$is_verified): ?><span class="badge bg-warning text-dark float-end">Action Needed</span><?php endif; ?>
                             <i class="bi bi-chat-dots-fill fs-1"></i>
                             <h4 class="mt-2 text-dark">Messages</h4>
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><small class="text-warning fw-bold">Upload ID here</small><?php endif; ?>
+ if (!$is_verified): ?><small class="text-warning fw-bold">Upload ID here</small><?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -795,7 +796,7 @@ require_once('secure_header.php'); if (!$is_verified): ?><small class="text-warn
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body text-center">
-                            <i class="bi bi-info-circle-fill fs-1"></i>
+                            <i class="bi bi-chat-square-text-fill fs-1"></i>
                             <h4 class="mt-2 text-dark">Complaint</h4>
                         </div>
                     </div>
@@ -871,12 +872,12 @@ function showVerifyAlert() {
             });
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="module" src="fcm_init.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

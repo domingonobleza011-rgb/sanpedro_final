@@ -138,17 +138,17 @@ h1 {
     <title><?= $resident['lname'];?>,     <?= $resident['fname'];?>    <?= $resident['mi'];?></title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <!-- bootstrap 3.0.2 -->
-    <link href="../BarangaySystem/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="../BarangaySystem-master/master/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <!-- font Awesome -->
-    <link href="../BarangaySystem/bootstrap/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Ionicons -->
-    <link href="../BarangaySystem/bootstrap/css/ionicons.min.css" rel="stylesheet" type="text/css" />
-    <link href="../BarangaySystem/bootstrap/css/morris-0.4.3.min.css" rel="stylesheet" type="text/css" />
+    <link href="../BarangaySystem-master/bootstrap/css/ionicons.min.css" rel="stylesheet" type="text/css" />
+    <link href="../BarangaySystem-master/bootstrap/css/morris-0.4.3.min.css" rel="stylesheet" type="text/css" />
     <!-- Theme style -->
-    <link href="../BarangaySystem/bootstrap/css/AdminLTE.css" rel="stylesheet" type="text/css" />
-    <link href="./BarangaySystem/bootstrap/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css" />
-    <link href="../BarangaySystem/bootstrap/css/select2.css" rel="stylesheet" type="text/css" />
-    <script src="../BarangaySystem/bootstrap/css/jquery-1.12.3.js" type="text/javascript"></script>  
+    <link href="../BarangaySystem-master/bootstrap/css/AdminLTE.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link href="../BarangaySystem-master/bootstrap/css/select2.css" rel="stylesheet" type="text/css" />
+    <script src="../BarangaySystem-master/bootstrap/css/jquery-1.12.3.js" type="text/javascript"></script>  
     
 </head>
  <body class="skin-black" >

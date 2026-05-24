@@ -11,7 +11,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+		<link href="../BarangaySystem-master/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
 	</head>
 
 	<body>

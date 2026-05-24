@@ -175,11 +175,12 @@ function bmis_set_security_headers(): void {
     header('X-XSS-Protection: 1; mode=block');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     
-    header("Content-Security-Policy: default-src 'self'; "
-         . "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://kit.fontawesome.com https://ka-f.fontawesome.com; "
-         . "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://ka-f.fontawesome.com; "
-         // Added https://cdn.jsdelivr.net here so Bootstrap Icons can load the actual font files
-         . "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://kit.fontawesome.com https://ka-f.fontawesome.com https://cdn.jsdelivr.net; "
-         . "img-src 'self' data: blob:; "
-         . "frame-src https://www.google.com;");
+header("Content-Security-Policy: default-src 'self'; "
+     . "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://code.jquery.com https://kit.fontawesome.com https://ka-f.fontawesome.com https://stackpath.bootstrapcdn.com https://maxcdn.bootstrapcdn.com https://ajax.googleapis.com https://www.gstatic.com https://cdnjs.cloudflare.com blob:; "
+     . "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://ka-f.fontawesome.com https://stackpath.bootstrapcdn.com https://maxcdn.bootstrapcdn.com; "
+     . "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://kit.fontawesome.com https://ka-f.fontawesome.com https://cdn.jsdelivr.net; "
+     . "img-src 'self' data: blob:; "
+     . "connect-src 'self' https://fcm.googleapis.com https://oauth2.googleapis.com https://www.googleapis.com https://cdn.jsdelivr.net https://ka-f.fontawesome.com https://www.gstatic.com https://stackpath.bootstrapcdn.com https://firebaseinstallations.googleapis.com https://fcmregistrations.googleapis.com https://cdnjs.cloudflare.com; "
+     . "worker-src 'self' blob:; "
+     . "frame-src https://www.google.com;");
 }

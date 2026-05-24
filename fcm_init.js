@@ -23,38 +23,41 @@ const app       = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 async function initPushNotifications() {
-    // 1. Register the service worker
     if (!('serviceWorker' in navigator)) return;
 
-    const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-
-    // 2. Request permission
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
-
-    // 3. Get FCM token and save it to the server
     try {
+        const reg = await navigator.serviceWorker.register(
+            '/BarangaySystem-master/firebase-messaging-sw.js',
+            { scope: '/BarangaySystem-master/' }
+        );
+
+        await reg.update();
+        const activeReg = await navigator.serviceWorker.ready;
+        console.log('SW active:', activeReg.scope);
+
+        const permission = await Notification.requestPermission();
+        console.log('Permission:', permission);
+        if (permission !== 'granted') return;
+
         const token = await getToken(messaging, {
-            vapidKey:          VAPID_KEY,
-            serviceWorkerRegistration: reg
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration: activeReg
         });
 
+        console.log('FCM Token:', token);
+
         if (token) {
-            await fetch('save_fcm_token.php', {
+            const res = await fetch('save_fcm_token.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'token=' + encodeURIComponent(token)
             });
+            const data = await res.json();
+            console.log('Token save result:', data);
         }
     } catch (err) {
-        console.warn('FCM token error:', err);
+        console.error('FCM error:', err.code, err.message);
     }
-
-    // 4. Handle foreground notifications (site IS open)
-    onMessage(messaging, (payload) => {
-        const { title, body } = payload.notification;
-        showInPageToast(title, body);
-    });
 }
 
 // Friendly in-page toast for foreground notifications

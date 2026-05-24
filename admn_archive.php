@@ -317,7 +317,7 @@
 
 <?php include('dashboard_sidebar_start.php'); ?>
 
-<link href="css/admn_pages.css" rel="stylesheet">
+<link href="css/" rel="stylesheet">
 
 <style>
 .archive-header {

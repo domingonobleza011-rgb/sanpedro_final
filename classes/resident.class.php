@@ -241,9 +241,12 @@ header("refresh: 0");
 
     if(isset($_POST['delete_resident'])) {
         $this->archive_record('tbl_resident', 'id_resident', $id_resident, 'resident');
+
         $connection = $this->openConn();
         $stmt = $connection->prepare("DELETE FROM tbl_resident WHERE id_resident = ?");
         $stmt->execute([$id_resident]);
+
+        $this->log_activity('DELETE_Resident', 'Resident', "Deleted Resident Record #$id_resident");
 
         $_SESSION['swal'] = json_encode([
             'icon'  => 'success',

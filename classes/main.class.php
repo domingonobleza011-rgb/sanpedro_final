@@ -1,4 +1,5 @@
 <?php 
+require_once __DIR__ . '/../vendor/autoload.php';
 function notif($message, $type = 'info') {
     $msg = addslashes($message);
     echo "<script>showNotif('$msg', '$type');</script>";
@@ -21,16 +22,16 @@ class BMISClass {
         die;
     }
  
-    public function openConn() {
+public function openConn() {
+    if ($this->con === null) {
         try {
             $this->con = new PDO($this->server, $this->user, $this->pass, $this->options);
-            return $this->con;
-        }
- 
-        catch(PDOException $e) {
+        } catch (PDOException $e) {
             notif("Database Connection Error: " . $e->getMessage(), 'error');
         }
     }
+    return $this->con;
+}
  
     // ──────────────────────────────────────────────────────────────────────────
     // ARCHIVE HELPER — call before any DELETE to log to tbl_archive
@@ -264,11 +265,45 @@ class BMISClass {
             return ['rows' => [], 'total' => 0];
         }
     }
- 
+ public function delete_login_history($id_history) {
+        try {
+            // If nothing was passed or the array is empty, stop early
+            if (empty($id_history)) {
+                return false;
+            }
+
+            // Force it to be an array if a single ID is accidentally passed
+            if (!is_array($id_history)) {
+                $id_history = [$id_history];
+            }
+
+            $connection = $this->openConn();
+
+            // 1. Create a string of question marks matching the number of IDs: e.g., "?, ?, ?"
+            $placeholders = implode(',', array_fill(0, count($id_history), '?'));
+
+            // 2. Point to the correct column name (id_history) instead of (id)
+            $sql  = "DELETE FROM tbl_login_history WHERE id_history IN ($placeholders)";
+            
+            $stmt = $connection->prepare($sql);
+            
+            // 3. Execute by passing the array values directly
+            return $stmt->execute(array_values($id_history));
+
+        } catch (PDOException $e) {
+            // Friendly framework notification layout
+            if (function_exists('notif')) {
+                notif("Database Error: " . $e->getMessage(), 'error');
+            } else {
+                error_log("Database Error: " . $e->getMessage());
+            }
+            return false;
+        }
+    }
     /**
      * Delete log rows older than $days days (optional maintenance).
      */
-    public function clear_old_logs(int $days = 90): void {
+    public function clear_old_logs(int $days = 1): void {
         try {
             $con = $this->openConn();
             $con->prepare("DELETE FROM tbl_activity_log  WHERE created_at < NOW() - INTERVAL ? DAY")->execute([$days]);
@@ -543,6 +578,7 @@ class BMISClass {
  
 public function admin_delete_announcement(){
     if(isset($_POST['delete_announcement'])) {
+        $this->archive_record('tbl_announcement', 'id_announcement', $id_announcement, 'announcement');
         $id_announcement = $_POST['id_announcement'];
         $connection = $this->openConn();
 
@@ -551,6 +587,7 @@ public function admin_delete_announcement(){
         $stmt->execute([$id_announcement]);
         $row = $stmt->fetch();
 
+        $this->log_activity('DELETE_Announcement', 'Announcement', "Deleted Announcement Record #$id_announcement");
         // Delete associated image files
         if($row && !empty($row['image'])) {
             foreach(explode(',', $row['image']) as $img) {
@@ -924,9 +961,15 @@ private function getFCMAccessToken(): ?string {
             return null;
         }
 
+        $sa = json_decode(file_get_contents($serviceAccountPath), true);
+        if (!$sa || empty($sa['private_key'])) {
+            error_log("FCM: service account JSON is invalid or missing private_key");
+            return null;
+        }
+
         $credentials = new \Google\Auth\Credentials\ServiceAccountCredentials(
             'https://www.googleapis.com/auth/firebase.messaging',
-            json_decode(file_get_contents($serviceAccountPath), true)
+            $sa
         );
 
         $token = $credentials->fetchAuthToken();
@@ -1112,9 +1155,13 @@ public function delete_certofres(){
         if(isset($_POST['delete_certofindigency'])) {
             $id_indigency = $_POST['id_indigency'];
             $this->archive_record('tbl_indigency', 'id_indigency', $id_indigency, 'certofindigency');
+
             $connection = $this->openConn();
             $stmt = $connection->prepare("DELETE FROM tbl_indigency where id_indigency = ?");
             $stmt->execute([$id_indigency]);
+
+            $this->log_activity('DELETE_DOCUMENT', 'Document', "Deleted Certificate of Indigency #$id_indigency");
+
             header("Refresh:0");
             exit();
         }
@@ -1177,9 +1224,13 @@ public function delete_certofres(){
         if(isset($_POST['delete_clearance'])) {
             $id_clearance = $_POST['id_clearance'];
             $this->archive_record('tbl_clearance', 'id_clearance', $id_clearance, 'clearance');
+
             $connection = $this->openConn();
             $stmt = $connection->prepare("DELETE FROM tbl_clearance where id_clearance = ?");
             $stmt->execute([$id_clearance]);
+
+            $this->log_activity('DELETE_DOCUMENT', 'Document', "Deleted Barangay Clearance #$id_clearance");
+
             header("Refresh:0");
             exit();
         }
@@ -1265,9 +1316,13 @@ public function delete_certofres(){
         if(isset($_POST['delete_bspermit'])) {
             $id_bspermit = $_POST['id_bspermit'];
             $this->archive_record('tbl_bspermit', 'id_bspermit', $id_bspermit, 'bspermit');
+
             $connection = $this->openConn();
             $stmt = $connection->prepare("DELETE FROM tbl_bspermit WHERE id_bspermit = ?");
             $stmt->execute([$id_bspermit]);
+
+            $this->log_activity('DELETE_DOCUMENT', 'Document', "Deleted Barangay Business Permit #$id_bspermit");
+
             header("Refresh:0");
             exit();
         }
@@ -1337,9 +1392,13 @@ public function get_single_youth($id_youth) {
         if(isset($_POST['delete_youth'])) {
             $id_youth = $_POST['id_youth'];
             $this->archive_record('tbl_youth', 'id_youth', $id_youth, 'youth');
+
             $connection = $this->openConn();
             $stmt = $connection->prepare("DELETE FROM tbl_youth WHERE id_youth = ?");
             $stmt->execute([$id_youth]);
+
+            $this->log_activity('DELETE_DOCUMENT', 'Document', "Deleted Youth Profile #$id_youth");
+
             header("Refresh:0");
             exit();
         }
@@ -1397,9 +1456,13 @@ public function get_single_youth($id_youth) {
         $id_brgyid = $_POST['id_brgyid'];
         if(isset($_POST['delete_brgyid'])) {
             $this->archive_record('tbl_brgyid', 'id_brgyid', $id_brgyid, 'brgyid');
+
             $connection = $this->openConn();
             $stmt = $connection->prepare("DELETE FROM tbl_brgyid WHERE id_brgyid = ?");
             $stmt->execute([$id_brgyid]);
+
+            $this->log_activity('DELETE_DOCUMENT', 'Document', "Deleted Barangay ID #$id_brgyid");
+
             header("Refresh:0");
             exit();
         }
@@ -1447,9 +1510,13 @@ public function get_single_youth($id_youth) {
         if(isset($_POST['delete_blotter'])) {
             $id_blotter = $_POST['id_blotter'];
             $this->archive_record('tbl_blotter', 'id_blotter', $id_blotter, 'blotter');
+
             $connection = $this->openConn();
             $stmt = $connection->prepare("DELETE FROM tbl_blotter WHERE id_blotter = ?");
             $stmt->execute([$id_blotter]);
+
+            $this->log_activity('DELETE_DOCUMENT', 'Document', "Deleted Blotter Record #$id_blotter");
+
             header("Refresh:0");
             exit();
         }

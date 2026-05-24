@@ -2,6 +2,8 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+define('BMIS_ROLE_REQUIRED', 'admin');
+include('secure_header.php'); 
     require('classes/main.class.php');
     $bmis->create_admin(); 
     $userdetails = $bmis->get_userdata();
@@ -326,6 +328,7 @@ error_reporting(E_ALL);
 
                 <div class="cp-body">
                     <form method="POST" autocomplete="off" id="addAdminForm">
+                        <?= bmis_csrf_field() ?>
 
                         <div class="section-label"><i class="fas fa-id-card"></i> Personal Information</div>
 

@@ -47,26 +47,20 @@ if (isset($_POST['delete_msg'])) {
     exit();
 }
 
+// ---- Handle: Bulk delete messages ----
+if (isset($_POST['bulk_delete_msg']) && !empty($_POST['msg_ids'])) {
+    $ids = array_map('intval', $_POST['msg_ids']);
+    foreach ($ids as $id) {
+        $systemObject->deleteMessage($id);
+    }
+    header("Location: admn_messages.php?toast=msg_deleted");
+    exit();
+}
+
 // ---- Fetch data ----
 $messages   = $systemObject->viewMessages();
 $id_uploads = [];
-$systemObject->getPendingIDUploads();
-
-// If the method is declared void and populates uploads on the object,
-// attempt to retrieve the pending uploads from the object's properties.
-try {
-    $reflect = new ReflectionObject($systemObject);
-    foreach ($reflect->getProperties() as $property) {
-        $property->setAccessible(true);
-        $value = $property->getValue($systemObject);
-        if (is_array($value) && isset($value[0]['id_upload'])) {
-            $id_uploads = $value;
-            break;
-        }
-    }
-} catch (ReflectionException $e) {
-    // ignore and continue with empty uploads list
-}
+$id_uploads = $systemObject->getPendingIDUploads();
 
 $pending_count = 0;
 foreach ($id_uploads as $up) {
@@ -116,6 +110,90 @@ foreach ($id_uploads as $up) {
         .bmis-btn-confirm {
             padding: 8px 20px; font-size: 13px; font-weight: 600; border-radius: 8px;
             cursor: pointer; border: none; color: #fff;
+        }
+
+        /* ── Bulk toolbar ── */
+        #bulkToolbar {
+            background: #eff6ff;
+            border-bottom: 1px solid #bfdbfe;
+            border-radius: 12px 12px 0 0;
+            transition: all 0.2s ease;
+        }
+
+        /* ── Row selected highlight ── */
+        tr.row-selected {
+            background-color: #eff6ff !important;
+        }
+
+        /* ── Custom checkboxes ── */
+        .msg-checkbox,
+        #selectAllMsgs {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #6c757d;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* Header checkbox sits inside dark thead — give it a lighter border */
+        thead .msg-checkbox,
+        thead #selectAllMsgs {
+            border-color: #adb5bd;
+            background-color: transparent;
+        }
+
+        /* Hover state */
+        .msg-checkbox:hover,
+        #selectAllMsgs:hover {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        }
+
+        /* Checked state */
+        .msg-checkbox:checked,
+        #selectAllMsgs:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        /* Checkmark via SVG background */
+        .msg-checkbox:checked::after,
+        #selectAllMsgs:checked::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3 8l3.5 3.5L13 4.5'/%3E%3C/svg%3E") center / 12px no-repeat;
+        }
+
+        /* Indeterminate (dash) state for select-all */
+        #selectAllMsgs:indeterminate {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        #selectAllMsgs:indeterminate::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' d='M3.5 8h9'/%3E%3C/svg%3E") center / 12px no-repeat;
+        }
+
+        /* Focus ring */
+        .msg-checkbox:focus-visible,
+        #selectAllMsgs:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.35);
+        }
+
+        /* Checked row — checkbox accent stays blue */
+        tr.row-selected .msg-checkbox {
+            border-color: #0d6efd;
         }
 
         /* ── Success toast ── */
@@ -260,10 +338,29 @@ foreach ($id_uploads as $up) {
         <!-- TAB 2: RESIDENT MESSAGES -->
         <div class="tab-pane fade" id="messages-panel">
             <div class="card shadow-sm border-0 rounded-4">
+
+                <!-- Bulk action toolbar (hidden until at least 1 checkbox is checked) -->
+                <div id="bulkToolbar" class="d-none px-4 py-3 d-flex align-items-center gap-3 rounded-top-4">
+                    <i class="bi bi-check2-square text-primary fs-5"></i>
+                    <span id="selectedCount" class="fw-bold text-primary small"></span>
+                    <button type="button" class="btn btn-danger btn-sm rounded-pill px-4 fw-bold"
+                            onclick="openBulkDeleteModal()">
+                        <i class="bi bi-trash-fill me-1"></i> Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                            onclick="clearSelection()">
+                        <i class="bi bi-x-lg me-1"></i> Cancel
+                    </button>
+                </div>
+
                 <div class="card-body p-0">
                     <table class="table table-hover text-center mb-0">
                         <thead class="table-dark">
                             <tr>
+                                <th class="py-3" style="width: 48px;">
+                                    <input type="checkbox" id="selectAllMsgs" class="form-check-input"
+                                           onchange="toggleSelectAll(this)" title="Select all messages">
+                                </th>
                                 <th class="py-3">Resident Name</th>
                                 <th class="py-3">Message Preview</th>
                                 <th class="py-3">Date Sent</th>
@@ -278,7 +375,11 @@ foreach ($id_uploads as $up) {
                                     $mfname   = htmlspecialchars($msg['fname']);
                                     $mfull    = htmlspecialchars($msg['fname'] . ' ' . $msg['lname']);
                                 ?>
-                                    <tr>
+                                    <tr id="msgRow<?= $mid ?>">
+                                        <td class="align-middle">
+                                            <input type="checkbox" class="form-check-input msg-checkbox"
+                                                   value="<?= $mid ?>" onchange="updateBulkToolbar()">
+                                        </td>
                                         <td class="align-middle fw-bold"><?= $mfull ?></td>
                                         <td class="align-middle text-muted">
                                             <?= htmlspecialchars(substr($msg['message_text'], 0, 50)) ?>...
@@ -329,7 +430,7 @@ foreach ($id_uploads as $up) {
 
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td colspan="5" class="py-5 text-muted fst-italic">No messages found.</td></tr>
+                                <tr><td colspan="6" class="py-5 text-muted fst-italic">No messages found.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -370,6 +471,12 @@ foreach ($id_uploads as $up) {
 <form id="deleteMsgForm" method="POST" action="admn_messages.php" style="display:none;">
     <input type="hidden" name="id_admin_msg" id="deleteMsgId">
     <input type="hidden" name="delete_msg"   value="1">
+</form>
+
+<!-- Bulk delete messages form -->
+<form id="bulkDeleteForm" method="POST" action="admn_messages.php" style="display:none;">
+    <input type="hidden" name="bulk_delete_msg" value="1">
+    <div id="bulkDeleteIds"></div>
 </form>
 
 
@@ -513,6 +620,39 @@ foreach ($id_uploads as $up) {
 
 
 <!-- ════════════════════════════════════════════════════════
+     BULK DELETE MESSAGES MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="bulkDeleteModal" class="bmis-modal-backdrop">
+  <div class="bmis-modal-card">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <div class="bmis-modal-icon" style="background:#fee2e2;">
+        <i class="bi bi-trash-fill" style="color:#dc2626; font-size:18px;"></i>
+      </div>
+      <div>
+        <p class="bmis-modal-title">Delete selected messages</p>
+        <p class="bmis-modal-sub">This action cannot be undone.</p>
+      </div>
+    </div>
+    <hr style="margin:16px 0; border-color:#e5e7eb;">
+    <div class="bmis-modal-info" style="background:#fef2f2; border:1.5px solid #fecaca;">
+      <i class="bi bi-exclamation-triangle-fill" style="color:#dc2626; font-size:20px; flex-shrink:0;"></i>
+      <div>
+        <p id="bulkDeleteCount" style="font-size:14px; font-weight:700; color:#991b1b;"></p>
+        <p style="font-size:12px; color:#b91c1c;">All selected messages will be permanently deleted.</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="bmis-btn-cancel" onclick="closeAllModals()">Cancel</button>
+      <button class="bmis-btn-confirm" style="background:linear-gradient(135deg,#dc2626,#ef4444);"
+              onclick="submitBulkDelete()">
+        <i class="bi bi-trash-fill me-1"></i> Yes, delete all
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
      SUCCESS TOAST
 ═══════════════════════════════════════════════════════════ -->
 <div id="bmisToast">
@@ -575,12 +715,78 @@ document.querySelectorAll('.bmis-modal-backdrop').forEach(function(m) {
 });
 
 
+// ── Bulk select / delete ──────────────────────────────────────
+
+function toggleSelectAll(cb) {
+    document.querySelectorAll('.msg-checkbox').forEach(function(c) {
+        c.checked = cb.checked;
+        c.closest('tr').classList.toggle('row-selected', cb.checked);
+    });
+    updateBulkToolbar();
+}
+
+function updateBulkToolbar() {
+    var checked    = document.querySelectorAll('.msg-checkbox:checked');
+    var all        = document.querySelectorAll('.msg-checkbox');
+    var toolbar    = document.getElementById('bulkToolbar');
+    var selectAll  = document.getElementById('selectAllMsgs');
+    var countLabel = document.getElementById('selectedCount');
+
+    // Update each row's highlight
+    document.querySelectorAll('.msg-checkbox').forEach(function(c) {
+        c.closest('tr').classList.toggle('row-selected', c.checked);
+    });
+
+    // Show/hide toolbar
+    if (checked.length > 0) {
+        toolbar.classList.remove('d-none');
+        toolbar.classList.add('d-flex');
+    } else {
+        toolbar.classList.add('d-none');
+        toolbar.classList.remove('d-flex');
+    }
+
+    countLabel.textContent = checked.length + ' message' + (checked.length !== 1 ? 's' : '') + ' selected';
+
+    // Header checkbox state
+    selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+    selectAll.checked       = all.length > 0 && checked.length === all.length;
+}
+
+function clearSelection() {
+    document.querySelectorAll('.msg-checkbox').forEach(function(c) {
+        c.checked = false;
+        c.closest('tr').classList.remove('row-selected');
+    });
+    var selectAll = document.getElementById('selectAllMsgs');
+    selectAll.checked       = false;
+    selectAll.indeterminate = false;
+    updateBulkToolbar();
+}
+
+function openBulkDeleteModal() {
+    var count = document.querySelectorAll('.msg-checkbox:checked').length;
+    document.getElementById('bulkDeleteCount').textContent =
+        count + ' message' + (count !== 1 ? 's' : '') + ' will be permanently deleted.';
+    document.getElementById('bulkDeleteModal').classList.add('open');
+}
+
+function submitBulkDelete() {
+    var ids       = Array.from(document.querySelectorAll('.msg-checkbox:checked')).map(function(c) { return c.value; });
+    var container = document.getElementById('bulkDeleteIds');
+    container.innerHTML = ids.map(function(id) {
+        return '<input type="hidden" name="msg_ids[]" value="' + id + '">';
+    }).join('');
+    document.getElementById('bulkDeleteForm').submit();
+}
+
+
 // ── Toast ────────────────────────────────────────────────────
 var toastConfigs = {
     approved:      { type: 'success', title: 'Approved',  msg: 'Resident account has been verified successfully.' },
     rejected:      { type: 'warning', title: 'Rejected',  msg: 'ID submission rejected. Resident has been notified.' },
     upload_deleted:{ type: 'delete',  title: 'Deleted',   msg: 'ID submission record permanently deleted.' },
-    msg_deleted:   { type: 'delete',  title: 'Deleted',   msg: 'Message permanently deleted.' },
+    msg_deleted:   { type: 'delete',  title: 'Deleted',   msg: 'Message(s) permanently deleted.' },
     error:         { type: 'error',   title: 'Error',     msg: 'Something went wrong. Please try again.' },
 };
 
@@ -630,7 +836,6 @@ function closeToast() {
     var key    = params.get('toast');
     if (key && toastConfigs[key]) {
         showToast(toastConfigs[key]);
-        // Clean URL without reloading
         history.replaceState(null, '', window.location.pathname);
     }
 })();

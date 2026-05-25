@@ -483,10 +483,13 @@ hr {
                     <span>Announcements</span></a>
             </li>
 
+
+
             <li class="nav-item">
-                <a class="nav-link" href="admn_youth_profile.php">
-                    <i class="fas fa-users"></i>
-                    <span>Youth Profiling</span></a>
+                <a class="nav-link" href="sk_dashboard.php">
+                    <i class="fas fa-leaf"></i>
+                    <span>SK Portal</span>
+                </a>
             </li>
 
             <!-- Certificate of Residency -->

@@ -15,7 +15,7 @@ class BMISClass {
     protected $con;
 
 
-    public function show_404()
+   public function show_404()
     {
         http_response_code(404);
         echo "Page is currently unavailable";
@@ -362,8 +362,10 @@ public function openConn() {
             }
  
             // Invalid credentials
-            $this->log_login_event('failed', [], $identity);          // ← NEW
-            notif('Invalid Credentials. Please check your Email/Phone and Password.', 'error');
+             $this->log_login_event('failed', [], $identity);
+        $_SESSION['login_error'] = 'Invalid credentials. Please check your Email/Phone and Password.';
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
         }
     }
  
@@ -1358,28 +1360,47 @@ public function get_single_youth($id_youth) {
     $youth = $stmt->fetch();
     return ($stmt->rowCount() > 0) ? $youth : false;
 }
-    public function create_youth() {
-        if(isset($_POST['create_youth'])) {
-            $lname          = $_POST['lname'];
-            $fname          = $_POST['fname'];
-            $mi             = $_POST['mi'];
-            $age            = $_POST['age'];
-            $sex            = $_POST['sex'];
-            $civil_status   = $_POST['civil_status'];
-            $contact_number = $_POST['contact_number'];
-            $email_address  = $_POST['email_address'];
-            $educ_attain    = $_POST['educ_attain'];
-            $emp_status     = $_POST['emp_status'];
-            $skill_name     = $_POST['skill_name'];
- 
-            $connection = $this->openConn();
-            $stmt = $connection->prepare("INSERT INTO tbl_youth (lname,fname,mi,age,sex,civil_status,contact_number,email_address,educ_attain,emp_status,skill_name) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
-            $stmt->execute([$lname, $fname, $mi, $age, $sex, $civil_status, $contact_number, $email_address, $educ_attain, $emp_status, $skill_name]);
- 
-            notif('Application submitted successfully!', 'success');
-            header("refresh: 0");
-        }
+public function create_youth() {
+    if(isset($_POST['create_youth'])) {
+        $id_youth       = $_POST['id_youth'];  // ← already in your modal form!
+        $lname          = $_POST['lname'];
+        $fname          = $_POST['fname'];
+        $mi             = $_POST['mi'];
+        $age            = $_POST['age'];
+        $sex            = $_POST['sex'];
+        $civil_status   = $_POST['civil_status'];
+        $contact_number = $_POST['contact_number'];
+        $email_address  = $_POST['email_address'];
+        $educ_attain    = $_POST['educ_attain'];
+        $emp_status     = $_POST['emp_status'];
+        $skill_name     = $_POST['skill_name'];
+
+        $connection = $this->openConn();
+        $stmt = $connection->prepare("
+            INSERT INTO tbl_youth 
+                (id_youth, lname, fname, mi, age, sex, civil_status, contact_number, email_address, educ_attain, emp_status, skill_name) 
+            VALUES 
+                (?,?,?,?,?,?,?,?,?,?,?,?)
+            ON DUPLICATE KEY UPDATE
+                lname=VALUES(lname), fname=VALUES(fname), mi=VALUES(mi),
+                age=VALUES(age), sex=VALUES(sex), civil_status=VALUES(civil_status),
+                contact_number=VALUES(contact_number), email_address=VALUES(email_address),
+                educ_attain=VALUES(educ_attain), emp_status=VALUES(emp_status),
+                skill_name=VALUES(skill_name)
+        ");
+        $stmt->execute([
+            $id_youth, $lname, $fname, $mi, $age, $sex,
+            $civil_status, $contact_number, $email_address,
+            $educ_attain, $emp_status, $skill_name
+        ]);
+
+        if (!session_id()) session_start();
+        $_SESSION['flash_message'] = 'Application submitted successfully!';
+        $_SESSION['flash_type']    = 'success';
+
+        header("refresh: 0");
     }
+}
  
     public function view_youth(){
         $connection = $this->openConn();

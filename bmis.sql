@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 22, 2026 at 09:05 AM
+-- Generation Time: May 26, 2026 at 12:21 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.30
 
@@ -53,10 +53,7 @@ INSERT INTO `admin_messages` (`id_admin_msg`, `id_resident`, `message_text`, `da
 (30, 87, 'VALID ID SUBMITTED - Please verify my account. Note: fghjngdd', '2026-05-19 19:39:20', 'unread'),
 (31, 88, 'VALID ID SUBMITTED - Please verify my account. Note: QWERGHJM,K.DSD', '2026-05-19 19:44:39', 'unread'),
 (32, 89, 'VALID ID SUBMITTED - Please verify my account. Note: 2wertgyhjmk;//', '2026-05-19 21:00:29', 'unread'),
-(33, 90, 'VALID ID SUBMITTED - Please verify my account. Note: 23r4tyuik;\';ljhgfdsa', '2026-05-21 09:34:32', 'unread'),
-(34, 95, 'VALID ID SUBMITTED - Please verify my account. Note: rtyuikujkhgfvcdssghjnnhg', '2026-05-21 12:30:03', 'unread'),
-(35, 96, 'VALID ID SUBMITTED - Please verify my account. Note: 234r5tyuilkjtr', '2026-05-22 17:00:58', 'unread'),
-(36, 97, 'VALID ID SUBMITTED - Please verify my account. Note: eryujnh.l/kjhgtfdre', '2026-05-22 17:04:37', 'unread');
+(33, 90, 'VALID ID SUBMITTED - Please verify my account. Note: 23r4tyuik;\';ljhgfdsa', '2026-05-21 09:34:32', 'unread');
 
 -- --------------------------------------------------------
 
@@ -66,6 +63,7 @@ INSERT INTO `admin_messages` (`id_admin_msg`, `id_resident`, `message_text`, `da
 
 CREATE TABLE `document_settings` (
   `id` int NOT NULL DEFAULT '1',
+  `country` varchar(120) NOT NULL DEFAULT 'Republic of the Philippines',
   `barangay_name` varchar(100) DEFAULT 'Barangay San Pedro',
   `city` varchar(100) DEFAULT 'City of Iriga',
   `province` varchar(100) DEFAULT 'Province of Camarines Sur',
@@ -73,6 +71,10 @@ CREATE TABLE `document_settings` (
   `punong_title` varchar(100) DEFAULT 'Punong Barangay',
   `office_title` varchar(150) DEFAULT 'OFFICE OF THE PUNONG BARANGAY',
   `footer_note` varchar(255) DEFAULT 'Not valid w/o official seal',
+  `clearance_body` text,
+  `certofres_body` text,
+  `indigency_body` text,
+  `id_validity_note` varchar(300) NOT NULL DEFAULT 'This ID is valid for 1 year only upon the issuance.',
   `logo_path` varchar(255) DEFAULT 'icons/logo.png',
   `seal_path` varchar(255) DEFAULT 'icons/Documents/seal.png',
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -82,8 +84,8 @@ CREATE TABLE `document_settings` (
 -- Dumping data for table `document_settings`
 --
 
-INSERT INTO `document_settings` (`id`, `barangay_name`, `city`, `province`, `punong_name`, `punong_title`, `office_title`, `footer_note`, `logo_path`, `seal_path`, `updated_at`) VALUES
-(1, 'Barangay San Pedro', 'City of Iriga', 'Province of Camarines Sur', 'JOSEPH B. BEBONIA', 'Punong Barangay', 'OFFICE OF THE PUNONG BARANGAY', 'Not valid w/o official seal', 'icons/logo.png', 'icons/Documents/seal.png', '2026-05-15 14:46:32');
+INSERT INTO `document_settings` (`id`, `country`, `barangay_name`, `city`, `province`, `punong_name`, `punong_title`, `office_title`, `footer_note`, `clearance_body`, `certofres_body`, `indigency_body`, `id_validity_note`, `logo_path`, `seal_path`, `updated_at`) VALUES
+(1, 'Republic of the Philippines', 'Barangay San Pedro', 'City of Iriga', 'Province of Camarines Sur', 'JOSEPH B. BEBONIA', 'Punong Barangay', 'OFFICE OF THE PUNONG BARANGAY', 'Not valid w/o official seal', 'This is to certify that {FULLNAME}, {AGE} years old, {STATUS} and a resident of {ADDRESS} is known to be of good moral character and law-abiding citizen in the community.\n\nTo certify further, that he/she has no derogatory and/or criminal records filed in this barangay.\n\nIssued this {DATE_ISSUED}.', 'This is to certify that {FULLNAME}, {AGE} years old, {STATUS} is a bona fide resident of {ADDRESS}.\n\nThis certification is issued upon the request of the above-named person for whatever legal purpose it may serve.\n\nIssued this {DATE_ISSUED}.', 'This is to certify that {FULLNAME}, {AGE} years old, {STATUS} is a bonafide resident of {ADDRESS} and belongs to an indigent family.\n\nThis certification is being issued to attest to the truth of the foregoing facts and for whatever legal purpose it may serve.\n\nIssued this {DATE_ISSUED}.', 'This ID is valid for 1 year only upon the issuance.', 'icons/logo.png', 'icons/Documents/seal.png', '2026-05-22 10:14:28');
 
 -- --------------------------------------------------------
 
@@ -151,9 +153,21 @@ INSERT INTO `resident_messages` (`id_message`, `id_resident`, `message_text`, `d
 (39, 87, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 19:39:38', 'sent'),
 (40, 88, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 19:44:58', 'sent'),
 (41, 89, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-19 21:00:43', 'sent'),
-(42, 95, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-21 12:30:32', 'sent'),
 (43, 96, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-22 17:01:20', 'sent'),
-(44, 97, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-22 17:04:57', 'sent');
+(44, 97, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-22 17:04:57', 'sent'),
+(45, 98, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-22 17:40:45', 'sent'),
+(46, 98, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-22 17:40:49', 'sent'),
+(47, 99, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-22 18:58:11', 'sent'),
+(48, 100, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-23 12:35:52', 'sent'),
+(49, 101, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-24 08:54:27', 'sent'),
+(50, 102, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-24 09:07:53', 'sent'),
+(51, 102, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-24 09:10:37', 'sent'),
+(52, 100, 'qwertyuioiuytrewq', '2026-05-24 11:59:11', 'sent'),
+(53, 101, 'ERTYUIOUYTREWQ', '2026-05-24 11:59:18', 'sent'),
+(54, 102, 'QSWSERFBGNJHM,KLOPIUYTR', '2026-05-24 11:59:22', 'sent'),
+(55, 98, 'QWERTYUIOPOIUYTRGAS', '2026-05-24 11:59:28', 'sent'),
+(56, 96, 'qtrgyuiop/iuyhtrfsea', '2026-05-24 11:59:34', 'sent'),
+(58, 94, '✅ Your account has been verified! You can now request barangay certificates and other services.', '2026-05-25 20:06:20', 'sent');
 
 -- --------------------------------------------------------
 
@@ -166,6 +180,25 @@ CREATE TABLE `resident_tokens` (
   `resident_id` int NOT NULL,
   `token` text NOT NULL,
   `last_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbl_activity_log`
+--
+
+CREATE TABLE `tbl_activity_log` (
+  `id_log` int NOT NULL,
+  `id_admin` int DEFAULT NULL,
+  `admin_name` varchar(255) NOT NULL,
+  `role` varchar(100) NOT NULL DEFAULT '',
+  `action` varchar(100) NOT NULL,
+  `module` varchar(100) NOT NULL DEFAULT '',
+  `description` text NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(512) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -191,9 +224,7 @@ CREATE TABLE `tbl_admin` (
 --
 
 INSERT INTO `tbl_admin` (`id_admin`, `email`, `phone_number`, `password`, `must_change_password`, `lname`, `fname`, `mi`, `role`) VALUES
-(5, 'sanpedroiriga@gmail.com', NULL, '$2y$10$EUyPeW.y.WUjSb590jMBjO/cyHo0H0/EKMQdugVbjd0Plv6UWPKMG', 0, 'This', 'Is', 'Admin', 'administrator'),
-(10, 'dominge@gmail.com', NULL, '$2y$10$0kaMFdn8NAzSkm3vxCQdDOQq1a4rMXo.jaVorWc96xgScaEfiNJCa', 0, 'nobleza', 'domingo', 'b', 'administrator'),
-(11, 'jeanrosenosipeda@gmail.com', NULL, '$2y$10$jxMdSDhpJZQ17JGwQHgunu1GVhkPLsBqb381P3kxFmIGXoM/dtkiW', 0, 'x 11\")', 'US-Letter', '(', 'administrator');
+(5, 'sanpedroiriga@gmail.com', NULL, '$2y$10$EUyPeW.y.WUjSb590jMBjO/cyHo0H0/EKMQdugVbjd0Plv6UWPKMG', 0, 'This', 'Is', 'Admin', 'administrator');
 
 -- --------------------------------------------------------
 
@@ -216,8 +247,7 @@ CREATE TABLE `tbl_announcement` (
 --
 
 INSERT INTO `tbl_announcement` (`id_announcement`, `event`, `target`, `start_date`, `addedby`, `status`, `image`) VALUES
-(73, 'btrgqwerg', NULL, '2026-05-18', 'This, Is Admin', 'active', '1779115602_6a0b26524442f.jpg,1779115602_6a0b265245c84.jpg'),
-(74, '2werftghjfdsa', NULL, '2026-05-19', 'This, Is Admin', 'active', '1779181136_6a0c2650c6e7d.png,1779181136_6a0c2650c8115.jpg');
+(77, '2efbgvjnmjnbgfvdweq', NULL, '2026-05-25', 'This, Is Admin', 'active', '1779701958_6a1418c627952.png,1779701958_6a1418c628fff.png,1779701958_6a1418c629b21.png,1779701958_6a1418c62a408.png,1779701958_6a1418c62adcb.png,1779701958_6a1418c62b749.png');
 
 -- --------------------------------------------------------
 
@@ -247,13 +277,6 @@ CREATE TABLE `tbl_announcement_reactions` (
   `created_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `tbl_announcement_reactions`
---
-
-INSERT INTO `tbl_announcement_reactions` (`id_reaction`, `announcement_id`, `user_id`, `reaction_type`, `created_at`) VALUES
-(75, 73, 66, 'like', '2026-05-19 16:57:16');
-
 -- --------------------------------------------------------
 
 --
@@ -279,7 +302,11 @@ CREATE TABLE `tbl_archive` (
 --
 
 INSERT INTO `tbl_archive` (`id_archive`, `record_type`, `record_id`, `full_name`, `summary`, `record_data`, `deleted_by`, `deleted_at`, `restored_at`, `restored_by`, `is_restored`) VALUES
-(225, 'staff', 41, 'x 11\"), US-Letter (.', 'Role: user | Email: sanpedroiriga@gmail.com', '{\"mi\": \"(\", \"age\": 122, \"sex\": \"Male\", \"role\": \"user\", \"email\": \"sanpedroiriga@gmail.com\", \"fname\": \"US-Letter\", \"lname\": \"x 11\\\")\", \"photo\": \"uploads/1779183163_Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg\", \"addedby\": \"This, Is\", \"address\": \"jeanrosenosipeda@gmail.com\", \"contact\": \"09070560963\", \"id_user\": 41, \"password\": \"$2y$10$KRhS3aOZ5BjtSlLng4v2f.Lwkn2/BdGwzUTvQ9mWfPMCCiLoKm5gy\", \"position\": \"Punong Barangay\", \"phone_number\": \"\", \"login_identity\": \"sanpedroiriga@gmail.com\", \"must_change_password\": 0}', NULL, '2026-05-22 13:34:27', NULL, NULL, 0);
+(301, 'youth', 11, 'x 11\"), US-Letter', 'Age: 565 | Status: Single | Skills: 7jthm,gt', '{\"mi\": \"\", \"age\": \"565\", \"sex\": \"Female\", \"fname\": \"US-Letter\", \"lname\": \"x 11\\\")\", \"id_youth\": 11, \"emp_status\": \"Employed\", \"skill_name\": \"7jthm,gt\", \"educ_attain\": \"college graduate\", \"civil_status\": \"Single\", \"email_address\": \"jeanrosenosipeda@gmail.com\", \"contact_number\": \"9070560963\"}', NULL, '2026-05-25 20:04:14', NULL, NULL, 0),
+(302, 'youth', 12, 'x 11\"), US-Letter', 'Age: 122 | Status: Single | Skills: wedrfghjjmgfdsa', '{\"mi\": \"\", \"age\": \"122\", \"sex\": \"Male\", \"fname\": \"US-Letter\", \"lname\": \"x 11\\\")\", \"id_youth\": 12, \"emp_status\": \"Employed\", \"skill_name\": \"wedrfghjjmgfdsa\", \"educ_attain\": \"college graduate\", \"civil_status\": \"Single\", \"email_address\": \"jeanrosenosipeda@gmail.com\", \"contact_number\": \"9070560963\"}', NULL, '2026-05-25 20:04:14', NULL, NULL, 0),
+(303, 'youth', 13, 'x 11\"), US-Letter (.', 'Age: 565 | Status: Single | Skills: 1ertgyjhgfq', '{\"mi\": \"(\", \"age\": \"565\", \"sex\": \"Female\", \"fname\": \"US-Letter\", \"lname\": \"x 11\\\")\", \"id_youth\": 13, \"emp_status\": \"Employed\", \"skill_name\": \"1ertgyjhgfq\", \"educ_attain\": \"college graduate\", \"civil_status\": \"Single\", \"email_address\": \"jeanrosenosipeda@gmail.com\", \"contact_number\": \"9070560963\"}', NULL, '2026-05-25 20:04:14', NULL, NULL, 0),
+(304, 'youth', 14, 'x 11\"), US-Letter (.', 'Age: 565 | Status: Single | Skills: 1ertgyjhgfq', '{\"mi\": \"(\", \"age\": \"565\", \"sex\": \"Female\", \"fname\": \"US-Letter\", \"lname\": \"x 11\\\")\", \"id_youth\": 14, \"emp_status\": \"Employed\", \"skill_name\": \"1ertgyjhgfq\", \"educ_attain\": \"college graduate\", \"civil_status\": \"Single\", \"email_address\": \"jeanrosenosipeda@gmail.com\", \"contact_number\": \"9070560963\"}', NULL, '2026-05-25 20:04:14', NULL, NULL, 0),
+(305, 'youth', 15, 'x 11\"), US-Letter (.', 'Age: 565 | Status: Single | Skills: 1q`drfbgjnhm,k', '{\"mi\": \"(\", \"age\": \"565\", \"sex\": \"Female\", \"fname\": \"US-Letter\", \"lname\": \"x 11\\\")\", \"id_youth\": 15, \"emp_status\": \"Self-Employed\", \"skill_name\": \"1q`drfbgjnhm,k\", \"educ_attain\": \"college graduate\", \"civil_status\": \"Single\", \"email_address\": \"jeanrosenosipeda@gmail.com\", \"contact_number\": \"9070560963\"}', NULL, '2026-05-25 20:04:14', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -309,8 +336,7 @@ CREATE TABLE `tbl_blotter` (
 --
 
 INSERT INTO `tbl_blotter` (`id_blotter`, `id_resident`, `lname`, `fname`, `mi`, `houseno`, `street`, `brgy`, `municipal`, `contact`, `narrative`, `timeapplied`, `is_deleted`, `deleted_at`) VALUES
-(19, 78, 'x 11', 'US-Letter', '(', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', '09090987658', 'qrklytrewqfrthyukio', '2026-05-19 16:59:34', 0, NULL),
-(20, 66, 'DOmingo', 'nobleza', 'bendal', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', '09090987658', 'qwertfgyjhu,k', '2026-05-19 16:59:34', 0, NULL);
+(21, 95, 'x 11', 'US-Letter', '(', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', '09345678999', 'e23gbyuhiop[potrgwsrfyujikpo;[oiuy', '2026-05-24 18:48:30', 0, NULL);
 
 --
 -- Triggers `tbl_blotter`
@@ -385,7 +411,8 @@ CREATE TABLE `tbl_brgyid` (
 --
 
 INSERT INTO `tbl_brgyid` (`id_brgyid`, `id_resident`, `lname`, `fname`, `mi`, `houseno`, `street`, `brgy`, `municipal`, `bplace`, `bdate`, `contact`, `inc_lname`, `inc_fname`, `inc_mi`, `inc_contact`, `relation`, `inc_houseno`, `inc_street`, `inc_brgy`, `inc_municipal`, `res_photo`, `is_deleted`, `deleted_at`) VALUES
-(20, 66, 'DOmingo', 'nobleza', 'bendal', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', 'Antipolo, Rizal', '2026-03-31', '09070560963', 'x 11\")', 'US-Letter', '', '09090987658', '5tyhjnr3', NULL, NULL, NULL, NULL, NULL, 0, NULL);
+(20, 66, 'DOmingo', 'nobleza', 'bendal', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', 'Antipolo, Rizal', '2026-03-31', '09070560963', 'x 11\")', 'US-Letter', '', '09090987658', '5tyhjnr3', NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(21, 95, 'x 11', 'US-Letter', '(', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'hibago', '2026-05-07', '09070560963', 'x 11\")', 'US-Letter', '', '09070560963', 'hehehhhe', NULL, NULL, NULL, NULL, NULL, 0, NULL);
 
 --
 -- Triggers `tbl_brgyid`
@@ -454,7 +481,12 @@ CREATE TABLE `tbl_bspermit` (
 
 INSERT INTO `tbl_bspermit` (`id_bspermit`, `id_resident`, `lname`, `fname`, `mi`, `bsname`, `houseno`, `street`, `brgy`, `municipal`, `bsindustry`, `aoe`) VALUES
 (11, 78, 'x 11', 'US-Letter', '(', 'bagasan', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'Food', 534567890),
-(12, 66, 'DOmingo', 'nobleza', 'bendal', 'bagasan', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', 'HealthCare', 234);
+(12, 66, 'DOmingo', 'nobleza', 'bendal', 'bagasan', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', 'HealthCare', 234),
+(13, 98, 'x 11', 'US-Letter', '(', 'bagasan', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'HealthCare', 234),
+(14, 98, 'x 11', 'US-Letter', '(', 'bagasan', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'HealthCare', 234),
+(15, 98, 'x 11', 'US-Letter', '(', 'bagasan', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'HealthCare', 234),
+(16, 98, 'x 11', 'US-Letter', '(', 'bagasan', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'HealthCare', 1235),
+(17, 95, 'x 11', 'US-Letter', '(', 'bagasan', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'Food', 2443);
 
 --
 -- Triggers `tbl_bspermit`
@@ -519,7 +551,8 @@ CREATE TABLE `tbl_clearance` (
 
 INSERT INTO `tbl_clearance` (`id_clearance`, `id_resident`, `lname`, `fname`, `mi`, `purpose`, `houseno`, `street`, `brgy`, `municipal`, `status`, `age`) VALUES
 (6, 78, 'x 11', 'US-Letter', '(', 'Police Clearance', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'Married', '565'),
-(7, 66, 'DOmingo', 'nobleza', 'bendal', 'Police Clearance', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', 'Married', '122');
+(7, 66, 'DOmingo', 'nobleza', 'bendal', 'Police Clearance', 'Blk. 14 Lot 25', 'El Chapo', 'San Pedro', 'iriga', 'Married', '122'),
+(8, 98, 'x 11', 'US-Letter', '(', 'Police Clearance', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', 'Married', '565');
 
 --
 -- Triggers `tbl_clearance`
@@ -579,6 +612,13 @@ CREATE TABLE `tbl_complaints` (
   `date_updated` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `tbl_complaints`
+--
+
+INSERT INTO `tbl_complaints` (`id`, `resident_id`, `full_name`, `contact_number`, `address`, `category`, `description`, `location`, `photo_path`, `status`, `admin_remarks`, `date_submitted`, `date_updated`) VALUES
+(8, NULL, 'US-Letter x 11\")', '09345678999', '', 'Peace and Order', '23TR5OLP;OYUJTRG', 'SA MAy simbahan', 'uploads/complaints/complaint_1779596915_af1a0344.png', 'pending', NULL, '2026-05-24 12:28:35', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -591,6 +631,14 @@ CREATE TABLE `tbl_fcm_tokens` (
   `fcm_token` text NOT NULL,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `tbl_fcm_tokens`
+--
+
+INSERT INTO `tbl_fcm_tokens` (`id`, `resident_id`, `fcm_token`, `updated_at`) VALUES
+(1, 95, 'fj-aPdKqJtg5-F6ulwCMfO:APA91bHp7u8rLqrybb213kTF7n1rOPlLszh9ih6aL1_K1jZpmnECYx8AjSIegiitskLM8yulIU2sSP3KcjG5W60d1zlQaJYOeWl5j283euB2tZhIOU0ZP2A', '2026-05-24 00:56:00'),
+(7, 102, 'fj-aPdKqJtg5-F6ulwCMfO:APA91bHp7u8rLqrybb213kTF7n1rOPlLszh9ih6aL1_K1jZpmnECYx8AjSIegiitskLM8yulIU2sSP3KcjG5W60d1zlQaJYOeWl5j283euB2tZhIOU0ZP2A', '2026-05-24 01:21:52');
 
 -- --------------------------------------------------------
 
@@ -655,7 +703,10 @@ INSERT INTO `tbl_hidden_announcements` (`id`, `user_id`, `announcement_id`) VALU
 (44, 66, 53),
 (45, 66, 46),
 (46, 66, 44),
-(47, NULL, 48);
+(47, NULL, 48),
+(48, 98, 74),
+(49, 98, 74),
+(50, 98, 73);
 
 -- --------------------------------------------------------
 
@@ -679,18 +730,11 @@ CREATE TABLE `tbl_id_uploads` (
 --
 
 INSERT INTO `tbl_id_uploads` (`id_upload`, `id_resident`, `file_name`, `original_name`, `file_type`, `message_note`, `upload_date`, `status`) VALUES
-(11, 44, 'validid_44_1777644510.jpg', 'b97485c7-e6d6-4b17-a79e-eae059e1cb6f.jpg', 'image/jpeg', 'hanep pa validate po', '2026-05-01 22:08:30', 'approved'),
-(17, 82, 'validid_82_1779185880.jpeg', 'Screenshot_4-5-2026_154117_barangaysanpedro.gt.tc.jpeg', 'image/jpeg', 'e3rtgyhujikl;', '2026-05-19 18:18:00', 'approved'),
-(18, 83, 'validid_83_1779189656.jpeg', 'Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg', 'image/jpeg', '2w3erftghj', '2026-05-19 19:20:56', 'approved'),
-(19, 85, 'validid_85_1779189843.jpeg', 'Screenshot_4-5-2026_154127_barangaysanpedro.gt.tc.jpeg', 'image/jpeg', 'asdfbn', '2026-05-19 19:24:03', 'approved'),
-(20, 86, 'validid_86_1779190316.jpeg', 'Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg', 'image/jpeg', 'rtyuiopip[;iulyktjhgfds', '2026-05-19 19:31:56', 'approved'),
-(21, 87, 'validid_87_1779190760.png', '07319ee9-ec0e-4048-ac6f-42a7d0326623-removebg-preview.png', 'image/png', 'fghjngdd', '2026-05-19 19:39:20', 'approved'),
-(22, 88, 'validid_88_1779191079.png', '07319ee9-ec0e-4048-ac6f-42a7d0326623-removebg-preview.png', 'image/png', 'QWERGHJM,K.DSD', '2026-05-19 19:44:39', 'approved'),
-(23, 89, 'validid_89_1779195629.png', '07319ee9-ec0e-4048-ac6f-42a7d0326623-removebg-preview.png', 'image/png', '2wertgyhjmk;//', '2026-05-19 21:00:29', 'approved'),
-(24, 90, 'validid_90_1779327272.jpg', 'RISK-REGISTER_page-0001.jpg', 'image/jpeg', '23r4tyuik;\';ljhgfdsa', '2026-05-21 09:34:32', 'pending'),
-(25, 95, 'validid_95_1779337803.jpg', 'RISK-REGISTER_page-0002.jpg', 'image/jpeg', 'rtyuikujkhgfvcdssghjnnhg', '2026-05-21 12:30:03', 'approved'),
-(26, 96, 'validid_96_1779440458.jpg', '2d5dd467-c773-4493-a511-93b405c52dfd.jpg', 'image/jpeg', '234r5tyuilkjtr', '2026-05-22 17:00:58', 'approved'),
-(27, 97, 'validid_97_1779440677.jpg', '2d5dd467-c773-4493-a511-93b405c52dfd.jpg', 'image/jpeg', 'eryujnh.l/kjhgtfdre', '2026-05-22 17:04:37', 'approved');
+(29, 99, 'validid_99_1779447474.jpg', '2d5dd467-c773-4493-a511-93b405c52dfd.jpg', 'image/jpeg', '', '2026-05-22 18:57:55', 'approved'),
+(30, 100, 'validid_100_1779510938.jpg', '2d5dd467-c773-4493-a511-93b405c52dfd.jpg', 'image/jpeg', '23r45thyujikjhgfdqw', '2026-05-23 12:35:38', 'approved'),
+(31, 101, 'validid_101_1779547543.png', 'Screenshot 2026-05-10 225040.png', 'image/png', 'qatrfgyujhkjkhg', '2026-05-23 22:45:43', 'approved'),
+(32, 102, 'validid_102_1779584854.png', '07319ee9-ec0e-4048-ac6f-42a7d0326623-removebg-preview.png', 'image/png', '3435tyhjmnbvc xzas', '2026-05-24 09:07:34', 'approved'),
+(33, 94, 'validid_94_1779710763.png', 'Screenshot 2026-05-10 225040.png', 'image/png', '23ERFTGHJKL', '2026-05-25 20:06:03', 'approved');
 
 -- --------------------------------------------------------
 
@@ -755,6 +799,41 @@ CREATE TRIGGER `trg_archive_indigency` BEFORE DELETE ON `tbl_indigency` FOR EACH
 END
 $$
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbl_login_history`
+--
+
+CREATE TABLE `tbl_login_history` (
+  `id_history` int NOT NULL,
+  `id_admin` int DEFAULT NULL,
+  `admin_name` varchar(255) NOT NULL,
+  `role` varchar(100) NOT NULL DEFAULT '',
+  `email` varchar(255) DEFAULT NULL,
+  `event` enum('login','logout','failed') NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(512) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `tbl_login_history`
+--
+
+INSERT INTO `tbl_login_history` (`id_history`, `id_admin`, `admin_name`, `role`, `email`, `event`, `ip_address`, `user_agent`, `created_at`) VALUES
+(61, 5, 'Is This', 'administrator', 'sanpedroiriga@gmail.com', 'login', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 17:39:02'),
+(62, NULL, 'domingonobleza011@gmail.com', '', 'domingonobleza011@gmail.com', 'failed', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 17:46:03'),
+(63, NULL, 'domingonobleza011@gmail.com', '', 'domingonobleza011@gmail.com', 'failed', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 17:46:36'),
+(64, NULL, 'domingonobleza011@gmail.com', '', 'domingonobleza011@gmail.com', 'failed', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 17:47:54'),
+(65, NULL, 'domingonobleza011@gmail.com', '', 'domingonobleza011@gmail.com', 'failed', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 17:48:08'),
+(66, 5, 'Is This', 'administrator', 'sanpedroiriga@gmail.com', 'login', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 19:59:39'),
+(67, NULL, 'qdfg', '', 'qdfg', 'failed', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 20:05:44'),
+(68, NULL, 'US-Letter x 11\")', 'resident', 'domingonobleza011@gmail.com', 'logout', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 20:06:06'),
+(69, 5, 'Is This', 'administrator', 'sanpedroiriga@gmail.com', 'login', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 20:06:14'),
+(70, NULL, 'US-Letter x 11\")', 'resident', 'domingonobleza011@gmail.com', 'logout', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 20:09:48'),
+(71, 5, 'Is This', 'administrator', 'sanpedroiriga@gmail.com', 'login', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0', '2026-05-25 20:10:01');
 
 -- --------------------------------------------------------
 
@@ -988,10 +1067,8 @@ CREATE TABLE `tbl_resident` (
 --
 
 INSERT INTO `tbl_resident` (`id_resident`, `res_photo`, `email`, `phone_number`, `password`, `must_change_password`, `lname`, `fname`, `mi`, `contact`, `age`, `sex`, `status`, `houseno`, `street`, `brgy`, `municipal`, `address`, `bdate`, `bplace`, `nationality`, `family_role`, `voter`, `role`, `is_verified`, `verified_at`, `verified_by`, `addedby`, `is_archived`, `archived_at`) VALUES
-(94, NULL, 'domingonobleza011@gmail.com', NULL, '$2y$10$L6TNI/FTWrSnrp8vREoEUeJUzc17yc.4ip6gztg3NgT5KrnZhc4XG', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'No', 'Yes', 'resident', 0, NULL, NULL, 'Resident', 0, NULL),
-(95, NULL, 'jeanrosenosipeda@gmail.com', NULL, '$2y$10$aRSP3P3fgG4rpXjJIYoOvOa0UNKjC4d1aUfubOVWrLr0jhyFLytO2', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-05-21 12:30:32', 'Admin', 'Resident', 0, NULL),
-(96, NULL, 'sanpedro1@gmail.com', NULL, '$2y$10$KPoBCGRhEh4R7rH/MWunBuXEnYd/DzbJ2odnTHH4MGKKPYi7KbJEC', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Female', 'Single', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'No', 'Yes', 'resident', 1, '2026-05-22 17:01:20', 'Admin', 'Resident', 0, NULL),
-(97, NULL, 'testing@gmail.com', NULL, '$2y$10$nfbhqxyrLkNNNiIn2Vh.1eGSh7yRPXNj9EliK3yQuHjycPodZcj.G', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Male', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-05-22 17:04:57', 'Admin', 'Resident', 0, NULL);
+(94, NULL, 'domingonobleza011@gmail.com', NULL, '$2y$10$L6TNI/FTWrSnrp8vREoEUeJUzc17yc.4ip6gztg3NgT5KrnZhc4XG', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'No', 'Yes', 'resident', 1, '2026-05-25 20:06:20', 'Admin', 'Resident', 0, NULL),
+(95, NULL, 'jeanrosenosipeda@gmail.com', NULL, '$2y$10$aRSP3P3fgG4rpXjJIYoOvOa0UNKjC4d1aUfubOVWrLr0jhyFLytO2', 0, 'x 11\")', 'US-Letter', '(', '09345678999', 565, 'Female', 'Widowed', 'Blk. 14 Lot 25', 'El Chapo', 'sagrada', 'iriga', NULL, '2026-05-07', 'Antipolo, Rizal', 'batman', 'Yes', 'Yes', 'resident', 1, '2026-05-21 12:30:32', 'Admin', 'Resident', 0, NULL);
 
 --
 -- Triggers `tbl_resident`
@@ -1100,6 +1177,7 @@ CREATE TABLE `tbl_user` (
 --
 
 INSERT INTO `tbl_user` (`id_user`, `login_identity`, `email`, `phone_number`, `password`, `must_change_password`, `lname`, `fname`, `mi`, `age`, `sex`, `address`, `contact`, `position`, `role`, `addedby`, `photo`) VALUES
+(41, 'sanpedroiriga@gmail.com', 'sanpedroiriga@gmail.com', '', '$2y$10$KRhS3aOZ5BjtSlLng4v2f.Lwkn2/BdGwzUTvQ9mWfPMCCiLoKm5gy', 0, 'x 11\")', 'US-Letter', '(', 122, 'Male', 'jeanrosenosipeda@gmail.com', '09070560963', 'Punong Barangay', 'user', 'This, Is', 'uploads/1779183163_Screenshot_4-5-2026_154228_barangaysanpedro.gt.tc.jpeg'),
 (42, 'sanpedro@gmail.com', 'sanpedro@gmail.com', '', '$2y$10$uhHMpTzCEF5vuagpFbgDLutCLaa7.gZXVH4VsLUupuLHNWEH8BUsi', 0, 'x 11\")', 'US-Letter', '(', 122, 'Male', 'jeanrosenosipeda@gmail.com', '09070560963', 'Committee on Ways and Means', 'user', 'This, Is', 'uploads/1779428098_2d5dd467-c773-4493-a511-93b405c52dfd.jpg'),
 (43, 'sansan@gmail.com', 'sansan@gmail.com', '', '$2y$10$R8J.dPfXjRb8lqrYDwGjIusiCjaIMYJs8VcglFWzzKpl72URVRCbi', 0, 'x 11\")', 'US-Letter', '(', 122, 'Male', 'jeanrosenosipeda@gmail.com', '09070560963', 'Punong Barangay', 'user', 'This, Is', 'uploads/1779428142_2d5dd467-c773-4493-a511-93b405c52dfd.jpg');
 
@@ -1169,8 +1247,9 @@ CREATE TABLE `tbl_youth` (
 --
 
 INSERT INTO `tbl_youth` (`id_youth`, `fname`, `lname`, `mi`, `age`, `sex`, `civil_status`, `contact_number`, `email_address`, `educ_attain`, `emp_status`, `skill_name`) VALUES
-(11, 'US-Letter', 'x 11\")', '', '565', 'Female', 'Single', '9070560963', 'jeanrosenosipeda@gmail.com', 'college graduate', 'Employed', '7jthm,gt'),
-(12, 'US-Letter', 'x 11\")', '', '122', 'Male', 'Single', '9070560963', 'jeanrosenosipeda@gmail.com', 'college graduate', 'Employed', 'wedrfghjjmgfdsa');
+(16, 'US-Letter', 'x 11\")', '(', '565', 'Female', 'Single', '9070560963', 'jeanrosenosipeda@gmail.com', 'college graduate', 'Employed', 'qweryhjkljhgew'),
+(17, 'US-Letter', 'x 11\")', '(', '565', 'Female', 'Single', '9070560963', 'jeanrosenosipeda@gmail.com', 'college graduate', 'Employed', 'ASDFVGHJM'),
+(94, 'US-Letter', 'x 11\")', '(', '565', 'Female', 'Single', '9070560963', 'jeanrosenosipeda@gmail.com', 'college graduate', 'Employed', 'SDFGJNMK,.');
 
 --
 -- Triggers `tbl_youth`
@@ -1229,8 +1308,7 @@ CREATE TABLE `tbl_youth_bulletin` (
 --
 
 INSERT INTO `tbl_youth_bulletin` (`id_post`, `post_title`, `post_content`, `post_type`, `posted_by`, `is_pinned`, `date_posted`) VALUES
-(1, 'Welcome to the Barangay San Pedro Youth Portal!', 'We are excited to launch the new Youth Engagement section of our Barangay Management System. Register your profile, join programs, and stay updated with youth activities!', 'Announcement', 'SK Admin', 1, '2026-05-06 04:04:20'),
-(2, 'Scholarship Opportunity: CHED Free Tuition', 'All incoming college students are reminded to secure their CHED scholarship forms at the Barangay Hall. Deadline is this month!', 'Opportunity', 'SK Admin', 0, '2026-05-06 04:04:20');
+(3, 'fgnhjmhgfds', 'sdfv bg,', 'Announcement', 'Is This', 0, '2026-05-25 01:20:42');
 
 -- --------------------------------------------------------
 
@@ -1253,10 +1331,8 @@ CREATE TABLE `tbl_youth_enrollment` (
 --
 
 INSERT INTO `tbl_youth_enrollment` (`id_enrollment`, `id_program`, `id_youth`, `youth_name`, `contact`, `enrolled_at`, `status`) VALUES
-(1, 4, 66, ' DOmingo', '', '2026-05-06 04:11:42', 'Enrolled'),
-(2, 2, 66, ' DOmingo', '', '2026-05-06 04:11:48', 'Enrolled'),
-(3, 3, 66, ' DOmingo', '', '2026-05-06 04:12:11', 'Enrolled'),
-(4, 1, 66, 'nobleza DOmingo', '09070560963', '2026-05-06 04:15:54', 'Enrolled');
+(5, 5, 11, 'x 11\"), US-Letter', '9070560963', '2026-05-25 02:09:33', 'Attended'),
+(6, 5, 94, 'x 11\"), US-Letter', '9070560963', '2026-05-25 12:09:43', 'Enrolled');
 
 -- --------------------------------------------------------
 
@@ -1284,10 +1360,7 @@ CREATE TABLE `tbl_youth_programs` (
 --
 
 INSERT INTO `tbl_youth_programs` (`id_program`, `program_title`, `program_type`, `description`, `venue`, `event_date`, `event_time`, `slots`, `requirements`, `status`, `created_by`, `date_created`) VALUES
-(1, 'SK Leadership Seminar 2025', 'Leadership', 'A seminar aimed at developing leadership skills among the youth of Barangay San Pedro.', 'Barangay Hall Multi-Purpose Room', '2026-05-20', '08:00:00', 50, 'Must be 15-30 years old, Barangay resident', 'Upcoming', 'Admin', '2026-05-06 04:04:20'),
-(2, 'Free Computer Literacy Training', 'Training', 'Basic computer skills training including MS Office and internet usage.', 'SK Office', '2026-05-13', '13:00:00', 30, 'No prior experience needed, ages 15-25', 'Cancelled', 'Admin', '2026-05-06 04:04:20'),
-(3, 'Barangay Youth Basketball League', 'Sports', 'Inter-purok basketball tournament for youth aged 15-30.', 'Barangay Basketball Court', '2026-05-27', '07:00:00', 80, 'Must be a registered youth resident', 'Upcoming', 'Admin', '2026-05-06 04:04:20'),
-(4, 'tybyum', 'Scholarship', 'xdgbgj', 'barangay hall', '2026-05-04', '00:10:00', 100, 'wala', 'Ongoing', ' This', '2026-05-06 04:10:13');
+(5, 'tybyum', 'Scholarship', 'qerthgyhgqw', 'wegrtyh', '2026-05-15', '12:46:00', 1000, 'wala', 'Upcoming', 'Is This', '2026-05-25 01:45:08');
 
 --
 -- Indexes for dumped tables
@@ -1323,6 +1396,15 @@ ALTER TABLE `resident_messages`
 ALTER TABLE `resident_tokens`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_token` (`token`(255));
+
+--
+-- Indexes for table `tbl_activity_log`
+--
+ALTER TABLE `tbl_activity_log`
+  ADD PRIMARY KEY (`id_log`),
+  ADD KEY `idx_admin` (`id_admin`),
+  ADD KEY `idx_action` (`action`),
+  ADD KEY `idx_created` (`created_at`);
 
 --
 -- Indexes for table `tbl_admin`
@@ -1396,7 +1478,8 @@ ALTER TABLE `tbl_complaints`
 --
 ALTER TABLE `tbl_fcm_tokens`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_resident` (`resident_id`);
+  ADD UNIQUE KEY `unique_resident` (`resident_id`),
+  ADD UNIQUE KEY `uq_resident_id` (`resident_id`);
 
 --
 -- Indexes for table `tbl_hidden_announcements`
@@ -1416,6 +1499,15 @@ ALTER TABLE `tbl_id_uploads`
 --
 ALTER TABLE `tbl_indigency`
   ADD PRIMARY KEY (`id_indigency`);
+
+--
+-- Indexes for table `tbl_login_history`
+--
+ALTER TABLE `tbl_login_history`
+  ADD PRIMARY KEY (`id_history`),
+  ADD KEY `idx_admin` (`id_admin`),
+  ADD KEY `idx_event` (`event`),
+  ADD KEY `idx_created` (`created_at`);
 
 --
 -- Indexes for table `tbl_programs`
@@ -1511,7 +1603,7 @@ ALTER TABLE `tbl_youth_programs`
 -- AUTO_INCREMENT for table `admin_messages`
 --
 ALTER TABLE `admin_messages`
-  MODIFY `id_admin_msg` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id_admin_msg` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -1523,7 +1615,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `resident_messages`
 --
 ALTER TABLE `resident_messages`
-  MODIFY `id_message` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id_message` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- AUTO_INCREMENT for table `resident_tokens`
@@ -1532,16 +1624,22 @@ ALTER TABLE `resident_tokens`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `tbl_activity_log`
+--
+ALTER TABLE `tbl_activity_log`
+  MODIFY `id_log` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+
+--
 -- AUTO_INCREMENT for table `tbl_admin`
 --
 ALTER TABLE `tbl_admin`
-  MODIFY `id_admin` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_admin` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `tbl_announcement`
 --
 ALTER TABLE `tbl_announcement`
-  MODIFY `id_announcement` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id_announcement` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `tbl_announcement_comments`
@@ -1553,67 +1651,73 @@ ALTER TABLE `tbl_announcement_comments`
 -- AUTO_INCREMENT for table `tbl_announcement_reactions`
 --
 ALTER TABLE `tbl_announcement_reactions`
-  MODIFY `id_reaction` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `id_reaction` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
 -- AUTO_INCREMENT for table `tbl_archive`
 --
 ALTER TABLE `tbl_archive`
-  MODIFY `id_archive` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=226;
+  MODIFY `id_archive` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=306;
 
 --
 -- AUTO_INCREMENT for table `tbl_blotter`
 --
 ALTER TABLE `tbl_blotter`
-  MODIFY `id_blotter` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id_blotter` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `tbl_brgyid`
 --
 ALTER TABLE `tbl_brgyid`
-  MODIFY `id_brgyid` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id_brgyid` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `tbl_bspermit`
 --
 ALTER TABLE `tbl_bspermit`
-  MODIFY `id_bspermit` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_bspermit` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `tbl_clearance`
 --
 ALTER TABLE `tbl_clearance`
-  MODIFY `id_clearance` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_clearance` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `tbl_complaints`
 --
 ALTER TABLE `tbl_complaints`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `tbl_fcm_tokens`
 --
 ALTER TABLE `tbl_fcm_tokens`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `tbl_hidden_announcements`
 --
 ALTER TABLE `tbl_hidden_announcements`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `tbl_id_uploads`
 --
 ALTER TABLE `tbl_id_uploads`
-  MODIFY `id_upload` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id_upload` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `tbl_indigency`
 --
 ALTER TABLE `tbl_indigency`
   MODIFY `id_indigency` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `tbl_login_history`
+--
+ALTER TABLE `tbl_login_history`
+  MODIFY `id_history` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- AUTO_INCREMENT for table `tbl_programs`
@@ -1655,7 +1759,7 @@ ALTER TABLE `tbl_rescert`
 -- AUTO_INCREMENT for table `tbl_resident`
 --
 ALTER TABLE `tbl_resident`
-  MODIFY `id_resident` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `id_resident` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `tbl_sms_log`
@@ -1673,25 +1777,25 @@ ALTER TABLE `tbl_user`
 -- AUTO_INCREMENT for table `tbl_youth`
 --
 ALTER TABLE `tbl_youth`
-  MODIFY `id_youth` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_youth` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
 
 --
 -- AUTO_INCREMENT for table `tbl_youth_bulletin`
 --
 ALTER TABLE `tbl_youth_bulletin`
-  MODIFY `id_post` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_post` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `tbl_youth_enrollment`
 --
 ALTER TABLE `tbl_youth_enrollment`
-  MODIFY `id_enrollment` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_enrollment` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `tbl_youth_programs`
 --
 ALTER TABLE `tbl_youth_programs`
-  MODIFY `id_program` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_program` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables

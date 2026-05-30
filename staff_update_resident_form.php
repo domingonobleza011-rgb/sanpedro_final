@@ -128,8 +128,12 @@
 
                             <div class="col">
                                 <div class="form-group">
-                                    <label>Age</label>
-                                    <input type="number" class="form-control" name="age" value="<?= $view['age']?>" required>
+                                    <label>PWD (Person with Disability)?</label>
+                                    <select class="form-control" name="pwd" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Yes" <?= ($view['pwd'] ?? '') == 'Yes' ? 'selected' : '' ?>>Yes</option>
+                                        <option value="No" <?= ($view['pwd'] ?? '') == 'No' ? 'selected' : '' ?>>No</option>
+                                    </select>
                                 </div>
                             </div>
 

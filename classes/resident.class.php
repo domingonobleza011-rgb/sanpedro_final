@@ -17,7 +17,7 @@
         $lname = $_POST['lname'];
         $fname = $_POST['fname'];
         $mi = $_POST['mi'];
-        $age = $_POST['age'];
+        $pwd = isset($_POST['pwd']) ? $_POST['pwd'] : 'No';
         $sex = $_POST['sex'];
         $status = $_POST['status'];
         $houseno = $_POST['houseno'];
@@ -47,47 +47,10 @@
         // 1. Check if this identity is already taken
         if ($this->check_resident($login_identity) == 0) {
             
-            // Age validation
-            if ($age < 18) {
-                echo "
-                <div id='toast' style='
-                    position:fixed; top:24px; right:24px; z-index:9999;
-                    background:#fff; border-left:4px solid #E24B4A;
-                    border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
-                    padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
-                    display:flex; align-items:flex-start; gap:14px;
-                    font-family:Georgia,serif;
-                    animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
-                '>
-                    <div style='width:36px;height:36px;border-radius:50%;background:#FCEBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;'>
-                        <svg width='18' height='18' fill='none' viewBox='0 0 24 24'>
-                            <circle cx='12' cy='12' r='10' fill='#E24B4A'/>
-                            <path d='M12 7v5M12 16h.01' stroke='#fff' stroke-width='2' stroke-linecap='round'/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div style='font-weight:700;color:#501313;font-size:15px;margin-bottom:3px;'>You must be 18 or older</div>
-                        <div style='color:#A32D2D;font-size:13px;'>Sorry, you are underage to register an account.</div>
-                    </div>
-                    <button onclick=\"document.getElementById('toast').remove()\" style='margin-left:auto;background:none;border:none;cursor:pointer;color:#E24B4A;font-size:20px;line-height:1;padding:0;flex-shrink:0;'>&times;</button>
-                </div>
-                <style>
-                    @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
-                    @keyframes slideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
-                </style>
-                <script>
-                    setTimeout(function(){
-                        var t=document.getElementById('toast');
-                        if(t){ t.style.animation='slideOut .35s ease forwards'; setTimeout(function(){ t&&t.remove(); },350); }
-                    }, 1000);
-                </script>";
-                return(0);
-            }
-
             $connection = $this->openConn();
             // 2. Updated INSERT to include both login columns
             $stmt = $connection->prepare("INSERT INTO tbl_resident (
-                `email`, `phone_number`, `password`, `lname`, `fname`, `mi`, `age`, `sex`, 
+                `email`, `phone_number`, `password`, `lname`, `fname`, `mi`, `pwd`, `sex`, 
                 `status`, `houseno`, `street`, `brgy`, `municipal`, `contact`, `bdate`, 
                 `bplace`, `nationality`, `voter`, `family_role`, `role`, `addedby`
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -96,7 +59,7 @@
                 $email_to_save, 
                 $phone_to_save, 
                 $hashed_password, 
-                $lname, $fname, $mi, $age, $sex, $status, 
+                $lname, $fname, $mi, $pwd, $sex, $status, 
                 $houseno, $street, $brgy, $municipal, $contact, 
                 $bdate, $bplace, $nationality, $voter, $familyrole, $role, $addedby
             ]);
@@ -189,7 +152,7 @@
                 $lname = $_POST['lname'];
                 $fname = $_POST['fname'];
                 $mi = $_POST['mi'];
-                $age = $_POST['age'];
+                $pwd = isset($_POST['pwd']) ? $_POST['pwd'] : 'No';
                 $sex = $_POST['sex'];
                 $status = $_POST['status'];
                 $houseno = $_POST['houseno'];
@@ -211,22 +174,22 @@
 if (!empty($password)) {
     // If password is NOT empty, update EVERYTHING including the new password
     $stmt = $connection->prepare("UPDATE tbl_resident SET `password` =?, `lname` =?, 
-        `fname` = ?, `mi` =?, `age` =?, `sex` =?, `status` =?, `email` =?, `houseno` =?, `street` =?,
+        `fname` = ?, `mi` =?, `pwd` =?, `sex` =?, `status` =?, `email` =?, `houseno` =?, `street` =?,
         `brgy` =?, `municipal` =?, `contact` =?,
         `bdate` =?, `bplace` =?, `nationality` =?, `voter` =?, `family_role` =?, `role` =?, `addedby` =? WHERE `id_resident` = ?");
     
-    $stmt->execute([$password, $lname, $fname, $mi, $age, $sex, $status, $email, $houseno, 
+    $stmt->execute([$password, $lname, $fname, $mi, $pwd, $sex, $status, $email, $houseno, 
         $street, $brgy, $municipal, $contact, $bdate, $bplace, $nationality, $voter, $family_role, $role, $addedby, $id_resident]);
 
 } else {
     // 2. If password is empty, update everything EXCEPT the password column
     $stmt = $connection->prepare("UPDATE tbl_resident SET `lname` =?, 
-        `fname` = ?, `mi` =?, `age` =?, `sex` =?, `status` =?, `email` =?, `houseno` =?, `street` =?,
+        `fname` = ?, `mi` =?, `pwd` =?, `sex` =?, `status` =?, `email` =?, `houseno` =?, `street` =?,
         `brgy` =?, `municipal` =?, `contact` =?,
         `bdate` =?, `bplace` =?, `nationality` =?, `voter` =?, `family_role` =?, `role` =?, `addedby` =? WHERE `id_resident` = ?");
     
     // Note: $password is removed from the array below
-    $stmt->execute([$lname, $fname, $mi, $age, $sex, $status, $email, $houseno, 
+    $stmt->execute([$lname, $fname, $mi, $pwd, $sex, $status, $email, $houseno, 
         $street, $brgy, $municipal, $contact, $bdate, $bplace, $nationality, $voter, $family_role, $role, $addedby, $id_resident]);
 }
 
@@ -361,7 +324,6 @@ header("refresh: 0");
 
     public function profile_update() {
         $id_resident = $_GET['id_resident'];
-        $age = $_POST['age'];
         $status = $_POST['status'];
         $address = $_POST['address'];
         $contact = $_POST['contact'];
@@ -369,9 +331,9 @@ header("refresh: 0");
         if (isset($_POST['profile_update'])) {
            
             $connection = $this->openConn();
-            $stmt = $connection->prepare("UPDATE tbl_resident SET  `age` = ?,  `status` = ?, 
+            $stmt = $connection->prepare("UPDATE tbl_resident SET `status` = ?, 
             `address` = ?, `contact` = ? WHERE id_resident = ?");
-            $stmt->execute([ $age, $status, $address,
+            $stmt->execute([ $status, $address,
             $contact, $id_resident]);
                
             $message2 = "Resident Profile Updated";
@@ -419,7 +381,26 @@ header("refresh: 0");
         return $rescount;
     }
 
+    public function view_resident_pwd() {
+        $connection = $this->openConn();
+        $stmt = $connection->prepare("SELECT * FROM tbl_resident WHERE `pwd` = 'Yes' AND `is_archived` = 0");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 
+    public function count_pwd() {
+        $connection = $this->openConn();
+        $stmt = $connection->prepare("SELECT COUNT(*) FROM tbl_resident WHERE `pwd` = 'Yes' AND `is_archived` = 0");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    public function count_non_pwd() {
+        $connection = $this->openConn();
+        $stmt = $connection->prepare("SELECT COUNT(*) FROM tbl_resident WHERE `pwd` = 'No' AND `is_archived` = 0");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
 
 
 

@@ -140,8 +140,12 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Age:</label>
-                                    <input type="number" class="form-control" name="age" required>
+                                    <label class="form-label">PWD (Person with Disability)?</label>
+                                    <select class="form-select" name="pwd" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Sex:</label>

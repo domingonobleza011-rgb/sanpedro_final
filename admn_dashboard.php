@@ -519,131 +519,49 @@ hr {
 <!-- Page Heading -->
 
 
-    <div class="row"> 
-        <div class="col-md-4">
-            <h4> Barangay Resident Data </h4>
-            <br>
-            <div class="card border-left-primary shadow">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Barangay Residents</div>
-                                <div class="h5 mb-0 font-weight-bold text-dark"><?= $rescount?></div>
-                                <br>
-                                <a href="admn_table_totalres.php"> View Records </a>
-                        </div>
-                        <div class="col-auto">
-                            <span style="color: #4e73df;"> 
-                                <i class="fas fa-user-friends fa-2x text-dark "></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="row mt-3">
 
-        <div class="col-md-4">  
-            <br>
-            <div class="card border-left-primary shadow card-upper-space">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Household Count</div>
-                                <div class="h5 mb-0 font-weight-bold text-dark"><?= $rescountfh?></div>
-                                <br>
-                                <a href="admn_table_totalhouse.php"> View Records </a>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-home fa-2x text-dark"></i>
-                        </div>
-                    </div>
+    <!-- Pie Chart: Gender -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow" style="border-top: 3px solid var(--navy-light) !important;">
+            <div class="card-body">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-3">
+                    Gender Distribution
+                </div>
+                <div style="max-width: 200px; margin: 0 auto;">
+                    <canvas id="genderPieChart"></canvas>
+                </div>
+                <div class="d-flex justify-content-center gap-3 mt-3" style="font-size:0.78rem; font-weight:600;">
+                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#1a4480;margin-right:5px;"></span>Male (<?= $rescountm ?>)</span>
+                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#e8b86d;margin-right:5px;"></span>Female (<?= $rescountf ?>)</span>
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-4"> 
-            <br>
-            <div class="card border-left-primary shadow card-upper-space">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Registered Voters </div>
-                                <div class="h5 mb-0 font-weight-bold text-dark"><?= $rescountvoter?></div>
-                                <br>
-                                <a href="admn_table_voters.php"> View Records </a>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-user-tie fa-2x text-dark"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> 
     </div>
 
-    <div class="row"> 
-        <div class="col-md-4">  
-            <div class="card border-left-primary shadow card-upper-space">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Male Residents</div>
-                                <div class="h5 mb-0 font-weight-bold text-dark"><?= $rescountm?></div>
-                                <br>
-                                <a href="admn_table_maleres.php"> View Records </a>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-male fa-2x text-dark"></i>
-                        </div>
-                    </div>
-                </div>
+    <!-- Bar Graph: Resident Overview -->
+   <!-- Doughnut Chart: Resident Overview -->
+<div class="col-md-8 mb-3">
+    <div class="card shadow" style="border-top: 3px solid var(--navy-light) !important;">
+        <div class="card-body">
+            <div class="text-xs font-weight-bold text-primary text-uppercase mb-3">
+                Resident Overview
+            </div>
+            <div style="max-width: 200px; margin: 0 auto;">
+                <canvas id="residentDoughnutChart"></canvas>
+            </div>
+            <!-- Legend -->
+            <div class="d-flex flex-wrap justify-content-center gap-3 mt-3" style="font-size:0.78rem; font-weight:600;">
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#1a4480;margin-right:5px;"></span>Total Residents (<?= $rescount ?>)</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#0d9488;margin-right:5px;"></span>Households (<?= $rescountfh ?>)</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c9943a;margin-right:5px;"></span>Voters (<?= $rescountvoter ?>)</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#dc2626;margin-right:5px;"></span>Seniors (<?= $rescountsenior ?>)</span>
             </div>
         </div>
-
-        <div class="col-md-4">  
-            <div class="card border-left-primary shadow card-upper-space">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Female Residents</div>
-                                <div class="h5 mb-0 font-weight-bold text-dark"><?= $rescountf?></div>
-                                <br>
-                                <a href="admn_table_femaleres.php"> View Records </a>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-female fa-2x text-dark"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="col-md-4"> 
-            <div class="card border-left-primary shadow card-upper-space">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Senior Residents</div>
-                                <div class="h5 mb-0 font-weight-bold text-dark"><?= $rescountsenior?></div>
-                                <br>
-                                <a href="admn_table_senior.php"> View Records </a>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-blind fa-2x text-dark"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
+</div>
+
+</div>
 
     <br>
     <hr>
@@ -795,12 +713,10 @@ hr {
     <!-- ══ END COMPLAINTS ══ -->
 
 <!-- /.container-fluid -->
-
 </div>
 <!-- End of Main Content -->
 
-<br>
-<br>
+<br><br>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -809,7 +725,118 @@ hr {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<?php 
-    include('dashboard_sidebar_end.php');
-?>
+
+<script>
+(function() {
+    var ctx = document.getElementById('genderPieChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Male', 'Female'],
+            datasets: [{
+                data: [<?= (int)$rescountm ?>, <?= (int)$rescountf ?>],
+                backgroundColor: ['#1a4480', '#e8b86d'],
+                borderColor: ['#fff','#fff'],
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+                            var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                            return ' ' + ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // ── Click a slice to navigate ──
+    document.getElementById('genderPieChart').addEventListener('click', function(e) {
+        var points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+        if (points.length === 0) return;
+
+        var index = points[0].index;
+        var links = [
+            'admn_table_maleres.php',    // index 0 = Male
+            'admn_table_femaleres.php'   // index 1 = Female
+        ];
+
+        if (links[index]) {
+            window.location.href = links[index];
+        }
+    });
+
+    // ── Show pointer cursor on hover ──
+    document.getElementById('genderPieChart').style.cursor = 'pointer';
+})();
+</script>
+<script>
+(function() {
+    var ctx = document.getElementById('residentDoughnutChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Total Residents', 'Households', 'Registered Voters', 'Senior Residents'],
+            datasets: [{
+                data: [
+                    <?= (int)$rescount ?>,
+                    <?= (int)$rescountfh ?>,
+                    <?= (int)$rescountvoter ?>,
+                    <?= (int)$rescountsenior ?>
+                ],
+                backgroundColor: [
+                    'rgba(26, 68, 128, 0.85)',
+                    'rgba(13, 148, 136, 0.85)',
+                    'rgba(201, 148, 58, 0.85)',
+                    'rgba(220, 38, 38, 0.85)'
+                ],
+                borderColor: ['#fff', '#fff', '#fff', '#fff'],
+                borderWidth: 3,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '65%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+                            var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                            return ' ' + ctx.label + ': ' + ctx.parsed.toLocaleString() + ' (' + pct + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // ── Click a slice to navigate ──
+    document.getElementById('residentDoughnutChart').addEventListener('click', function(e) {
+        var points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+        if (points.length === 0) return;
+        var links = [
+            'admn_table_totalres.php',
+            'admn_table_totalhouse.php',
+            'admn_table_voters.php',
+            'admn_table_senior.php'
+        ];
+        var index = points[0].index;
+        if (links[index]) window.location.href = links[index];
+    });
+
+    document.getElementById('residentDoughnutChart').style.cursor = 'pointer';
+})();
+</script>
+<?php include('dashboard_sidebar_end.php'); ?>

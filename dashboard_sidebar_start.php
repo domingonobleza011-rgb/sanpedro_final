@@ -24,6 +24,7 @@
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -417,151 +418,135 @@ hr {
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <!-- Sidebar -->
+<!-- Sidebar -->
+<ul class="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="admn_dashboard.php">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    
-                </div>
-                <div class="sidebar-brand-text">Administrator Dashboard </div>
-            </a>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
-
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
-                <a class="nav-link" href="admn_dashboard.php">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span></a>
-            </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                User Management
-            </div>
-
-            <!-- Barangay Staff CRUD -->
-            <li class="nav-item">
-                <a class="nav-link" href="admn_staff_crud.php">
-                    <i class="fas fa-user-tie"></i>
-                    <span>Barangay Staffs</span></a>
-            </li>
-
-            <!-- Resident CRUD -->
-            <li class="nav-item">
-                <a class="nav-link" href="admn_resident_crud.php">
-                    <i class="fas fa-users"></i>
-                    <span>Barangay Residents</span></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="admn_messages.php">
-                    <i class="bi bi-chat-left-text"></i>
-                    <span>Messages</span></a>
-            </li>
-        <li class="nav-item">
-                <a class="nav-link" href="admn_complaints.php">
-                    <i class="bi bi-person-exclamation"></i>
-                    <span>Complaints</span></a>
-            </li>
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Barangay Services
-            </div>
-
-            <!-- Announcement Management -->
-            <li class="nav-item">
-                <a class="nav-link" href="admn_announcement_crud.php">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>Announcements</span></a>
-            </li>
-
-
-
-            <li class="nav-item">
-                <a class="nav-link" href="sk_dashboard.php">
-                    <i class="fas fa-leaf"></i>
-                    <span>SK Portal</span>
-                </a>
-            </li>
-
-            <!-- Certificate of Residency -->
-            <li class="nav-item">
-                <a class="nav-link" href="admn_certofres.php">
-                    <i class="fas fa-file-word"></i>
-                    <span>Certificate of Residency</span></a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="admn_brgyid.php">
-                    <i class="fas fa-id-card"></i>
-                    <span>Barangay ID </span></a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="admn_bspermit.php">
-                    <i class="fas fa-file-contract"></i>
-                    <span>Business Permit</span></a>
-            </li>
-
-
-
-            <!-- Barangay Clearance -->
-            <li class="nav-item">
-                <a class="nav-link" href="admn_brgyclearance.php">
-                    <i class="fas fa-file"></i>
-                    <span>Barangay Clearance</span></a>
-            </li>
-
-            <!-- Certificate of Indigency -->
-            <li class="nav-item">
-                <a class="nav-link" href="admn_certofindigency.php">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Certificate of Indigency</span></a>
-            </li>
-
-            <!-- Complain Blotter Report -->
-            <li class="nav-item">
-                <a class="nav-link" href="admn_blotterreport.php">
-                    <i class="fas fa-user-shield"></i>
-                    <span>Peace and Order Report</span></a>
-            </li>
-            <hr>
-            <li class="nav-item">
-    <a class="nav-link" href="admn_activity_logs.php">
-        <i class="fas fa-history"></i>
-        <span>Audit &amp; Logs</span>
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="admn_dashboard.php">
+        <div class="sidebar-brand-icon rotate-n-15"></div>
+        <div class="sidebar-brand-text">Administrator Dashboard</div>
     </a>
+
+    <hr class="sidebar-divider my-0">
+
+    <!-- Dashboard -->
+    <li class="nav-item">
+        <a class="nav-link" href="admn_dashboard.php">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <!-- ▼ User Management DROPDOWN -->
+    <li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUserMgmt"
+        aria-expanded="false" aria-controls="collapseUserMgmt">
+        <i class="fas fa-users-cog"></i>
+        <span>Barangay Records</span>
+    </a>
+    <div id="collapseUserMgmt" class="collapse" data-bs-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <a class="collapse-item" href="admn_staff_crud.php">
+                <i class="fas fa-user-tie mr-2"></i> Barangay Officials/Staffs
+            </a>
+            <a class="collapse-item" href="admn_resident_crud.php">
+                <i class="fas fa-users mr-2"></i> Barangay Residents
+            </a>
+            <a class="collapse-item" href="admn_messages.php">
+                <i class="bi bi-chat-left-text mr-2"></i> Verification &Messages
+            </a>
+        </div>
+    </div>
 </li>
-            <li class="nav-item">
-                <a class="nav-link" href="admn_archive.php">
-                    <i class="fas fa-archive"></i>
-                    <span>Archive</span></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="admn_settings.php">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span></a>
-            </li>
 
-            
+    <hr class="sidebar-divider">
 
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
+    <!-- Announcements (flat) -->
+    <li class="nav-item">
+        <a class="nav-link" href="admn_announcement_crud.php">
+            <i class="fas fa-bullhorn"></i>
+            <span>Announcements</span>
+        </a>
+    </li>
 
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
+    <!-- ▼ Barangay Services DROPDOWN -->
+    <li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseBarangayServices"
+        aria-expanded="false" aria-controls="collapseBarangayServices">
+        <i class="fas fa-landmark"></i>
+        <span>Barangay Services</span>
+    </a>
+    <div id="collapseBarangayServices" class="collapse" data-bs-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <a class="collapse-item" href="admn_certofres.php">
+                <i class="fas fa-file-word mr-2"></i> Certificate of Residency
+            </a>
+            <a class="collapse-item" href="admn_brgyid.php">
+                <i class="fas fa-id-card mr-2"></i> Barangay ID
+            </a>
+            <a class="collapse-item" href="admn_bspermit.php">
+                <i class="fas fa-file-contract mr-2"></i> Business Permit
+            </a>
+            <a class="collapse-item" href="admn_brgyclearance.php">
+                <i class="fas fa-file mr-2"></i> Barangay Clearance
+            </a>
+            <a class="collapse-item" href="admn_certofindigency.php">
+                <i class="fas fa-fw fa-table mr-2"></i> Certificate of Indigency
+            </a>
+            <a class="collapse-item" href="admn_blotterreport.php">
+                <i class="fas fa-user-shield mr-2"></i> Blotter Report
+            </a>
+            <a class="collapse-item" href="admn_complaints.php">
+                <i class="bi bi-people-fill mr-2"></i> Complaints
+            </a>
+        </div>
+    </div>
+</li>
 
-        </ul>
+    <hr class="sidebar-divider">
+
+    <!-- Audit & Logs -->
+    <li class="nav-item">
+        <a class="nav-link" href="admn_activity_logs.php">
+            <i class="fas fa-history"></i>
+            <span>Audit &amp; Logs</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="admn_archive.php">
+            <i class="fas fa-archive"></i>
+            <span>Archive</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="admn_settings.php">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <!-- SK Portal at the bottom -->
+    <li class="nav-item">
+        <a class="nav-link" href="sk_dashboard.php">
+            <i class="fas fa-leaf"></i>
+            <span>SK Portal</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+
+</ul>
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->

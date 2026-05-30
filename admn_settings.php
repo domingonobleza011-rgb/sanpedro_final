@@ -312,7 +312,7 @@ include('secure_header.php');
         <div class="head-icon"><i class="fas fa-users-cog"></i></div>
         <div>
             <h1>User Management</h1>
-            <p>Manage administrator and staff accounts for this system</p>
+            <p>Manage administrator</p>
         </div>
     </div>
 
@@ -322,7 +322,7 @@ include('secure_header.php');
 
                 <div class="cp-header">
                     <div class="badge-pill"><i class="fas fa-user-plus"></i> New Account</div>
-                    <h2>Register Admin / Staff</h2>
+                    <h2>Register Admin</h2>
                     <p>Fill in the details below to create a new system account.</p>
                 </div>
 

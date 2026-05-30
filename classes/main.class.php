@@ -540,7 +540,14 @@ public function openConn() {
             $connection   = $this->openConn();
             $stmt = $connection->prepare("INSERT INTO tbl_announcement (`event`,`start_date`,`addedby`,`image`,`status`) VALUES (?, ?, ?, ?, 'active')");
             $stmt->execute([$event, $start_date, $addedby, $image_string]);
- 
+
+            // ── Broadcast push notification to all residents ──────────────
+            $this->broadcastFCMNotification(
+                '📢 New Barangay Announcement',
+                $event
+            );
+            // ─────────────────────────────────────────────────────────────
+
             $count = count($uploaded_images);
             notif("Announcement added with {$count} image(s).", 'success');
             header('refresh:0');
@@ -879,6 +886,93 @@ public function approveResidentVerification($id_resident, $id_upload, $admin_nam
  * @param string $title
  * @param string $body
  */
+    /**
+     * Send a push notification to ALL residents who have an FCM token stored.
+     * Called after a new announcement is created.
+     */
+    public function broadcastFCMNotification(string $title, string $body): void {
+        try {
+            $con  = $this->openConn();
+            $stmt = $con->query(
+                "SELECT DISTINCT fcm_token FROM tbl_fcm_tokens
+                 WHERE fcm_token IS NOT NULL AND fcm_token <> ''
+                 ORDER BY updated_at DESC"
+            );
+            $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if (empty($tokens)) {
+                error_log("broadcastFCMNotification: No FCM tokens found.");
+                return;
+            }
+
+            $access_token = $this->getFCMAccessToken();
+            if (!$access_token) {
+                error_log("broadcastFCMNotification: Could not obtain FCM access token.");
+                return;
+            }
+
+            $project_id = 'barangay-management-syst-3512b';
+            $endpoint   = "https://fcm.googleapis.com/v1/projects/{$project_id}/messages:send";
+            $headers    = [
+                'Authorization: Bearer ' . $access_token,
+                'Content-Type: application/json',
+            ];
+
+            foreach ($tokens as $token) {
+                $payload = json_encode([
+                    'message' => [
+                        'token'        => $token,
+                        'notification' => [
+                            'title' => $title,
+                            'body'  => $body,
+                        ],
+                        'webpush' => [
+                            'notification' => [
+                                'icon' => '/assets/logo.jpg',
+                            ],
+                            'fcm_options' => [
+                                'link' => 'resident_homepage.php',
+                            ],
+                        ],
+                        'data' => [
+                            'url' => 'resident_homepage.php',
+                        ],
+                    ],
+                ]);
+
+                $ch = curl_init($endpoint);
+                curl_setopt_array($ch, [
+                    CURLOPT_POST           => true,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_HTTPHEADER     => $headers,
+                    CURLOPT_POSTFIELDS     => $payload,
+                    CURLOPT_TIMEOUT        => 10,
+                ]);
+                $response = curl_exec($ch);
+                $err      = curl_error($ch);
+                curl_close($ch);
+
+                if ($err) {
+                    error_log("broadcastFCMNotification cURL error: {$err}");
+                } else {
+                    $result = json_decode($response, true);
+                    if (!empty($result['error'])) {
+                        // Token may be stale — remove it from the DB
+                        $code = $result['error']['details'][0]['errorCode'] ?? '';
+                        if (in_array($code, ['UNREGISTERED', 'INVALID_ARGUMENT'])) {
+                            $del = $con->prepare("DELETE FROM tbl_fcm_tokens WHERE fcm_token = ?");
+                            $del->execute([$token]);
+                        }
+                        error_log("broadcastFCMNotification FCM error for token: {$response}");
+                    }
+                }
+            }
+
+        } catch (Exception $e) {
+            error_log("broadcastFCMNotification Exception: " . $e->getMessage());
+        }
+    }
+
 private function sendFCMNotification(int $id_resident, string $title, string $body): void {
         try {
             // ── 1. Look up the resident's FCM device token ─────────────────
@@ -940,7 +1034,7 @@ private function sendFCMNotification(int $id_resident, string $title, string $bo
             ]);
  $response = curl_exec($ch);
 $err      = curl_error($ch);
-// remove: curl_close($ch);   ← just delete this line
+curl_close($ch);
 
 if ($err) {
     error_log("sendFCMNotification cURL error: {$err}");

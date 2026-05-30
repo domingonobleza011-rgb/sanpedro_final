@@ -27,8 +27,8 @@ async function initPushNotifications() {
 
     try {
         const reg = await navigator.serviceWorker.register(
-            '/BarangaySystem-master/firebase-messaging-sw.js',
-            { scope: '/BarangaySystem-master/' }
+            '/firebase-messaging-sw.js',
+            { scope: '/' }
         );
 
         await reg.update();

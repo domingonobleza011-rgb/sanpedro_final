@@ -25,10 +25,23 @@
   <meta name="google-site-verification" content="googledb459bb901e2f59e" />
 
     <title>Barangay San Pedro</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+    <link rel="manifest" href="/BarangaySystem-master/manifest.json">
+<meta name="theme-color" content="#0f2d5a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Brgy San Pedro">
+<link rel="apple-touch-icon" href="/icons/pwa/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <!-- responsive tags for screen compatibility -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- custom css --> 
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+        <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 </head>
     <style>
         :root {
@@ -511,5 +524,6 @@
             passField.type = passField.type === "password" ? "text" : "password";
         }
     </script>
+    <script src="/js/pwa.js"></script>
 </body>
 </html>

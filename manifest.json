@@ -1,0 +1,105 @@
+{
+  "name": "Barangay San Pedro BMIS",
+  "short_name": "Brgy San Pedro",
+  "description": "Barangay Management Information System for Barangay San Pedro",
+  "start_url": "/index.php",
+  "display": "standalone",
+  "background_color": "#0f2d5a",
+  "theme_color": "#0f2d5a",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-PH",
+  "categories": ["government", "utilities"],
+  "icons": [
+    {
+      "src": "icons/pwa/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa/icon-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icons/pwa/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "BMIS Mobile Dashboard"
+    },
+    {
+      "src": "icons/pwa/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "BMIS Admin Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Resident Homepage",
+      "short_name": "Home",
+      "url": "/resident_homepage.php",
+      "icons": [{ "src": "icons/pwa/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Announcements",
+      "short_name": "Announcements",
+      "url": "/resident_announcement.php",
+      "icons": [{ "src": "icons/pwa/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Request Documents",
+      "short_name": "Documents",
+      "url": "/services_brgyclearance.php",
+      "icons": [{ "src": "icons/pwa/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ]
+}

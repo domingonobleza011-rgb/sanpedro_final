@@ -36,7 +36,10 @@
                         <i class="fas fa-comment-alt"></i> Message
                     </button>
                     
-                    <input type="hidden" name="id_resident" value="<?= $row['id_resident'];?>">
+                    <button type="button" class="btn btn-warning btn-sm text-white" style="width: 110px; font-size: 17px; border-radius:30px;" data-toggle="modal" data-target="#promoteModal<?= $row['id_resident'] ?>">
+                        <i class="fas fa-user-tie"></i> Promote
+                    </button>
+                                        <input type="hidden" name="id_resident" value="<?= $row['id_resident'];?>">
                     
                     <button class="btn btn-danger" type="submit" name="delete_resident" style="width: 90px; font-size: 17px; border-radius:30px;"> Archive </button>
                 </form>
@@ -59,7 +62,6 @@
                             <div class="row">
                                 <div class="col-6">
                                     <p><strong>Full Name:</strong><br> <?= $row['lname'] ?>, <?= $row['fname'] ?> <?= $row['mi'] ?>.</p>
-                                    <p><strong>Age:</strong> <?= $row['age'] ?></p>
                                     <p><strong>Sex:</strong> <?= $row['sex'] ?></p>
                                     <p><strong>Civil Status:</strong> <?= $row['status'] ?></p>
                                 </div>
@@ -135,14 +137,17 @@
             <td>    
                 <form action="" method="post">
                     <button type="button" class="btn btn-primary btn-sm" style="width: 90px; font-size: 17px; border-radius:30px;" data-toggle="modal" data-target="#viewModal<?= $row['id_resident'] ?>">
-                        <i class="fa fa-eye"></i> View
+                        </i> View
                     </button>
 
                     <button type="button" class="btn btn-info btn-sm text-white" style="width: 110px; font-size: 17px; border-radius:30px;" data-toggle="modal" data-target="#messageModal<?= $row['id_resident'] ?>">
-                        <i class="fas fa-comment-alt"></i> Message
+                        </i> Message
                     </button>
                     
-                    <input type="hidden" name="id_resident" value="<?= $row['id_resident'];?>">
+                    <button type="button" class="btn btn-warning btn-sm text-white" style="width: 110px; font-size: 17px; border-radius:30px;" data-toggle="modal" data-target="#promoteModal<?= $row['id_resident'] ?>">
+                        </i> Promote
+                    </button>
+                                        <input type="hidden" name="id_resident" value="<?= $row['id_resident'];?>">
                     
                     <button class="btn btn-danger" type="submit" name="delete_resident" style="width: 90px; font-size: 17px; border-radius:30px;"> Archive </button>
                 </form>
@@ -165,7 +170,6 @@
                             <div class="row">
                                 <div class="col-6">
                                     <p><strong>Full Name:</strong><br> <?= $row['lname'] ?>, <?= $row['fname'] ?> <?= $row['mi'] ?>.</p>
-                                    <p><strong>Age:</strong> <?= $row['age'] ?></p>
                                     <p><strong>Sex:</strong> <?= $row['sex'] ?></p>
                                     <p><strong>Civil Status:</strong> <?= $row['status'] ?></p>
                                 </div>
@@ -209,6 +213,104 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:30px;">Cancel</button>
                                 <button type="submit" name="send_msg" class="btn btn-info text-white" style="border-radius:30px; width: 120px;">Send</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Promote to Staff Modal -->
+            <div class="modal fade" id="promoteModal<?= $row['id_resident'] ?>" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content" style="border-radius: 20px; overflow: hidden;">
+                        <div class="modal-header text-white" style="background: linear-gradient(135deg, #b8860b, #daa520);">
+                            <h5 class="modal-title"><i class="fas fa-user-tie mr-2"></i> Promote to Barangay Staff</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                        </div>
+                        <form action="admn_resident_crud.php" method="POST">
+                            <div class="modal-body text-left">
+                                <div class="alert alert-warning" style="border-radius:10px;">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    You are about to promote <strong><?= $row['fname'] ?> <?= $row['lname'] ?></strong> to a Barangay Staff member.
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Assign Position:</strong></label>
+                                    <select class="form-control" name="position" required style="border-radius:10px;">
+                                        <option value="">-- Choose Position --</option>
+                                        <option value="Punong Barangay">Punong Barangay</option>
+                                        <option value="Secretary">Secretary</option>
+                                        <option value="Treasurer">Treasurer</option>
+                                        <option value="Clerk">Clerk</option>
+                                        <option value="Book Keeper">Book Keeper</option>
+                                        <option value="Committee on Appropriation">Committee on Appropriation</option>
+                                        <option value="Committee on Health">Committee on Health</option>
+                                        <option value="Committee on Women and Children">Committee on Women and Children</option>
+                                        <option value="Committee on Education">Committee on Education</option>
+                                        <option value="Committee on Peace and Order">Committee on Peace and Order</option>
+                                        <option value="Committee on Infrastructure">Committee on Infrastructure</option>
+                                        <option value="Committee on Ways and Means">Committee on Ways and Means</option>
+                                        <option value="Committee on Agriculture">Committee on Agriculture</option>
+                                        <option value="Committee on Tourism">Committee on Tourism</option>
+                                        <option value="IPMRR Representative">IPMRR Representative</option>
+                                        <option value="Sk Chairperson">Sk Chairperson</option>
+                                    </select>
+                                </div>
+                                <input type="hidden" name="promote_id_resident" value="<?= $row['id_resident'] ?>">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:30px;">Cancel</button>
+                                <button type="submit" name="promote_resident" class="btn text-white" style="border-radius:30px; width: 140px; background: linear-gradient(135deg, #b8860b, #daa520);">
+                                    <i class="fas fa-level-up-alt mr-1"></i> Promote
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Promote to Staff Modal -->
+            <div class="modal fade" id="promoteModal<?= $row['id_resident'] ?>" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content" style="border-radius: 20px; overflow: hidden;">
+                        <div class="modal-header text-white" style="background: linear-gradient(135deg, #b8860b, #daa520);">
+                            <h5 class="modal-title"><i class="fas fa-user-tie mr-2"></i> Promote to Barangay Staff</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                        </div>
+                        <form action="admn_resident_crud.php" method="POST">
+                            <div class="modal-body text-left">
+                                <div class="alert alert-warning" style="border-radius:10px;">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    You are about to promote <strong><?= $row['fname'] ?> <?= $row['lname'] ?></strong> to a Barangay Staff member.
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Assign Position:</strong></label>
+                                    <select class="form-control" name="position" required style="border-radius:10px;">
+                                        <option value="">-- Choose Position --</option>
+                                        <option value="Punong Barangay">Punong Barangay</option>
+                                        <option value="Secretary">Secretary</option>
+                                        <option value="Treasurer">Treasurer</option>
+                                        <option value="Clerk">Clerk</option>
+                                        <option value="Book Keeper">Book Keeper</option>
+                                        <option value="Committee on Appropriation">Committee on Appropriation</option>
+                                        <option value="Committee on Health">Committee on Health</option>
+                                        <option value="Committee on Women and Children">Committee on Women and Children</option>
+                                        <option value="Committee on Education">Committee on Education</option>
+                                        <option value="Committee on Peace and Order">Committee on Peace and Order</option>
+                                        <option value="Committee on Infrastructure">Committee on Infrastructure</option>
+                                        <option value="Committee on Ways and Means">Committee on Ways and Means</option>
+                                        <option value="Committee on Agriculture">Committee on Agriculture</option>
+                                        <option value="Committee on Tourism">Committee on Tourism</option>
+                                        <option value="IPMRR Representative">IPMRR Representative</option>
+                                        <option value="Sk Chairperson">Sk Chairperson</option>
+                                    </select>
+                                </div>
+                                <input type="hidden" name="promote_id_resident" value="<?= $row['id_resident'] ?>">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:30px;">Cancel</button>
+                                <button type="submit" name="promote_resident" class="btn text-white" style="border-radius:30px; width: 140px; background: linear-gradient(135deg, #b8860b, #daa520);">
+                                    <i class="fas fa-level-up-alt mr-1"></i> Promote
+                                </button>
                             </div>
                         </form>
                     </div>

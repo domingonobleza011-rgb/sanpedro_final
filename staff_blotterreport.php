@@ -43,7 +43,7 @@
 
     <div class="row"> 
         <div class="col text-center"> 
-            <h1> Peace and Order Report Data</h1>
+            <h1> Blotter Report</h1>
         </div>
     </div>
 

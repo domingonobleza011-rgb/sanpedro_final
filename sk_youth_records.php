@@ -1,53 +1,21 @@
 <?php
 error_reporting(E_ALL ^ E_WARNING);
-define('BMIS_ROLE_REQUIRED', 'admin');
-include('secure_header.php');
+require_once('classes/security.php');
+bmis_session_start();
+bmis_set_security_headers();
+require_once('classes/conn.php');
 include('classes/staff.class.php');
-    include('classes/resident.class.php');
-    require_once('classes/conn.php');
-$userdetails = $bmis->get_userdata();
-    $bmis->validate_admin();
-    $bmis->delete_youth();
-    $view = $bmis->view_youth();
+include('classes/resident.class.php');
 
-
-// Handle ADD
-if (isset($_POST['add_youth'])) {
-    $stmt = $conn->prepare("INSERT INTO tbl_youth (fname,lname,mi,age,sex,civil_status,contact_number,email_address,educ_attain,emp_status,skill_name) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
-    $stmt->execute([$_POST['fname'],$_POST['lname'],$_POST['mi'],$_POST['age'],$_POST['sex'],$_POST['civil_status'],$_POST['contact_number'],$_POST['email_address'],$_POST['educ_attain'],$_POST['emp_status'],$_POST['skill_name']]);
-    header("Location: sk_youth_records.php?success=added"); exit;
-}
-// Handle EDIT
-if (isset($_POST['edit_youth'])) {
-    $stmt = $conn->prepare("UPDATE tbl_youth SET fname=?,lname=?,mi=?,age=?,sex=?,civil_status=?,contact_number=?,email_address=?,educ_attain=?,emp_status=?,skill_name=? WHERE id_youth=?");
-    $stmt->execute([$_POST['fname'],$_POST['lname'],$_POST['mi'],$_POST['age'],$_POST['sex'],$_POST['civil_status'],$_POST['contact_number'],$_POST['email_address'],$_POST['educ_attain'],$_POST['emp_status'],$_POST['skill_name'],$_POST['id_youth']]);
-    header("Location: sk_youth_records.php?success=updated"); exit;
-}
-// Handle DELETE
-if (isset($_POST['delete_youth'])) {
-    $stmt = $conn->prepare("DELETE FROM tbl_youth WHERE id_youth=?");
-    $stmt->execute([$_POST['id_youth']]);
-    header("Location: sk_youth_records.php?success=deleted"); exit;
-}
-if (isset($_POST['bulk_delete_youth']) && !empty($_POST['selected_ids'])) {
-    $ids = array_map('intval', $_POST['selected_ids']);
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $stmt = $conn->prepare("DELETE FROM tbl_youth WHERE id_youth IN ($placeholders)");
-    $stmt->execute($ids);
-    header("Location: sk_youth_records.php?success=deleted"); exit;
+// Enforce: only SK Chairperson may access this page
+$userdetails = bmis_require_login();
+if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk Chairperson') {
+    http_response_code(403);
+    die('Access denied. This page is restricted to the SK Chairperson only.');
 }
 
-$keyword = $_GET['keyword'] ?? '';
-if ($keyword) {
-    $s = $conn->prepare("SELECT * FROM tbl_youth WHERE fname LIKE ? OR lname LIKE ? OR email_address LIKE ? ORDER BY lname");
-    $k = "%$keyword%";
-    $s->execute([$k,$k,$k]);
-} else {
-    $s = $conn->prepare("SELECT * FROM tbl_youth ORDER BY lname");
-    $s->execute();
-}
-$youths = $s->fetchAll(PDO::FETCH_ASSOC);
-$total = count($youths);
+require_once('classes/main.class.php');
+$bmis = new BMISClass();
 ?>
 <?php include('dashboard_sidebar_start_sk.php'); ?>
 <style>

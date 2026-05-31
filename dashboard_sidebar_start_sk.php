@@ -115,12 +115,12 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
     <!-- SK Sidebar -->
     <ul class="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="admn_dashboard.php">
-            <div class="sidebar-brand-text ms-2">
-                ADMIN PORTAL<br>
-                <span style="font-size:0.68rem;font-weight:400;opacity:0.7;">BACK TO ADMIN PORTAL</span>
+
+            <div class="sidebar-brand d-flex align-items-center justify-content-center">
+                Sk PORTAL<br>
+                
             </div>
-        </a>
+
 
         <hr class="sidebar-divider my-0">
 
@@ -192,7 +192,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
                         <a class="nav-link" href="index.php">
                             <span class="mr-2 d-none d-lg-inline text-gray-800 small"><?= $userdetails['surname']?>, <?= $userdetails['firstname']?> <?= $userdetails['mname']?></span>
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
-                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+                           
                         </a>
                     </li>
                 </ul>

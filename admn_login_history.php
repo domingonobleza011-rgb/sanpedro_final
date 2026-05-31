@@ -1,6 +1,9 @@
 <?php
+    require_once('classes/security.php');
+    bmis_session_start();
+    bmis_set_security_headers();
     require('classes/main.class.php');
-    $userdetails = $bmis->get_userdata();
+    $userdetails = bmis_require_staff_or_admin();
 
     // ==========================================
     // BACKEND: Handle Bulk Deletion Action

@@ -10,6 +10,7 @@ require_once('secure_header.php');
     $staffbmis->create_staff();
     $staffbmis->update_staff();
     $staffbmis->delete_staff();
+    $staffbmis->demote_staff();
     $staffcount = $staffbmis->count_staff();
     
 ?>
@@ -669,11 +670,41 @@ hr {
                             <?php foreach($view as $staff) {?>
                                 <tr>
                                     <td>    
-                                        <form action="" method="post">
-                                            <a href="update_staff_form.php?id_user=<?= $staff['id_user'];?>" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" class="btn btn-success"> Update </a>
+                                         <form action="" method="post">
+                                            <a href="update_staff_form.php?id_user=<?= $staff['id_user'];?>" style="width: 110px; font-size: 15px; border-radius:30px; margin-bottom: 2px;" class="btn btn-success"> Update </a>
+                                            <button type="button" class="btn btn-warning text-white" style="width: 110px; font-size: 15px; border-radius:30px; margin-bottom: 2px;" data-toggle="modal" data-target="#demoteModal<?= $staff['id_user'] ?>">
+                                                 Demote
+                                            </button>
                                             <input type="hidden" name="id_user" value="<?= $staff['id_user'];?>">
-                                            <button class="btn btn-danger" type="submit" name="delete_staff"style="width: 90px; font-size: 17px; border-radius:30px;"> Archive </button>
+                                            <button class="btn btn-danger" type="submit" name="delete_staff" style="width: 110px; font-size: 15px; border-radius:30px;"> Archive </button>
                                         </form>
+                                        <!-- Demote to Resident Modal -->
+                                        <div class="modal fade" id="demoteModal<?= $staff['id_user'] ?>" tabindex="-1" role="dialog" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content" style="border-radius: 20px; overflow: hidden;">
+                                                    <div class="modal-header text-white" style="background: linear-gradient(135deg, #7b4d00, #b8860b);">
+                                                        <h5 class="modal-title"><i class="fas fa-user-minus mr-2"></i> Demote to Resident</h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                    </div>
+                                                    <form action="admn_staff_crud.php" method="POST">
+                                                        <div class="modal-body text-left">
+                                                            <div class="alert alert-warning" style="border-radius:10px;">
+                                                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                                You are about to demote <strong><?= $staff['fname'] ?> <?= $staff['lname'] ?></strong> from the position of <strong><?= $staff['position'] ?></strong> back to a Barangay Resident.
+                                                            </div>
+                                                            <p class="text-muted mb-0"><small>Their staff account will be removed. They will retain their resident record and can still log in as a resident.</small></p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:30px;">Cancel</button>
+                                                            <input type="hidden" name="demote_id_user" value="<?= $staff['id_user'] ?>">
+                                                            <button type="submit" name="demote_staff" class="btn text-white" style="border-radius:30px; width: 140px; background: linear-gradient(135deg, #7b4d00, #b8860b);">
+                                                                <i class="fas fa-level-down-alt mr-1"></i> Confirm Demote
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td> <?= $staff['lname'];?>, <?= $staff['fname'];?> <?= $staff['mi'];?> </td>
                                     <td> <?= $staff['age'];?> </td>

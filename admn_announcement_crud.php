@@ -4,7 +4,7 @@
    require('classes/resident.class.php');
 
    $userdetails = $bmis->get_userdata();
-   $bmis->validate_admin();
+   $bmis->validate_staff_or_admin();
    $current_admin_id = $userdetails['id_resident'];
 
    if(isset($_POST['create_announce'])) {

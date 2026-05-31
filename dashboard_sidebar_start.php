@@ -530,15 +530,6 @@ hr {
         </a>
     </li>
 
-    <hr class="sidebar-divider">
-
-    <!-- SK Portal at the bottom -->
-    <li class="nav-item">
-        <a class="nav-link" href="sk_dashboard.php">
-            <i class="fas fa-leaf"></i>
-            <span>SK Portal</span>
-        </a>
-    </li>
 
     <hr class="sidebar-divider d-none d-md-block">
 

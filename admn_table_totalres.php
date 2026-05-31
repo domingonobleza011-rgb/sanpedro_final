@@ -2,7 +2,7 @@
     
    error_reporting(E_ALL ^ E_WARNING);
    ini_set('display_errors',0);
-define('BMIS_ROLE_REQUIRED', 'admin');
+define('BMIS_ROLE_REQUIRED', 'staff');
 require('secure_header.php');
    require('classes/resident.class.php');
    $userdetails = $bmis->get_userdata();

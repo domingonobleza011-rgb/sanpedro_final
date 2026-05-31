@@ -342,7 +342,11 @@ public function openConn() {
                 if($user['role'] == 'user') {
                     $this->set_userdata($user);
                     $this->log_login_event('login', $user);           // ← NEW
-                    echo "<script>window.location.href='staff_dashboard.php';</script>";
+                    if ($user['position'] === 'Sk Chairperson') {
+                        echo "<script>window.location.href='sk_dashboard.php';</script>";
+                    } else {
+                        echo "<script>window.location.href='staff_dashboard.php';</script>";
+                    }
                     exit();
                 }
             }
@@ -430,6 +434,7 @@ public function openConn() {
             "nationality"  => $array['nationality'],
             "family_role"  => $array['family_role'],
             "role"         => $array['role'],
+            "position"     => $array['position'] ?? '',
             "houseno"      => $array['houseno'],
             "street"       => $array['street'],
             "brgy"         => $array['brgy'],
@@ -1362,6 +1367,20 @@ public function delete_certofres(){
                 return $userdetails;
             }
         }
+    }
+
+    public function validate_staff_or_admin() {
+        $userdetails = $this->get_userdata();
+        if (!isset($userdetails)) {
+            $this->show_404();
+            return;
+        }
+        $allowed = ['administrator', 'Admin', 'user'];
+        // SK Chairperson is staff (role=user) but must NOT access admin pages
+        if (!in_array($userdetails['role'], $allowed) || ($userdetails['position'] ?? '') === 'Sk Chairperson') {
+            $this->show_404();
+        }
+        return $userdetails;
     }
  
  

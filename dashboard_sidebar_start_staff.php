@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,18 +9,22 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Barangay Information & E-Services Management System</title>
+    <title>Barangay San Pedro</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
+    
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
-
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+    
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -417,124 +418,100 @@ hr {
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <!-- Sidebar -->
+<!-- Sidebar -->
+<ul class="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="staff_dashboard.php">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    
-                </div>
-                <div class="sidebar-brand-text">Staff Dashboard </div>
+    
+        <div class="sidebar-brand-icon rotate-n-15"></div>
+        <div class="sidebar-brand d-flex align-items-center justify-content-center">Staff Dashboard</div>
+    
+
+    <hr class="sidebar-divider my-0">
+
+    <!-- Dashboard -->
+    <li class="nav-item">
+        <a class="nav-link" href="staff_dashboard.php">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <!-- ▼ User Management DROPDOWN -->
+    <li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUserMgmt"
+        aria-expanded="false" aria-controls="collapseUserMgmt">
+        <i class="fas fa-users-cog"></i>
+        <span>Barangay Records</span>
+    </a>
+    <div id="collapseUserMgmt" class="collapse" data-bs-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <a class="collapse-item" href="staff_staff_crud.php">
+                <i class="fas fa-user-tie mr-2"></i> Barangay Officials/Staffs
             </a>
+            <a class="collapse-item" href="staff_resident_crud.php">
+                <i class="fas fa-users mr-2"></i> Barangay Residents
+            </a>
+        
+        </div>
+    </div>
+</li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
+    <hr class="sidebar-divider">
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_dashboard.php">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span></a>
-            </li>
+    <!-- Announcements (flat) -->
+    <li class="nav-item">
+        <a class="nav-link" href="staff_announcement_crud.php">
+            <i class="fas fa-bullhorn"></i>
+            <span>Announcements</span>
+        </a>
+    </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+    <!-- ▼ Barangay Services DROPDOWN -->
+    <li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseBarangayServices"
+        aria-expanded="false" aria-controls="collapseBarangayServices">
+        <i class="fas fa-landmark"></i>
+        <span>Barangay Services</span>
+    </a>
+    <div id="collapseBarangayServices" class="collapse" data-bs-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <a class="collapse-item" href="staff_certofres.php">
+                <i class="fas fa-file-word mr-2"></i> Certificate of Residency
+            </a>
+            <a class="collapse-item" href="staff_brgyid.php">
+                <i class="fas fa-id-card mr-2"></i> Barangay ID
+            </a>
+            <a class="collapse-item" href="staff_bspermit.php">
+                <i class="fas fa-file-contract mr-2"></i> Business Permit
+            </a>
+            <a class="collapse-item" href="staff_brgyclearance.php">
+                <i class="fas fa-file mr-2"></i> Barangay Clearance
+            </a>
+            <a class="collapse-item" href="staff_certofindigency.php">
+                <i class="fas fa-fw fa-table mr-2"></i> Certificate of Indigency
+            </a>
+            <a class="collapse-item" href="staff_blotterreport.php">
+                <i class="fas fa-user-shield mr-2"></i> Blotter Report
+            </a>
+            <a class="collapse-item" href="staff_complaints.php">
+                <i class="bi bi-people-fill mr-2"></i> Complaints
+            </a>
+        </div>
+    </div>
+</li>
 
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                User Management
-            </div>
 
-            <!-- Barangay Staff CRUD -->
-            <li class="nav-item">
-            <a class="nav-link" href="staff_staff_crud.php?id_user=<?= $userdetails['id_user'];?>">
-                    <i class="fas fa-user-tie"></i>
-                    <span>Barangay Staffs</span></a>
-            </li>
 
-            <!-- Resident CRUD -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_resident_crud.php">
-                    <i class="fas fa-users"></i>
-                    <span>Barangay Residents</span></a>
-            </li>
-                    <li class="nav-item">
-                <a class="nav-link" href="staff_complaints.php">
-                    <i class="bi bi-person-exclamation"></i>
-                    <span>Complaints</span></a>
-            </li>
+    <hr class="sidebar-divider d-none d-md-block">
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
 
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Barangay Services
-            </div>
-
-            <!-- Announcement Management -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_announcement_crud.php">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>Announcements</span></a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="staff_youth_profile.php">
-                    <i class="fas fa-users"></i>
-                    <span>Youth Profiling</span></a>
-            </li>
-
-            <!-- Certificate of Residency -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_table_certofres.php">
-                    <i class="fas fa-file-word"></i>
-                    <span>Certificate of Residency</span></a>
-            </li>
-
-            <!-- Barangay ID -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_brgyid.php">
-                    <i class="fas fa-id-card"></i>
-                    <span>Barangay ID</span></a>
-            </li>
-
-            <!-- Business Permit -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_bspermit.php">
-                    <i class="fas fa-file-contract"></i>
-                    <span>Business Permit</span></a>
-            </li>
-
-            <!-- Barangay Clearance -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_brgyclearance.php">
-                    <i class="fas fa-file"></i>
-                    <span>Barangay Clearance</span></a>
-            </li>
-
-            <!-- Certificate of Indigency -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_certofindigency.php">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Certificate of Indigency</span></a>
-            </li>
-
-            <!-- Complain Blotter Report -->
-            <li class="nav-item">
-                <a class="nav-link" href="staff_blotterreport.php">
-                    <i class="fas fa-user-shield"></i>
-                    <span>Peace and Order Report</span></a>
-            </li>
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
-
-        </ul>
+</ul>
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
@@ -578,16 +555,27 @@ hr {
                             </div>
                         </li>
 
-                        <div class="topbar-divider d-none d-sm-block"></div>
-
                         <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" href="index.php" id="userDropdown" role="button"
-                                aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-800 small"><?= $userdetails['surname']?>, <?= $userdetails['firstname']?></span>
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
-                            </a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link" href="index.php" id="userDropdown" role="button"
+                                    aria-haspopup="true" aria-expanded="false">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-800 small"><?= $userdetails['surname']?>, <?= $userdetails['firstname']?> <?= $userdetails['mname']?></span>
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+                                </a>
+                            </li>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="logout.php" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
                         </li>
                     </ul>
                 </nav>
+
+                
                 <!-- End of Topbar -->

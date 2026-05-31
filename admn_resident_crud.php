@@ -2,7 +2,7 @@
     
    error_reporting(E_ALL ^ E_WARNING);
    ini_set('display_errors',0);
-define('BMIS_ROLE_REQUIRED', 'admin');
+define('BMIS_ROLE_REQUIRED', 'staff');
 require_once('secure_header.php'); 
    require('classes/resident.class.php');
    $userdetails = $bmis->get_userdata();
@@ -11,6 +11,7 @@ require_once('secure_header.php');
    $residentbmis->create_resident();
    $residentbmis->update_resident();
    $residentbmis->delete_resident();
+   $residentbmis->promote_resident();
    
 
    $rescount = $residentbmis->count_resident();

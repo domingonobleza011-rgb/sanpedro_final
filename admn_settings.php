@@ -2,7 +2,7 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-define('BMIS_ROLE_REQUIRED', 'admin');
+define('BMIS_ROLE_REQUIRED', 'staff');
 include('secure_header.php'); 
     require('classes/main.class.php');
     $bmis->create_admin(); 

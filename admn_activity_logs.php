@@ -6,7 +6,7 @@ require('classes/main.class.php');
 $userdetails = $bmis->get_userdata();
 
 // ── FLEXIBLE ADMIN CHECK ─────────────────────────────────────────────
-$admin_roles = ['admin', 'Administrator', 'Admin', 'ADMIN', 'administrator'];
+$admin_roles = ['admin', 'Administrator', 'Admin', 'ADMIN', 'administrator', 'user'];
 $user_role   = $userdetails['role'] ?? '';
 $is_admin    = in_array($user_role, $admin_roles);
 // If your system uses a numeric level, replace the above with:

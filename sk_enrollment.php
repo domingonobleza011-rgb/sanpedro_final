@@ -1,56 +1,21 @@
 <?php
 error_reporting(E_ALL ^ E_WARNING);
-define('BMIS_ROLE_REQUIRED', 'admin');
-include('secure_header.php');
+require_once('classes/security.php');
+bmis_session_start();
+bmis_set_security_headers();
+require_once('classes/conn.php');
 include('classes/staff.class.php');
-    include('classes/resident.class.php');
-    require_once('classes/conn.php');
-$userdetails = $bmis->get_userdata();
-$bmis->validate_admin();
+include('classes/resident.class.php');
 
-// ADD enrollment
-if (isset($_POST['add_enrollment'])) {
-    // Get youth name from tbl_youth
-    $y = $conn->prepare("SELECT fname,lname,contact_number FROM tbl_youth WHERE id_youth=?");
-    $y->execute([$_POST['id_youth']]);
-    $yu = $y->fetch(PDO::FETCH_ASSOC);
-    $name = $yu ? ($yu['lname'].', '.$yu['fname']) : '';
-    $contact = $yu ? $yu['contact_number'] : '';
-    $stmt = $conn->prepare("INSERT INTO tbl_youth_enrollment (id_program,id_youth,youth_name,contact,status) VALUES (?,?,?,?,?)");
-    $stmt->execute([$_POST['id_program'],$_POST['id_youth'],$name,$contact,$_POST['status']]);
-    header("Location: sk_enrollment.php?success=added&program=".$_POST['id_program']); exit;
-}
-// UPDATE status
-if (isset($_POST['update_enrollment'])) {
-    $stmt = $conn->prepare("UPDATE tbl_youth_enrollment SET status=? WHERE id_enrollment=?");
-    $stmt->execute([$_POST['status'],$_POST['id_enrollment']]);
-    header("Location: sk_enrollment.php?success=updated&program=".$_POST['id_program']); exit;
-}
-// DELETE
-if (isset($_POST['delete_enrollment'])) {
-    $conn->prepare("DELETE FROM tbl_youth_enrollment WHERE id_enrollment=?")->execute([$_POST['id_enrollment']]);
-    header("Location: sk_enrollment.php?success=deleted&program=".$_POST['id_program']); exit;
+// Enforce: only SK Chairperson may access this page
+$userdetails = bmis_require_login();
+if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk Chairperson') {
+    http_response_code(403);
+    die('Access denied. This page is restricted to the SK Chairperson only.');
 }
 
-$prog_filter = $_GET['program'] ?? '';
-// Get programs list
-$programs = $conn->query("SELECT * FROM tbl_youth_programs ORDER BY event_date DESC")->fetchAll(PDO::FETCH_ASSOC);
-// Get youth list
-$youth_list = $conn->query("SELECT id_youth, fname, lname FROM tbl_youth ORDER BY lname")->fetchAll(PDO::FETCH_ASSOC);
-
-if ($prog_filter) {
-    $s = $conn->prepare("SELECT e.*,p.program_title,p.program_type,p.event_date FROM tbl_youth_enrollment e JOIN tbl_youth_programs p ON e.id_program=p.id_program WHERE e.id_program=? ORDER BY e.enrolled_at DESC");
-    $s->execute([$prog_filter]);
-} else {
-    $s = $conn->query("SELECT e.*,p.program_title,p.program_type,p.event_date FROM tbl_youth_enrollment e JOIN tbl_youth_programs p ON e.id_program=p.id_program ORDER BY e.enrolled_at DESC");
-}
-$enrollments = $s->fetchAll(PDO::FETCH_ASSOC);
-
-// Stats
-$total_e    = count($enrollments);
-$attended   = count(array_filter($enrollments, fn($e)=>$e['status']==='Attended'));
-$enrolled   = count(array_filter($enrollments, fn($e)=>$e['status']==='Enrolled'));
-$dropped    = count(array_filter($enrollments, fn($e)=>$e['status']==='Dropped'));
+require_once('classes/main.class.php');
+$bmis = new BMISClass();
 ?>
 <?php include('dashboard_sidebar_start_sk.php'); ?>
 <style>

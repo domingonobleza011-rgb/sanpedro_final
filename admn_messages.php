@@ -1,5 +1,5 @@
 <?php 
-    define('BMIS_ROLE_REQUIRED', 'admin');
+    define('BMIS_ROLE_REQUIRED', 'staff');
 require('secure_header.php');
 require_once 'classes/main.class.php'; 
 $systemObject = new BMISClass();

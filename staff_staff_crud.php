@@ -70,10 +70,6 @@
                         <input type="text" class="form-control" name="position"  Value="<?= $view['position'];?>">
                     </div>
                     <div class="col">
-                        <label class="form-group">Age </label>
-                        <input type="number" class="form-control" name="age" Value="<?= $view['age'];?>">
-                    </div>
-                    <div class="col">
                         <label class="form-group">sex </label>
                         <input type="text" class="form-control" name="sex" Value="<?= $view['sex'];?>">
                     </div>

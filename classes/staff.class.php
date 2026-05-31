@@ -269,6 +269,95 @@ public function update_staff() {
     }
 }
 
+
+    //------------------------------------- DEMOTE STAFF TO RESIDENT ----------------------------------------
+
+    public function demote_staff() {
+        if (isset($_POST['demote_staff'])) {
+            $id_user = $_POST['demote_id_user'];
+
+            $connection = $this->openConn();
+
+            // 1. Fetch the staff record
+            $stmt = $connection->prepare("SELECT * FROM tbl_user WHERE id_user = ?");
+            $stmt->execute([$id_user]);
+            $staff = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$staff) {
+                $_SESSION['swal'] = json_encode([
+                    'icon'  => 'error',
+                    'title' => 'Not Found',
+                    'text'  => 'Staff record could not be found.'
+                ]);
+                header('Location: admn_staff_crud.php');
+                exit;
+            }
+
+            $email  = $staff['email']  ?? null;
+            $phone  = $staff['phone_number'] ?? null;
+
+            // 2. Check if this person already has a resident record (by email or phone)
+            $checkStmt = $connection->prepare("SELECT COUNT(*) FROM tbl_resident WHERE email = ? OR phone_number = ?");
+            $checkStmt->execute([$email, $phone]);
+            $alreadyResident = $checkStmt->fetchColumn();
+
+            if ($alreadyResident == 0) {
+                // 3a. No resident record exists — create one from staff data
+                $login_identity = !empty($email) ? $email : $phone;
+
+                // Parse address back into components (best-effort)
+                $addressParts = explode(',', $staff['address']);
+                $houseno   = trim($addressParts[0] ?? '');
+                $street    = trim($addressParts[1] ?? '');
+                $brgy      = trim($addressParts[2] ?? '');
+                $municipal = trim($addressParts[3] ?? '');
+
+                // Determine addedby from session
+                $userdetails = $this->get_userdata();
+                $addedby = ($userdetails['surname'] ?? '') . ', ' . ($userdetails['firstname'] ?? '');
+
+                $insertStmt = $connection->prepare("INSERT INTO tbl_resident
+                    (email, phone_number, password, lname, fname, mi, sex, houseno, street, brgy, municipal,
+                     address, contact, role, addedby, status, voter, family_role, nationality, bplace, bdate, pwd)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'resident', ?, 'Single', 'No', 'No', 'Filipino', '', CURDATE(), 'No')");
+
+                $insertStmt->execute([
+                    $email,
+                    $phone,
+                    $staff['password'],
+                    $staff['lname'],
+                    $staff['fname'],
+                    $staff['mi'],
+                    $staff['sex'],
+                    $houseno,
+                    $street,
+                    $brgy,
+                    $municipal,
+                    $staff['address'],
+                    $staff['contact'],
+                    $addedby
+                ]);
+            }
+            // 3b. Resident record already exists — nothing extra needed, just remove the staff record
+
+            // 4. Archive and delete from tbl_user
+            $this->archive_record('tbl_user', 'id_user', $id_user, 'staff');
+
+            $stmt_del = $connection->prepare("DELETE FROM tbl_user WHERE id_user = ?");
+            $stmt_del->execute([$id_user]);
+
+            $this->log_activity('DEMOTE_Staff', 'Staff', "Demoted Staff #{$id_user} ({$staff['lname']}, {$staff['fname']}) — Position was: {$staff['position']}");
+
+            $_SESSION['swal'] = json_encode([
+                'icon'  => 'success',
+                'title' => 'Demoted Successfully!',
+                'text'  => $staff['fname'] . ' ' . $staff['lname'] . ' has been demoted back to Barangay Resident.'
+            ]);
+            header('Location: admn_staff_crud.php');
+            exit;
+        }
+    }
+
     //--------------------------------------------- EXTRA FUNCTIONS FOR STAFF -------------------------------------------------
 
             public function get_single_staff($id_user){

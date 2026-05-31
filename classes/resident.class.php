@@ -466,6 +466,97 @@ public function resident_changepass() {
 
 
 
+
+    //-------------------------------------- PROMOTE RESIDENT TO STAFF ----------------------------------------
+
+    public function promote_resident() {
+        if (isset($_POST['promote_resident'])) {
+            $id_resident = $_POST['promote_id_resident'];
+            $position    = $_POST['position'];
+
+            $connection = $this->openConn();
+
+            // 1. Fetch the resident's data
+            $stmt = $connection->prepare("SELECT * FROM tbl_resident WHERE id_resident = ?");
+            $stmt->execute([$id_resident]);
+            $resident = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$resident) {
+                $_SESSION['swal'] = json_encode([
+                    'icon'  => 'error',
+                    'title' => 'Not Found',
+                    'text'  => 'Resident record could not be found.'
+                ]);
+                header('Location: admn_resident_crud.php');
+                exit;
+            }
+
+            // 2. Build address and login_identity
+            $address  = trim($resident['houseno'] . ' ' . $resident['street'] . ', ' . $resident['brgy'] . ', ' . $resident['municipal']);
+            $login_identity = !empty($resident['email']) ? $resident['email'] : $resident['phone_number'];
+            $email    = $resident['email'] ?? null;
+            $phone    = $resident['phone_number'] ?? null;
+
+            // 3. Check if already a staff member
+            $checkStmt = $connection->prepare("SELECT COUNT(*) FROM tbl_user WHERE email = ? OR phone_number = ?");
+            $checkStmt->execute([$email, $phone]);
+            $exists = $checkStmt->fetchColumn();
+
+            if ($exists > 0) {
+                $_SESSION['swal'] = json_encode([
+                    'icon'  => 'warning',
+                    'title' => 'Already a Staff Member',
+                    'text'  => $resident['fname'] . ' ' . $resident['lname'] . ' is already registered as a staff member.'
+                ]);
+                header('Location: admn_resident_crud.php');
+                exit;
+            }
+
+            // 4. Determine addedby from session
+            $userdetails = $this->get_userdata();
+            $addedby = ($userdetails['surname'] ?? '') . ', ' . ($userdetails['firstname'] ?? '');
+
+            // 5. Calculate age from bdate
+            $age = 0;
+            if (!empty($resident['bdate'])) {
+                $birthDate = new DateTime($resident['bdate']);
+                $today     = new DateTime();
+                $age       = $birthDate->diff($today)->y;
+            }
+
+            // 6. Insert into tbl_user (staff table)
+            $insertStmt = $connection->prepare("INSERT INTO tbl_user 
+                (login_identity, email, phone_number, password, lname, fname, mi, age, sex, address, contact, position, role, addedby)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'user', ?)");
+
+            $insertStmt->execute([
+                $login_identity,
+                $email,
+                $phone,
+                $resident['password'],
+                $resident['lname'],
+                $resident['fname'],
+                $resident['mi'],
+                $age,
+                $resident['sex'],
+                $address,
+                $resident['contact'],
+                $position,
+                $addedby
+            ]);
+
+            $this->log_activity('PROMOTE_Resident', 'Resident', "Promoted Resident #{$id_resident} ({$resident['lname']}, {$resident['fname']}) to Staff — Position: {$position}");
+
+            $_SESSION['swal'] = json_encode([
+                'icon'  => 'success',
+                'title' => 'Promoted Successfully!',
+                'text'  => $resident['fname'] . ' ' . $resident['lname'] . ' has been promoted to Barangay Staff as ' . $position . '.'
+            ]);
+            header('Location: admn_resident_crud.php');
+            exit;
+        }
+    }
+
     //========================================== SCOPE CHANGED FUNCTIONS ===========================================
 
     public function view_resident_household(){

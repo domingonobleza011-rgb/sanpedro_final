@@ -4,7 +4,7 @@
     require_once('classes/conn.php');
     require('classes/resident.class.php');
     $userdetails = $bmis->get_userdata();
-    $bmis->validate_admin();
+    $bmis->validate_staff_or_admin();
 
     $type_meta = [
         'resident'        => ['label' => 'Resident',              'icon' => 'fa-users',          'color' => 'blue'],

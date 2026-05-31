@@ -1,43 +1,21 @@
 <?php
 error_reporting(E_ALL ^ E_WARNING);
-define('BMIS_ROLE_REQUIRED', 'admin');
-include('secure_header.php');
+require_once('classes/security.php');
+bmis_session_start();
+bmis_set_security_headers();
+require_once('classes/conn.php');
 include('classes/staff.class.php');
-    include('classes/resident.class.php');
-    require_once('classes/conn.php');
-$userdetails = $bmis->get_userdata();
-$bmis->validate_admin();
+include('classes/resident.class.php');
 
-// ADD
-if (isset($_POST['add_program'])) {
-    $stmt = $conn->prepare("INSERT INTO tbl_youth_programs (program_title,program_type,description,venue,event_date,event_time,slots,requirements,status,created_by) VALUES (?,?,?,?,?,?,?,?,?,?)");
-    $stmt->execute([$_POST['program_title'],$_POST['program_type'],$_POST['description'],$_POST['venue'],$_POST['event_date'],$_POST['event_time'],$_POST['slots'],$_POST['requirements'],$_POST['status'],$userdetails['firstname'].' '.$userdetails['surname']]);
-    header("Location: sk_programs.php?success=added"); exit;
-}
-// EDIT
-if (isset($_POST['edit_program'])) {
-    $stmt = $conn->prepare("UPDATE tbl_youth_programs SET program_title=?,program_type=?,description=?,venue=?,event_date=?,event_time=?,slots=?,requirements=?,status=? WHERE id_program=?");
-    $stmt->execute([$_POST['program_title'],$_POST['program_type'],$_POST['description'],$_POST['venue'],$_POST['event_date'],$_POST['event_time'],$_POST['slots'],$_POST['requirements'],$_POST['status'],$_POST['id_program']]);
-    header("Location: sk_programs.php?success=updated"); exit;
-}
-// DELETE
-if (isset($_POST['delete_program'])) {
-    $conn->prepare("DELETE FROM tbl_youth_programs WHERE id_program=?")->execute([$_POST['id_program']]);
-    header("Location: sk_programs.php?success=deleted"); exit;
+// Enforce: only SK Chairperson may access this page
+$userdetails = bmis_require_login();
+if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk Chairperson') {
+    http_response_code(403);
+    die('Access denied. This page is restricted to the SK Chairperson only.');
 }
 
-$status_filter = $_GET['status'] ?? '';
-if ($status_filter) {
-    $s = $conn->prepare("SELECT * FROM tbl_youth_programs WHERE status=? ORDER BY event_date DESC");
-    $s->execute([$status_filter]);
-} else {
-    $s = $conn->prepare("SELECT * FROM tbl_youth_programs ORDER BY event_date DESC");
-    $s->execute();
-}
-$programs = $s->fetchAll(PDO::FETCH_ASSOC);
-
-$types = ['Training','Sports','Arts','Leadership','Health','Livelihood','Scholarship','Community Service','Other'];
-$statuses = ['Upcoming','Ongoing','Completed','Cancelled'];
+require_once('classes/main.class.php');
+$bmis = new BMISClass();
 ?>
 <?php include('dashboard_sidebar_start_sk.php'); ?>
 <style>

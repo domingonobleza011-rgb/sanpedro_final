@@ -20,6 +20,11 @@ $_BMIS_ROLE = defined('BMIS_ROLE_REQUIRED') ? BMIS_ROLE_REQUIRED : 'admin';
 switch ($_BMIS_ROLE) {
     case 'staff':
         $userdetails = bmis_require_staff_or_admin();
+        // SK Chairperson (staff with position 'Sk Chairperson') must not access admin/staff pages
+        if (($userdetails['role'] ?? '') === 'user' && ($userdetails['position'] ?? '') === 'Sk Chairperson') {
+            http_response_code(403);
+            die('Access denied. SK Chairperson can only access the SK Dashboard.');
+        }
         break;
     case 'resident':
         $userdetails = bmis_require_resident();

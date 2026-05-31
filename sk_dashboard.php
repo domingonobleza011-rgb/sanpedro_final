@@ -1,12 +1,21 @@
 <?php
 error_reporting(E_ALL ^ E_WARNING);
-define('BMIS_ROLE_REQUIRED', 'admin');
-include('secure_header.php');
+require_once('classes/security.php');
+bmis_session_start();
+bmis_set_security_headers();
+require_once('classes/conn.php');
 include('classes/staff.class.php');
-    include('classes/resident.class.php');
-    require_once('classes/conn.php');
-$userdetails = $bmis->get_userdata();
-$bmis->validate_admin();
+include('classes/resident.class.php');
+
+// Enforce: only logged-in staff with position 'Sk Chairperson' may access this page
+$userdetails = bmis_require_login();
+if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk Chairperson') {
+    http_response_code(403);
+    die('Access denied. This page is restricted to the SK Chairperson only.');
+}
+
+require_once('classes/main.class.php');
+$bmis = new BMISClass();
 
 // Count stats from existing tables
 try {

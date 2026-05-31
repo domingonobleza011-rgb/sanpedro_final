@@ -25,7 +25,7 @@
   <meta name="google-site-verification" content="googledb459bb901e2f59e" />
 
     <title>Barangay San Pedro</title>
-    <link rel="manifest" href="/BarangaySystem-master/manifest.json">
+    <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0f2d5a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">

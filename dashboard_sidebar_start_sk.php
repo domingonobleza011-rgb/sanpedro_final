@@ -206,4 +206,5 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
                     </li>
                 </ul>
             </nav>
+            <script src="/js/pwa.js"></script>
             <!-- End Topbar -->

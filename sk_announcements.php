@@ -7,7 +7,7 @@ require_once('classes/conn.php');
 include('classes/staff.class.php');
 include('classes/resident.class.php');
 
-// Enforce: only SK Chairperson may access this page
+// Enforce: only logged-in staff with position 'Sk Chairperson' may access this page
 $userdetails = bmis_require_login();
 if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk Chairperson') {
     http_response_code(403);
@@ -15,12 +15,47 @@ if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk 
 }
 
 require_once('classes/main.class.php');
-$bmis = new BMISClass();
+// ADD
+if (isset($_POST['add_post'])) {
+    $stmt = $conn->prepare("INSERT INTO tbl_youth_bulletin (post_title,post_content,post_type,posted_by,is_pinned) VALUES (?,?,?,?,?)");
+    $stmt->execute([$_POST['post_title'],$_POST['post_content'],$_POST['post_type'],$poster,isset($_POST['is_pinned'])?1:0]);
+    header("Location: sk_announcements.php?success=added"); exit;
+}
+// EDIT
+if (isset($_POST['edit_post'])) {
+    $stmt = $conn->prepare("UPDATE tbl_youth_bulletin SET post_title=?,post_content=?,post_type=?,is_pinned=? WHERE id_post=?");
+    $stmt->execute([$_POST['post_title'],$_POST['post_content'],$_POST['post_type'],isset($_POST['is_pinned'])?1:0,$_POST['id_post']]);
+    header("Location: sk_announcements.php?success=updated"); exit;
+}
+// DELETE
+if (isset($_POST['delete_post'])) {
+    $conn->prepare("DELETE FROM tbl_youth_bulletin WHERE id_post=?")->execute([$_POST['id_post']]);
+    header("Location: sk_announcements.php?success=deleted"); exit;
+}
+// TOGGLE PIN
+if (isset($_POST['toggle_pin'])) {
+    $cur = $conn->prepare("SELECT is_pinned FROM tbl_youth_bulletin WHERE id_post=?");
+    $cur->execute([$_POST['id_post']]);
+    $r = $cur->fetch(PDO::FETCH_ASSOC);
+    $conn->prepare("UPDATE tbl_youth_bulletin SET is_pinned=? WHERE id_post=?")->execute([$r['is_pinned']?0:1,$_POST['id_post']]);
+    header("Location: sk_announcements.php"); exit;
+}
+
+$type_filter = $_GET['type'] ?? '';
+if ($type_filter) {
+    $s = $conn->prepare("SELECT * FROM tbl_youth_bulletin WHERE post_type=? ORDER BY is_pinned DESC, date_posted DESC");
+    $s->execute([$type_filter]);
+} else {
+    $s = $conn->query("SELECT * FROM tbl_youth_bulletin ORDER BY is_pinned DESC, date_posted DESC");
+}
+$posts = $s->fetchAll(PDO::FETCH_ASSOC);
+
+$post_types = ['Announcement','Opportunity','Reminder','Achievement','General'];
 ?>
 <?php include('dashboard_sidebar_start_sk.php'); ?>
 <style>
-:root { --sk:#1a4480;--gold:#c9943a;--sk-pale:#e8f5ed;--gold-pale:#fdf3e3; }
-.page-header { background:linear-gradient(135deg,#1a4480,#2b5ea7);color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 6px 24px rgba(26,107,58,.2); }
+:root { --sk:#1a6b3a;--gold:#c9943a;--sk-pale:#e8f5ed;--gold-pale:#fdf3e3; }
+.page-header { background:linear-gradient(135deg,#1a6b3a,#2dab5f);color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 6px 24px rgba(26,107,58,.2); }
 .page-header .hdr-icon { width:60px;height:60px;border-radius:14px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0; }
 .page-header h2 { margin:0;font-size:1.5rem;font-weight:700; }
 .page-header p  { margin:4px 0 0;opacity:.82;font-size:.88rem; }
@@ -54,8 +89,8 @@ $bmis = new BMISClass();
 .btn-sk { background:#1a6b3a;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:.875rem;font-weight:600;transition:all .2s; }
 .btn-sk:hover { background:#145230;color:#fff; }
 .filter-tab { padding:7px 16px;border-radius:8px;border:1.5px solid #e8ecf0;font-size:.82rem;font-weight:600;cursor:pointer;background:#fff;color:#666;text-decoration:none;transition:all .15s; }
-.filter-tab:hover,.filter-tab.active { border-color:#1a4480;background:#1a4480;color:#fff; }
-.modal-header { background:#1a4480;color:#fff;border-radius:12px 12px 0 0; }
+.filter-tab:hover,.filter-tab.active { border-color:#1a6b3a;background:#1a6b3a;color:#fff; }
+.modal-header { background:#1a6b3a;color:#fff;border-radius:12px 12px 0 0; }
 .modal-header .btn-close { filter:invert(1); }
 .alert-success-custom { background:#e8f5ed;color:#1a6b3a;border:1.5px solid #1a6b3a;border-radius:10px;padding:10px 18px;font-size:.875rem;font-weight:600;margin-bottom:16px; }
 </style>
@@ -217,7 +252,7 @@ $bmis = new BMISClass();
     </div>
   </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.getElementById('editPostModal').addEventListener('show.bs.modal', function(e) {
     const b = e.relatedTarget;

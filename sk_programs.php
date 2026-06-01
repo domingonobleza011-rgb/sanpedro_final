@@ -7,7 +7,7 @@ require_once('classes/conn.php');
 include('classes/staff.class.php');
 include('classes/resident.class.php');
 
-// Enforce: only SK Chairperson may access this page
+// Enforce: only logged-in staff with position 'Sk Chairperson' may access this page
 $userdetails = bmis_require_login();
 if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk Chairperson') {
     http_response_code(403);
@@ -15,12 +15,41 @@ if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk 
 }
 
 require_once('classes/main.class.php');
-$bmis = new BMISClass();
+// ADD
+if (isset($_POST['add_program'])) {
+    $stmt = $conn->prepare("INSERT INTO tbl_youth_programs (program_title,program_type,description,venue,event_date,event_time,slots,requirements,status,created_by) VALUES (?,?,?,?,?,?,?,?,?,?)");
+    $stmt->execute([$_POST['program_title'],$_POST['program_type'],$_POST['description'],$_POST['venue'],$_POST['event_date'],$_POST['event_time'],$_POST['slots'],$_POST['requirements'],$_POST['status'],$userdetails['firstname'].' '.$userdetails['surname']]);
+    header("Location: sk_programs.php?success=added"); exit;
+}
+// EDIT
+if (isset($_POST['edit_program'])) {
+    $stmt = $conn->prepare("UPDATE tbl_youth_programs SET program_title=?,program_type=?,description=?,venue=?,event_date=?,event_time=?,slots=?,requirements=?,status=? WHERE id_program=?");
+    $stmt->execute([$_POST['program_title'],$_POST['program_type'],$_POST['description'],$_POST['venue'],$_POST['event_date'],$_POST['event_time'],$_POST['slots'],$_POST['requirements'],$_POST['status'],$_POST['id_program']]);
+    header("Location: sk_programs.php?success=updated"); exit;
+}
+// DELETE
+if (isset($_POST['delete_program'])) {
+    $conn->prepare("DELETE FROM tbl_youth_programs WHERE id_program=?")->execute([$_POST['id_program']]);
+    header("Location: sk_programs.php?success=deleted"); exit;
+}
+
+$status_filter = $_GET['status'] ?? '';
+if ($status_filter) {
+    $s = $conn->prepare("SELECT * FROM tbl_youth_programs WHERE status=? ORDER BY event_date DESC");
+    $s->execute([$status_filter]);
+} else {
+    $s = $conn->prepare("SELECT * FROM tbl_youth_programs ORDER BY event_date DESC");
+    $s->execute();
+}
+$programs = $s->fetchAll(PDO::FETCH_ASSOC);
+
+$types = ['Training','Sports','Arts','Leadership','Health','Livelihood','Scholarship','Community Service','Other'];
+$statuses = ['Upcoming','Ongoing','Completed','Cancelled'];
 ?>
 <?php include('dashboard_sidebar_start_sk.php'); ?>
 <style>
-:root { --sk:#1a4480;--gold:#c9943a;--sk-pale:#e8f5ed;--gold-pale:#fdf3e3; }
-.page-header { background:linear-gradient(135deg,#1a4480,#2b5ea7);color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 6px 24px rgba(26,107,58,.2); }
+:root { --sk:#1a6b3a;--gold:#c9943a;--sk-pale:#e8f5ed;--gold-pale:#fdf3e3; }
+.page-header { background:linear-gradient(135deg,#1a6b3a,#2dab5f);color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 6px 24px rgba(26,107,58,.2); }
 .page-header .hdr-icon { width:60px;height:60px;border-radius:14px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0; }
 .page-header h2 { margin:0;font-size:1.5rem;font-weight:700; }
 .page-header p  { margin:4px 0 0;opacity:.82;font-size:.88rem; }
@@ -40,16 +69,16 @@ $bmis = new BMISClass();
 .badge-ongoing   { background:#e8f5ed;color:#1a6b3a;border-radius:6px;padding:3px 9px;font-size:.73rem;font-weight:700; }
 .badge-completed { background:#f0f4f8;color:#555;border-radius:6px;padding:3px 9px;font-size:.73rem;font-weight:700; }
 .badge-cancelled { background:#fde8e8;color:#c0392b;border-radius:6px;padding:3px 9px;font-size:.73rem;font-weight:700; }
-.btn-sk { background:#1a4480;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:.875rem;font-weight:600;transition:all .2s; }
+.btn-sk { background:#1a6b3a;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:.875rem;font-weight:600;transition:all .2s; }
 .btn-sk:hover { background:#145230;color:#fff; }
 .filter-tab { padding:7px 16px;border-radius:8px;border:1.5px solid #e8ecf0;font-size:.82rem;font-weight:600;cursor:pointer;background:#fff;color:#666;text-decoration:none;transition:all .15s; }
-.filter-tab:hover,.filter-tab.active { border-color:#1a4480;background:#1a4480;color:#fff; }
+.filter-tab:hover,.filter-tab.active { border-color:#1a6b3a;background:#1a6b3a;color:#fff; }
 .action-btn { border:none;border-radius:7px;padding:5px 12px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s; }
 .edit-btn { background:#e8f0fe;color:#1967d2; }
 .edit-btn:hover { background:#1967d2;color:#fff; }
 .del-btn { background:#fde8e8;color:#c0392b; }
 .del-btn:hover { background:#c0392b;color:#fff; }
-.modal-header { background:#1a4480;color:#fff;border-radius:12px 12px 0 0; }
+.modal-header { background:#1a6b3a;color:#fff;border-radius:12px 12px 0 0; }
 .modal-header .btn-close { filter:invert(1); }
 .alert-success-custom { background:#e8f5ed;color:#1a6b3a;border:1.5px solid #1a6b3a;border-radius:10px;padding:10px 18px;font-size:.875rem;font-weight:600;margin-bottom:16px; }
 </style>
@@ -257,3 +286,4 @@ document.getElementById('delProgModal').addEventListener('show.bs.modal', functi
 </script>
 
 <?php include('dashboard_sidebar_end.php'); ?>
+

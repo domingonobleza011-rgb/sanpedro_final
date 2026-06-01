@@ -70,7 +70,37 @@ function bmis_require_admin(): array {
     }
     return $u;
 }
+function bmis_require_admin_dashboard(): array {
+    $u = bmis_require_login();
 
+    $is_admin_role = in_array($u['role'], ['administrator', 'Admin'], true);
+
+    $admin_dashboard_positions = [
+        'Punong Barangay',
+        'Secretary',
+        'Treasurer',
+        'Clerk',
+        'Book Keeper',
+        'Committee on Appropriation',
+        'Committee on Health',
+        'Committee on Women and Children',
+        'Committee on Education',
+        'Committee on Peace and Order',
+        'Committee on Infrastructure',
+        'Committee on Ways and Means',
+        'Committee on Agriculture',
+        'Committee on Tourism',
+        'IPMRR Representative',
+    ];
+
+    $is_allowed_position = in_array($u['position'] ?? '', $admin_dashboard_positions, true);
+
+    if (!$is_admin_role && !$is_allowed_position) {
+        http_response_code(403);
+        die('Access denied.');
+    }
+    return $u;
+}
 function bmis_require_staff_or_admin(): array {
     $u = bmis_require_login();
     $allowed = ['administrator', 'Admin', 'user'];

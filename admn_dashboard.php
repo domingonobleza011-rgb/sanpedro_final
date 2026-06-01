@@ -1,20 +1,22 @@
 <?php
     error_reporting(E_ALL ^ E_WARNING);
-
+define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
+include('secure_header.php'); 
     include('classes/staff.class.php');
     include('classes/resident.class.php');
     require_once('classes/conn.php'); // needed for complaint counts
 
     $userdetails = $bmis->get_userdata();
-    $bmis->validate_admin();
+    $bmis->validate_staff_or_admin();
 
-    $rescount = $residentbmis->count_resident();
+   
     $rescountm = $residentbmis->count_male_resident();
     $rescountf = $residentbmis->count_female_resident();
     $rescountfh = $residentbmis->count_head_resident();
     $rescountfm = $residentbmis->count_member_resident();
     $rescountvoter = $residentbmis->count_voters();
     $rescountsenior = $residentbmis->count_resident_senior();
+$rescountpwd = $residentbmis->count_pwd();
 
     $staffcount = $staffbmis->count_staff();
     $staffcountm = $staffbmis->count_mstaff();
@@ -551,10 +553,11 @@ hr {
             </div>
             <!-- Legend -->
             <div class="d-flex flex-wrap justify-content-center gap-3 mt-3" style="font-size:0.78rem; font-weight:600;">
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#1a4480;margin-right:5px;"></span>Total Residents (<?= $rescount ?>)</span>
+             
                 <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#0d9488;margin-right:5px;"></span>Households (<?= $rescountfh ?>)</span>
                 <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c9943a;margin-right:5px;"></span>Voters (<?= $rescountvoter ?>)</span>
                 <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#dc2626;margin-right:5px;"></span>Seniors (<?= $rescountsenior ?>)</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#6f42c1;margin-right:5px;"></span>PWD (<?= $rescountpwd ?>)</span>
             </div>
         </div>
     </div>
@@ -784,19 +787,19 @@ hr {
     var chart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Total Residents', 'Households', 'Registered Voters', 'Senior Residents'],
+            labels: ['Total Residents', 'Households', 'Registered Voters', 'Senior Residents', 'PWD'],
             datasets: [{
                 data: [
-                    <?= (int)$rescount ?>,
                     <?= (int)$rescountfh ?>,
                     <?= (int)$rescountvoter ?>,
-                    <?= (int)$rescountsenior ?>
+                    <?= (int)$rescountsenior ?>,
+                    <?= (int)$rescountpwd ?>
                 ],
                 backgroundColor: [
-                    'rgba(26, 68, 128, 0.85)',
                     'rgba(13, 148, 136, 0.85)',
                     'rgba(201, 148, 58, 0.85)',
-                    'rgba(220, 38, 38, 0.85)'
+                    'rgba(220, 38, 38, 0.85)',
+                    'rgba(111, 66, 193, 0.85)'
                 ],
                 borderColor: ['#fff', '#fff', '#fff', '#fff'],
                 borderWidth: 3,
@@ -826,10 +829,10 @@ hr {
         var points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
         if (points.length === 0) return;
         var links = [
-            'admn_table_totalres.php',
             'admn_table_totalhouse.php',
             'admn_table_voters.php',
-            'admn_table_senior.php'
+            'admn_table_senior.php',
+            'admn_table_pwd.php'
         ];
         var index = points[0].index;
         if (links[index]) window.location.href = links[index];

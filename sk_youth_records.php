@@ -7,15 +7,86 @@ require_once('classes/conn.php');
 include('classes/staff.class.php');
 include('classes/resident.class.php');
 
-// Enforce: only SK Chairperson may access this page
 $userdetails = bmis_require_login();
 if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk Chairperson') {
     http_response_code(403);
-    die('Access denied. This page is restricted to the SK Chairperson only.');
+    die('Access denied.');
 }
 
 require_once('classes/main.class.php');
 $bmis = new BMISClass();
+
+// ── ADD / EDIT / DELETE HANDLERS ──────────────────────────────────────────
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    if (isset($_POST['add_youth'])) {
+        $stmt = $conn->prepare("INSERT INTO tbl_youth (lname, fname, mi, age, bdate, gender, address, contact, email, emp_status, skills)
+                                VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+        $stmt->execute([
+            $_POST['lname'], $_POST['fname'], $_POST['mi'],
+            $_POST['age'],   $_POST['bdate'], $_POST['gender'],
+            $_POST['address'], $_POST['contact'], $_POST['email'],
+            $_POST['emp_status'], $_POST['skills']
+        ]);
+        header('Location: sk_youth_records.php?success=added'); exit;
+    }
+
+    if (isset($_POST['edit_youth'])) {
+        $stmt = $conn->prepare("UPDATE tbl_youth SET lname=?, fname=?, mi=?, age=?, bdate=?, gender=?, address=?, contact=?, email=?, emp_status=?, skills=? WHERE id_youth=?");
+        $stmt->execute([
+            $_POST['lname'], $_POST['fname'], $_POST['mi'],
+            $_POST['age'],   $_POST['bdate'], $_POST['gender'],
+            $_POST['address'], $_POST['contact'], $_POST['email'],
+            $_POST['emp_status'], $_POST['skills'], $_POST['id_youth']
+        ]);
+        header('Location: sk_youth_records.php?success=updated'); exit;
+    }
+
+    if (isset($_POST['delete_youth'])) {
+        $stmt = $conn->prepare("DELETE FROM tbl_youth WHERE id_youth=?");
+        $stmt->execute([$_POST['id_youth']]);
+        header('Location: sk_youth_records.php?success=deleted'); exit;
+    }
+
+    if (isset($_POST['bulk_delete_youth'])) {
+        $ids = $_POST['selected_ids'] ?? [];
+        if (!empty($ids)) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = $conn->prepare("DELETE FROM tbl_youth WHERE id_youth IN ($placeholders)");
+            $stmt->execute($ids);
+        }
+        header('Location: sk_youth_records.php?success=deleted'); exit;
+    }
+}
+
+// ── FETCH / SEARCH ────────────────────────────────────────────────────────
+
+$keyword  = trim($_GET['keyword'] ?? '');
+$per_page = 10;
+$page     = max(1, (int)($_GET['page'] ?? 1));
+$offset   = ($page - 1) * $per_page;
+
+if ($keyword) {
+    $like  = "%$keyword%";
+    $total = (int)$conn->prepare("SELECT COUNT(*) FROM tbl_youth WHERE lname LIKE ? OR fname LIKE ? OR email LIKE ?")
+                        ->execute([$like,$like,$like]) ? 0 : 0; // placeholder, see below
+    $stmtC = $conn->prepare("SELECT COUNT(*) FROM tbl_youth WHERE lname LIKE ? OR fname LIKE ? OR email LIKE ?");
+    $stmtC->execute([$like,$like,$like]);
+    $total = (int)$stmtC->fetchColumn();
+
+    $stmtR = $conn->prepare("SELECT * FROM tbl_youth WHERE lname LIKE ? OR fname LIKE ? OR email LIKE ? ORDER BY id_youth DESC LIMIT $per_page OFFSET $offset");
+    $stmtR->execute([$like,$like,$like]);
+} else {
+    $stmtC = $conn->query("SELECT COUNT(*) FROM tbl_youth");
+    $total = (int)$stmtC->fetchColumn();
+
+    $stmtR = $conn->prepare("SELECT * FROM tbl_youth ORDER BY id_youth DESC LIMIT $per_page OFFSET $offset");
+    $stmtR->execute();
+}
+
+$youths    = $stmtR->fetchAll(PDO::FETCH_ASSOC);
+$total_pages = (int)ceil($total / $per_page);
 ?>
 <?php include('dashboard_sidebar_start_sk.php'); ?>
 <style>
@@ -421,5 +492,6 @@ document.getElementById('delModal').addEventListener('show.bs.modal', function(e
     document.getElementById('del_name').textContent = b.dataset.name;
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <?php include('dashboard_sidebar_end.php'); ?>
+

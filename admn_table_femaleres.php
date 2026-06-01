@@ -2,11 +2,11 @@
     
    error_reporting(E_ALL ^ E_WARNING);
    ini_set('display_errors',0);
-define('BMIS_ROLE_REQUIRED', 'staff');
+define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
 require_once('secure_header.php'); 
    require('classes/resident.class.php');
    $userdetails = $bmis->get_userdata();
-   $bmis->validate_admin();
+   $bmis->validate_staff_or_admin();
    $view = $residentbmis->view_resident_female();
    
 ?>

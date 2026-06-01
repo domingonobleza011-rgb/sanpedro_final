@@ -6,7 +6,7 @@ define('BMIS_ROLE_REQUIRED', 'staff');
 require_once('secure_header.php'); 
    require('classes/resident.class.php');
    $userdetails = $bmis->get_userdata();
-   $bmis->validate_admin();
+   $bmis->validate_staff_or_admin();
    $view = $residentbmis->view_resident();
    $residentbmis->create_resident();
    $residentbmis->update_resident();

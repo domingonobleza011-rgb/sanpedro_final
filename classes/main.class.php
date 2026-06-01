@@ -313,65 +313,86 @@ public function openConn() {
         }
     }
     public function login() {
-        if(isset($_POST['login'])) {
-            $identity       = $_POST['login_identity'];
-            $password_input = $_POST['password'];
- 
-            $connection = $this->openConn();
- 
-            // 1. Check ADMIN table
-            $stmt = $connection->prepare("SELECT * FROM tbl_admin WHERE email = ? OR phone_number = ?");
-            $stmt->execute([$identity, $identity]);
-            $user = $stmt->fetch();
- 
-            if($user && password_verify($password_input, $user['password'])) {
-                if($user['role'] == 'Admin' || $user['role'] == 'administrator') {
-                    $this->set_userdata($user);
-                    $this->log_login_event('login', $user);           // ← NEW
-                    header('Location: admn_dashboard.php');
-                    exit();
-                }
+    if(isset($_POST['login'])) {
+        $identity       = $_POST['login_identity'];
+        $password_input = $_POST['password'];
+
+        $connection = $this->openConn();
+
+        // 1. Check ADMIN table
+        $stmt = $connection->prepare("SELECT * FROM tbl_admin WHERE email = ? OR phone_number = ?");
+        $stmt->execute([$identity, $identity]);
+        $user = $stmt->fetch();
+
+        if($user && password_verify($password_input, $user['password'])) {
+            if($user['role'] == 'Admin' || $user['role'] == 'administrator') {
+                $this->set_userdata($user);
+                $this->log_login_event('login', $user);
+                header('Location: admn_dashboard.php');
+                exit();
             }
- 
-            // 2. Check USER (Staff) table
-            $stmt = $connection->prepare("SELECT * FROM tbl_user WHERE email = ? OR phone_number = ?");
-            $stmt->execute([$identity, $identity]);
-            $user = $stmt->fetch();
- 
-            if($user && password_verify($password_input, $user['password'])) {
-                if($user['role'] == 'user') {
-                    $this->set_userdata($user);
-                    $this->log_login_event('login', $user);           // ← NEW
-                    if ($user['position'] === 'Sk Chairperson') {
-                        echo "<script>window.location.href='sk_dashboard.php';</script>";
-                    } else {
-                        echo "<script>window.location.href='staff_dashboard.php';</script>";
-                    }
-                    exit();
-                }
+        }
+
+        // 2. Check USER (Staff) table
+        $stmt = $connection->prepare("SELECT * FROM tbl_user WHERE email = ? OR phone_number = ?");
+        $stmt->execute([$identity, $identity]);
+        $user = $stmt->fetch();
+
+        if($user && password_verify($password_input, $user['password'])) {
+            if($user['role'] == 'user') {
+                $this->set_userdata($user);
+                $this->log_login_event('login', $user);
+
+                $position = $user['position'];
+
+                $admin_dashboard_positions = [
+                    'Punong Barangay',
+                    'Secretary',
+                    'Treasurer',
+                    'Clerk',
+                    'Book Keeper',
+                    'Committee on Appropriation',
+                    'Committee on Health',
+                    'Committee on Women and Children',
+                    'Committee on Education',
+                    'Committee on Peace and Order',
+                    'Committee on Infrastructure',
+                    'Committee on Ways and Means',
+                    'Committee on Agriculture',
+                    'Committee on Tourism',
+                    'IPMRR Representative',
+                ];
+
+                if ($position === 'Sk Chairperson') {
+    echo "<script>window.location.href='sk_dashboard.php';</script>";
+} else {
+    echo "<script>window.location.href='admn_dashboard.php';</script>";
+}
+                exit();
             }
- 
-            // 3. Check RESIDENT table
-            $stmt = $connection->prepare("SELECT * FROM tbl_resident WHERE email = ? OR phone_number = ?");
-            $stmt->execute([$identity, $identity]);
-            $user = $stmt->fetch();
- 
-            if($user && password_verify($password_input, $user['password'])) {
-                if($user['role'] == 'resident') {
-                    $this->set_userdata($user);
-                    // residents are not admins — skip admin log
-                    header('Location: resident_homepage.php');
-                    exit();
-                }
+        }
+
+        // 3. Check RESIDENT table
+        $stmt = $connection->prepare("SELECT * FROM tbl_resident WHERE email = ? OR phone_number = ?");
+        $stmt->execute([$identity, $identity]);
+        $user = $stmt->fetch();
+
+        if($user && password_verify($password_input, $user['password'])) {
+            if($user['role'] == 'resident') {
+                $this->set_userdata($user);
+                // residents are not admins — skip admin log
+                header('Location: resident_homepage.php');
+                exit();
             }
- 
-            // Invalid credentials
-             $this->log_login_event('failed', [], $identity);
+        }
+
+        // Invalid credentials
+        $this->log_login_event('failed', [], $identity);
         $_SESSION['login_error'] = 'Invalid credentials. Please check your Email/Phone and Password.';
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
-        }
     }
+}
  
 // ============================================================
 //  PATCHED logout() — replaces the existing logout() method
@@ -476,6 +497,13 @@ public function openConn() {
         $admin = $stmt->fetch();
         return ($stmt->rowCount() > 0) ? $admin : false;
     }
+    public function view_admin(){
+            $connection = $this->openConn();
+            $stmt = $connection->prepare("SELECT * from tbl_admin");
+            $stmt->execute();
+            $view = $stmt->fetchAll();
+            return $view;
+        }
  
     public function admin_changepass() {
         if(isset($_POST['admin_changepass'])) {

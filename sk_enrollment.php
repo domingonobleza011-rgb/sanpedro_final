@@ -7,7 +7,7 @@ require_once('classes/conn.php');
 include('classes/staff.class.php');
 include('classes/resident.class.php');
 
-// Enforce: only SK Chairperson may access this page
+// Enforce: only logged-in staff with position 'Sk Chairperson' may access this page
 $userdetails = bmis_require_login();
 if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk Chairperson') {
     http_response_code(403);
@@ -15,12 +15,54 @@ if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk 
 }
 
 require_once('classes/main.class.php');
-$bmis = new BMISClass();
+// ADD enrollment
+if (isset($_POST['add_enrollment'])) {
+    // Get youth name from tbl_youth
+    $y = $conn->prepare("SELECT fname,lname,contact_number FROM tbl_youth WHERE id_youth=?");
+    $y->execute([$_POST['id_youth']]);
+    $yu = $y->fetch(PDO::FETCH_ASSOC);
+    $name = $yu ? ($yu['lname'].', '.$yu['fname']) : '';
+    $contact = $yu ? $yu['contact_number'] : '';
+    $stmt = $conn->prepare("INSERT INTO tbl_youth_enrollment (id_program,id_youth,youth_name,contact,status) VALUES (?,?,?,?,?)");
+    $stmt->execute([$_POST['id_program'],$_POST['id_youth'],$name,$contact,$_POST['status']]);
+    header("Location: sk_enrollment.php?success=added&program=".$_POST['id_program']); exit;
+}
+// UPDATE status
+if (isset($_POST['update_enrollment'])) {
+    $stmt = $conn->prepare("UPDATE tbl_youth_enrollment SET status=? WHERE id_enrollment=?");
+    $stmt->execute([$_POST['status'],$_POST['id_enrollment']]);
+    header("Location: sk_enrollment.php?success=updated&program=".$_POST['id_program']); exit;
+}
+// DELETE
+if (isset($_POST['delete_enrollment'])) {
+    $conn->prepare("DELETE FROM tbl_youth_enrollment WHERE id_enrollment=?")->execute([$_POST['id_enrollment']]);
+    header("Location: sk_enrollment.php?success=deleted&program=".$_POST['id_program']); exit;
+}
+
+$prog_filter = $_GET['program'] ?? '';
+// Get programs list
+$programs = $conn->query("SELECT * FROM tbl_youth_programs ORDER BY event_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+// Get youth list
+$youth_list = $conn->query("SELECT id_youth, fname, lname FROM tbl_youth ORDER BY lname")->fetchAll(PDO::FETCH_ASSOC);
+
+if ($prog_filter) {
+    $s = $conn->prepare("SELECT e.*,p.program_title,p.program_type,p.event_date FROM tbl_youth_enrollment e JOIN tbl_youth_programs p ON e.id_program=p.id_program WHERE e.id_program=? ORDER BY e.enrolled_at DESC");
+    $s->execute([$prog_filter]);
+} else {
+    $s = $conn->query("SELECT e.*,p.program_title,p.program_type,p.event_date FROM tbl_youth_enrollment e JOIN tbl_youth_programs p ON e.id_program=p.id_program ORDER BY e.enrolled_at DESC");
+}
+$enrollments = $s->fetchAll(PDO::FETCH_ASSOC);
+
+// Stats
+$total_e    = count($enrollments);
+$attended   = count(array_filter($enrollments, fn($e)=>$e['status']==='Attended'));
+$enrolled   = count(array_filter($enrollments, fn($e)=>$e['status']==='Enrolled'));
+$dropped    = count(array_filter($enrollments, fn($e)=>$e['status']==='Dropped'));
 ?>
 <?php include('dashboard_sidebar_start_sk.php'); ?>
 <style>
-:root { --sk:#1a4480;--gold:#c9943a;--sk-pale:#e8f5ed;--gold-pale:#fdf3e3; }
-.page-header { background:linear-gradient(135deg,#1a4480,#2b5ea7);color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 6px 24px rgba(26,107,58,.2); }
+:root { --sk:#1a6b3a;--gold:#c9943a;--sk-pale:#e8f5ed;--gold-pale:#fdf3e3; }
+.page-header { background:linear-gradient(135deg,#1a6b3a,#2dab5f);color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 6px 24px rgba(26,107,58,.2); }
 .page-header .hdr-icon { width:60px;height:60px;border-radius:14px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0; }
 .page-header h2 { margin:0;font-size:1.5rem;font-weight:700; }
 .page-header p  { margin:4px 0 0;opacity:.82;font-size:.88rem; }
@@ -46,7 +88,7 @@ $bmis = new BMISClass();
 .edit-btn:hover { background:#1967d2;color:#fff; }
 .del-btn { background:#fde8e8;color:#c0392b; }
 .del-btn:hover { background:#c0392b;color:#fff; }
-.modal-header { background:#1a4480;color:#fff;border-radius:12px 12px 0 0; }
+.modal-header { background:#1a6b3a;color:#fff;border-radius:12px 12px 0 0; }
 .modal-header .btn-close { filter:invert(1); }
 .alert-success-custom { background:#e8f5ed;color:#1a6b3a;border:1.5px solid #1a6b3a;border-radius:10px;padding:10px 18px;font-size:.875rem;font-weight:600;margin-bottom:16px; }
 </style>
@@ -208,7 +250,7 @@ $bmis = new BMISClass();
     </div>
   </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.getElementById('editEnrollModal').addEventListener('show.bs.modal', function(e) {
     const b = e.relatedTarget;

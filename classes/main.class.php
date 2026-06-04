@@ -622,6 +622,7 @@ public function admin_delete_announcement(){
     if(isset($_POST['delete_announcement'])) {
         $this->archive_record('tbl_announcement', 'id_announcement', $id_announcement, 'announcement');
         $id_announcement = $_POST['id_announcement'];
+        $this->archive_record('tbl_announcement', 'id_announcement', $id_announcement, 'announcement');
         $connection = $this->openConn();
 
         // Fetch image paths before deleting

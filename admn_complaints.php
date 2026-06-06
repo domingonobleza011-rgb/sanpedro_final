@@ -10,7 +10,7 @@
 
 error_reporting(E_ALL ^ E_WARNING);
 ini_set('display_errors', 0);
-define('BMIS_ROLE_REQUIRED', 'staff');
+define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
 require('secure_header.php');
 // ---------- DB CONFIG — adjust to match your setup ----------
 $host   = 'localhost';
@@ -828,7 +828,7 @@ hr {
             <div class="stat-card stat-all">
                 <div class="stat-icon"><i class="bi bi-clipboard2-data"></i></div>
                 <div>
-                    <div class="stat-val"><?= $count_all ?></div>
+                    <div class="stat-val" id="cmp-stat-all"><?= $count_all ?></div>
                     <div class="stat-lbl">Total Complaints</div>
                 </div>
             </div>
@@ -837,7 +837,7 @@ hr {
             <div class="stat-card stat-pending">
                 <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
                 <div>
-                    <div class="stat-val"><?= $count_pending ?></div>
+                    <div class="stat-val" id="cmp-stat-pending"><?= $count_pending ?></div>
                     <div class="stat-lbl">Pending</div>
                 </div>
             </div>
@@ -846,7 +846,7 @@ hr {
             <div class="stat-card stat-resolved">
                 <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
                 <div>
-                    <div class="stat-val"><?= $count_resolved ?></div>
+                    <div class="stat-val" id="cmp-stat-resolved"><?= $count_resolved ?></div>
                     <div class="stat-lbl">Resolved</div>
                 </div>
             </div>
@@ -901,7 +901,7 @@ hr {
         </span>
     </div>
 
-    <div class="complaint-list">
+    <div class="complaint-list" id="complaint-list-container">
     <?php foreach ($complaints as $c):
         $is_pending  = $c['status'] === 'pending';
         $card_class  = $is_pending ? 'c-pending' : 'c-resolved';
@@ -1070,6 +1070,58 @@ hr {
 </div><!-- /.container-fluid -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Auto-poll complaints every 8 seconds ──────────────────────
+(function () {
+    var params = new URLSearchParams(window.location.search);
+
+    function buildUrl() {
+        var url = 'ajax_complaints.php?';
+        url += 'status='   + encodeURIComponent(params.get('status')   || 'all');
+        url += '&category='+ encodeURIComponent(params.get('category') || '');
+        url += '&search='  + encodeURIComponent(params.get('search')   || '');
+        return url;
+    }
+
+    function animateNum(el, newVal) {
+        if (!el) return;
+        var old = parseInt(el.textContent, 10);
+        el.textContent = newVal;
+        if (!isNaN(old) && old !== newVal) {
+            el.style.transition = 'color .4s';
+            el.style.color = newVal > old ? '#059669' : '#dc2626';
+            setTimeout(function () { el.style.color = ''; }, 1200);
+        }
+    }
+
+    function poll() {
+        // Don't refresh if a modal is open (user is interacting)
+        if (document.querySelector('.modal.show')) return;
+
+        fetch(buildUrl())
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.error) return;
+
+                // Update stat numbers
+                animateNum(document.getElementById('cmp-stat-all'),      data.count_all);
+                animateNum(document.getElementById('cmp-stat-pending'),   data.count_pending);
+                animateNum(document.getElementById('cmp-stat-resolved'),  data.count_resolved);
+
+                // Replace complaint cards
+                var container = document.getElementById('complaint-list-container');
+                if (container) {
+                    container.innerHTML = data.html || '<p class="text-muted text-center py-5">No complaints found.</p>';
+                }
+            })
+            .catch(function () {}); // silent fail
+    }
+
+    // First poll immediately, then every 8 s
+    poll();
+    setInterval(poll, 3000);
+})();
+</script>
 <?php if ($sidebar_exists) include('dashboard_sidebar_end.php'); ?>
 </body>
 </html>

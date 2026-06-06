@@ -1,6 +1,4 @@
 <?php
-if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); require_once('secure_header.php'); }
-
 	// require the database connection
 	require 'classes/conn.php';
 	if(isset($_POST['search_totalstaff'])){
@@ -24,11 +22,10 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 
 	<tbody>     
 		<?php
-			$stmnt = $conn->prepare("SELECT * FROM `tbl_user` WHERE `lname` LIKE ? or  `mi` LIKE ? or  `fname` LIKE ? 
-			or `age` LIKE ? or  `sex` LIKE ? or  `address` LIKE ? or  `contact` LIKE ?
-			or `email` LIKE ?");
-			$keyword_param = "%$keyword%";
-			$stmnt->execute([$keyword_param, $keyword_param, $keyword_param, $keyword_param, $keyword_param, $keyword_param, $keyword_param, $keyword_param]);
+			$stmnt = $conn->prepare("SELECT * FROM `tbl_user` WHERE `lname` LIKE '%$keyword%' or  `mi` LIKE '%$keyword%' or  `fname` LIKE '%$keyword%' 
+			or `age` LIKE '%$keyword%' or  `sex` LIKE '%$keyword%' or  `address` LIKE '%$keyword%' or  `contact` LIKE '%$keyword%'
+			or `email` LIKE '%$keyword%'");
+			$stmnt->execute();
 			
 			while($view = $stmnt->fetch()){
 		?>
@@ -70,17 +67,17 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 
 	<tbody>
 		<?php if(is_array($view)) {?>
-			<?php foreach($view as $row) {?>
+			<?php foreach($view as $view) {?>
 				<tr>
 					
-					<td> <?= $row['lname'];?> </td>
-					<td> <?= $row['fname'];?> </td>
-					<td> <?= $row['mi'];?> </td>
-					<td> <?= $row['age'];?> </td>
-					<td> <?= $row['sex'];?> </td>
-					<td> <?= $row['address'];?> </td>
-					<td> <?= $row['contact'];?> </td>
-					<td> <?= $row['position'];?> </td>
+					<td> <?= $view['lname'];?> </td>
+					<td> <?= $view['fname'];?> </td>
+					<td> <?= $view['mi'];?> </td>
+					<td> <?= $view['age'];?> </td>
+					<td> <?= $view['sex'];?> </td>
+					<td> <?= $view['address'];?> </td>
+					<td> <?= $view['contact'];?> </td>
+					<td> <?= $view['position'];?> </td>
 				</tr>
 			
 			<?php

@@ -263,7 +263,7 @@ $statuses = ['Upcoming','Ongoing','Completed','Cancelled'];
     </div>
   </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.getElementById('editProgModal').addEventListener('show.bs.modal', function(e) {
     const b = e.relatedTarget;

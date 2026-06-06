@@ -2,8 +2,8 @@
 // Place this file in your PROJECT ROOT (same folder as index.php)
 // This is the Service Worker that handles background push notifications.
 
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
     apiKey:            "AIzaSyDsAtSrF718UU4oz-_c_s3Wu59DrUKVe4s",

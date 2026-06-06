@@ -1,7 +1,7 @@
 <?php
-require_once 'includes/session.php';
-require_once 'includes/db.php';
-requireLogin();
+define('BMIS_ROLE_REQUIRED', 'resident');
+require('secure_header.php');
+require_once 'classes/main.class.php';
 
 // Get filter parameters
 $category = $_GET['category'] ?? null;

@@ -11,16 +11,6 @@
 
     <title>Barangay San Pedro</title>
 
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f2d5a">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Brgy San Pedro">
-    <link rel="apple-touch-icon" href="/icons/pwa/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
-
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
@@ -460,13 +450,13 @@ hr {
     <div id="collapseUserMgmt" class="collapse" data-bs-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
             <a class="collapse-item" href="admn_staff_crud.php">
-                <i class="fas fa-user-tie mr-2"></i> Barangay Officials/Staffs
+                <i class="fas fa-user-tie mr-2"></i>Barangay Officials/Staffs
             </a>
             <a class="collapse-item" href="admn_resident_crud.php">
-                <i class="fas fa-users mr-2"></i> Barangay Residents
+                <i class="fas fa-users mr-2"></i>Barangay Residents
             </a>
             <a class="collapse-item" href="admn_messages.php">
-                <i class="bi bi-chat-left-text mr-2"></i> Verification &Messages
+                <i class="bi bi-chat-left-text mr-2"></i>Verification &Messages
             </a>
         </div>
     </div>
@@ -492,25 +482,25 @@ hr {
     <div id="collapseBarangayServices" class="collapse" data-bs-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
             <a class="collapse-item" href="admn_certofres.php">
-                <i class="fas fa-file-word mr-2"></i> Certificate of Residency
+                <i class="fas fa-file-word mr-2"></i>Certificate of Residency
             </a>
             <a class="collapse-item" href="admn_brgyid.php">
-                <i class="fas fa-id-card mr-2"></i> Barangay ID
+                <i class="fas fa-id-card mr-2"></i>Barangay ID
             </a>
             <a class="collapse-item" href="admn_bspermit.php">
-                <i class="fas fa-file-contract mr-2"></i> Business Permit
+                <i class="fas fa-file-contract mr-2"></i>Business Permit
             </a>
             <a class="collapse-item" href="admn_brgyclearance.php">
-                <i class="fas fa-file mr-2"></i> Barangay Clearance
+                <i class="fas fa-file mr-2"></i>Barangay Clearance
             </a>
             <a class="collapse-item" href="admn_certofindigency.php">
-                <i class="fas fa-fw fa-table mr-2"></i> Certificate of Indigency
+                <i class="fas fa-fw fa-table mr-2"></i>Certificate of Indigency
             </a>
             <a class="collapse-item" href="admn_blotterreport.php">
-                <i class="fas fa-user-shield mr-2"></i> Blotter Report
+                <i class="fas fa-user-shield mr-2"></i>Blotter Report
             </a>
             <a class="collapse-item" href="admn_complaints.php">
-                <i class="bi bi-people-fill mr-2"></i> Complaints
+                <i class="bi bi-people-fill mr-2"></i>Complaints
             </a>
         </div>
     </div>
@@ -533,15 +523,11 @@ hr {
         </a>
     </li>
 
-    <li class="nav-item">
-        <a class="nav-link" href="admn_settings.php">
-            <i class="fas fa-cog"></i>
-            <span>Settings</span>
-        </a>
-    </li>
+   
+
+    <hr class="sidebar-divider">
 
 
-    <hr class="sidebar-divider d-none d-md-block">
 
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
@@ -595,7 +581,7 @@ hr {
                             <li class="nav-item dropdown">
                                 <a class="nav-link" href="index.php" id="userDropdown" role="button"
                                     aria-haspopup="true" aria-expanded="false">
-                                    <span class="mr-2 d-none d-lg-inline text-gray-800 small"><?= $userdetails['surname']?>, <?= $userdetails['firstname']?> <?= $userdetails['mname']?></span>
+                                    <span class="mr-2 d-none d-lg-inline text-gray-800 small"><?= htmlspecialchars(($userdetails['surname'] ?? '') . ', ' . ($userdetails['firstname'] ?? '') . ' ' . ($userdetails['mname'] ?? '')) ?></span>
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
                                 </a>
                             </li>

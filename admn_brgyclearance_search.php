@@ -1,6 +1,4 @@
 <?php
-if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); require_once('secure_header.php'); }
-
 	// require the database connection
 	require 'classes/conn.php';
 	if(isset($_POST['search_clearance'])){
@@ -76,21 +74,21 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 </div>
     <tbody>
         <?php if(is_array($view)) {?>
-            <?php foreach($view as $row) {?>
+            <?php foreach($view as $view) {?>
                 <tr>
                     <td>    
                         <form action="" method="post">
-                            <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="brgyclearance_form.php?id_resident=<?= $row['id_resident'];?>">Generate</a> 
-                            <input type="hidden" name="id_clearance" value="<?= $row['id_clearance']; ?>">
+                            <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="brgyclearance_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
+                            <input type="hidden" name="id_clearance" value="<?= $view['id_clearance']; ?>">
                             <button class="btn btn-danger"  style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_clearance"> Archive </button>
                         </form>
                     </td>
-                    <td> <?= $row['id_resident'];?> </td> 
-                <td> <?= $row['lname'];?>, <?= $row['fname'];?> <?= $row['mi'];?>. </td>
-                <td> <?= $row['purpose'];?> </td>
-                <td> <?= $row['houseno'];?>, <?= $row['street'];?>, <?= $row['brgy'];?>, <?= $row['municipal'];?> </td>
-                <td> <?= $row['status'];?> </td>
-                <td> <?= $row['age'];?> </td>
+                    <td> <?= $view['id_resident'];?> </td> 
+                <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?>. </td>
+                <td> <?= $view['purpose'];?> </td>
+                <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
+                <td> <?= $view['status'];?> </td>
+                <td> <?= $view['age'];?> </td>
                 </tr>
             <?php
                 }
@@ -107,12 +105,12 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 <!-- responsive tags for screen compatibility -->
 <meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
 <!-- custom css --> 
-
+<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
 <!-- bootstrap css --> 
-<link href="../BarangaySystem-master/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
+<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
 <!-- fontawesome icons -->
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
 
 <?php
 	}

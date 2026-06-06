@@ -1,6 +1,4 @@
 <?php
-if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); require_once('secure_header.php'); }
-
 	// require the database connection
 	require 'classes/conn.php';
 	if(isset($_POST['search_senior'])){
@@ -76,19 +74,19 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 	</thead>
 	<tbody>
 		<?php if(is_array($view)) {?>
-			<?php foreach($view as $resident) {?>
+			<?php foreach($view as $view) {?>
 				<tr>
 					
-					<td> <?= $resident['lname'];?> </td>
-					<td> <?= $resident['fname'];?> </td>
-					<td> <?= $resident['mi'];?> </td>
-					<td> <?= $resident['age'];?> </td>
-					<td> <?= $resident['sex'];?> </td>
-					<td> <?= $resident['houseno'];?> </td>
-					<td> <?= $resident['street'];?> </td>
-					<td> <?= $resident['brgy'];?> </td>
-					<td> <?= $resident['municipal'];?> </td>
-					<td> <?= $resident['contact'];?> </td>
+					<td> <?= $view['lname'];?> </td>
+					<td> <?= $view['fname'];?> </td>
+					<td> <?= $view['mi'];?> </td>
+					<td> <?= $view['age'];?> </td>
+					<td> <?= $view['sex'];?> </td>
+					<td> <?= $view['houseno'];?> </td>
+					<td> <?= $view['street'];?> </td>
+					<td> <?= $view['brgy'];?> </td>
+					<td> <?= $view['municipal'];?> </td>
+					<td> <?= $view['contact'];?> </td>
 				</tr>
 			<?php
 				}
@@ -104,12 +102,12 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 <!-- responsive tags for screen compatibility -->
 <meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
 <!-- custom css --> 
-
+<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
 <!-- bootstrap css --> 
-<link href="../BarangaySystem-master/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
+<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
 <!-- fontawesome icons -->
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
 
 <?php
 	}

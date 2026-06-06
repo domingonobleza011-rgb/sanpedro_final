@@ -7,14 +7,18 @@
 // ─── 1. Session Hardening ────────────────────────────────────────────────────
 function bmis_session_start() {
     if (session_status() === PHP_SESSION_NONE) {
-        // Secure session cookie settings
+        // Consistent session path across all pages
+        $sessionPath = dirname(__DIR__) . '/sessions';
+        if (!is_dir($sessionPath)) mkdir($sessionPath, 0755, true);
+        session_save_path($sessionPath);
+
         session_set_cookie_params([
-            'lifetime' => 0,                    // Browser session only
+            'lifetime' => 0,
             'path'     => '/',
             'domain'   => '',
-            'secure'   => isset($_SERVER['HTTPS']), // HTTPS-only when available
-            'httponly' => true,                  // Inaccessible to JavaScript
-            'samesite' => 'Strict',              // CSRF mitigation
+            'secure'   => false,
+            'httponly' => true,
+            'samesite' => 'Lax',
         ]);
         session_start();
     }

@@ -23,7 +23,7 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
         </tr>
     </thead>
 
-    <tbody> 
+    <tbody id="cert-tbody-brgyid"> 
         <?php
             
             $stmnt = $conn->prepare("SELECT * FROM `tbl_brgyid` WHERE `lname` LIKE '%$keyword%' or  `mi` LIKE '%$keyword%' or  `fname` LIKE '%$keyword%' 
@@ -78,7 +78,7 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
         </tr>
     </thead>
     
-    <tbody>
+    <tbody id="cert-tbody-brgyid">
         <?php if(is_array($view)) {?>
             <?php foreach($view as $row) {?>
                 <tr>

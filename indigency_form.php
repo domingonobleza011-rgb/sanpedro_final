@@ -3,6 +3,17 @@ require('classes/resident.class.php');
 $userdetails = $residentbmis->get_userdata();
 $id_resident = $_GET['id_resident'];
 $resident = $residentbmis->get_single_certofindigency($id_resident);
+
+// ── Activity Log: Certificate of Indigency Generated ────────────────────────
+if ($resident) {
+    $resident_name = strtoupper(trim(($resident['lname'] ?? '') . ', ' . ($resident['fname'] ?? '') . ' ' . ($resident['mi'] ?? '')));
+    $residentbmis->log_activity(
+        'GENERATE_DOCUMENT',
+        'Certificate of Indigency',
+        "Generated Certificate of Indigency for {$resident_name} (Resident ID: {$id_resident})"
+    );
+}
+// ────────────────────────────────────────────────────────────────────────────
   ?>
 <!DOCTYPE html>
 <html id="clearance">

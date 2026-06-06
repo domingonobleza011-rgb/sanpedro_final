@@ -1,132 +1,193 @@
-const CACHE_VERSION   = 'bmis-v1';
-const STATIC_CACHE    = `${CACHE_VERSION}-static`;
-const DYNAMIC_CACHE   = `${CACHE_VERSION}-dynamic`;
-const OFFLINE_PAGE    = '/offline.php';
+/**
+ * Barangay San Pedro BMIS — Service Worker
+ * Provides offline support, asset caching, and background sync.
+ */
 
+const CACHE_VERSION = 'v1';
+const STATIC_CACHE  = `bmis-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `bmis-dynamic-${CACHE_VERSION}`;
+const OFFLINE_URL   = 'offline.php';
+
+// Core assets to pre-cache on install
 const STATIC_ASSETS = [
-    '/index.php',
-    '/offline.php',
-    '/css/sb-admin-2.min.css',
-    '/js/sb-admin-2.min.js',
-    '/icons/pwa/icon-192x192.png',
-    '/icons/pwa/icon-512x512.png',
-    '/icons/logo.png'
+  './',
+  'index.php',
+  'login.php',
+  'offline.php',
+  'manifest.json',
+
+  // CSS
+  'css/index.css',
+  'css/homestyle.css',
+  'css/pagestyle.css',
+  'css/sb-admin-2.min.css',
+
+  // JS
+  'js/sb-admin-2.min.js',
+
+  // Icons / images
+  'icons/pwa/icon-192x192.png',
+  'icons/pwa/icon-512x512.png',
+  'icons/logo.png',
 ];
 
+// ─── Install ────────────────────────────────────────────────────────────────
 self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(STATIC_CACHE)
-            .then(cache => cache.addAll(STATIC_ASSETS.map(url => new Request(url, { cache: 'reload' }))))
-            .then(() => self.skipWaiting())
-            .catch(err => console.warn('[SW] Pre-cache failed:', err))
-    );
+  console.log('[SW] Installing…');
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then(cache => {
+      // Add assets one-by-one so a single 404 doesn't abort everything
+      return Promise.allSettled(
+        STATIC_ASSETS.map(url => cache.add(url).catch(() => {
+          console.warn('[SW] Could not pre-cache:', url);
+        }))
+      );
+    }).then(() => self.skipWaiting())
+  );
 });
 
+// ─── Activate ───────────────────────────────────────────────────────────────
 self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(keys =>
-            Promise.all(
-                keys
-                    .filter(k => k.startsWith('bmis-') && k !== STATIC_CACHE && k !== DYNAMIC_CACHE)
-                    .map(k => caches.delete(k))
-            )
-        ).then(() => self.clients.claim())
-    );
+  console.log('[SW] Activating…');
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(k => k !== STATIC_CACHE && k !== DYNAMIC_CACHE)
+          .map(k => {
+            console.log('[SW] Deleting old cache:', k);
+            return caches.delete(k);
+          })
+      )
+    ).then(() => self.clients.claim())
+  );
 });
 
+// ─── Fetch ──────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', event => {
-    const { request } = event;
-    const url = new URL(request.url);
+  const { request } = event;
+  const url = new URL(request.url);
 
-    if (request.method !== 'GET') return;
-    if (url.hostname.includes('firebase')) return;
+  // Skip non-GET and cross-origin requests
+  if (request.method !== 'GET') return;
+  if (url.origin !== self.location.origin) return;
 
-    if (isStaticAsset(url)) {
-        event.respondWith(cacheFirst(request));
-        return;
-    }
-
-    if (url.pathname.endsWith('.php') || url.pathname.endsWith('/')) {
-        event.respondWith(networkFirstWithOfflineFallback(request));
-        return;
-    }
-
-    event.respondWith(staleWhileRevalidate(request));
+  // Strategy: Network-first for PHP pages, Cache-first for static assets
+  if (url.pathname.endsWith('.php') || url.pathname === '/') {
+    event.respondWith(networkFirstStrategy(request));
+  } else {
+    event.respondWith(cacheFirstStrategy(request));
+  }
 });
 
-async function cacheFirst(request) {
+/**
+ * Network-first: try network, fall back to cache, fall back to offline page.
+ */
+async function networkFirstStrategy(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
     const cached = await caches.match(request);
     if (cached) return cached;
-    try {
-        const response = await fetch(request);
-        if (response.ok) {
-            const cache = await caches.open(STATIC_CACHE);
-            cache.put(request, response.clone());
-        }
-        return response;
-    } catch {
-        return new Response('Asset unavailable offline.', { status: 503 });
+
+    // If it's a navigation request, show the offline page
+    if (request.mode === 'navigate') {
+      const offline = await caches.match(OFFLINE_URL);
+      if (offline) return offline;
     }
+    return new Response('You are offline and this page is not cached.', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain' },
+    });
+  }
 }
 
-async function networkFirstWithOfflineFallback(request) {
-    try {
-        const response = await fetch(request);
-        if (response.ok) {
-            const cache = await caches.open(DYNAMIC_CACHE);
-            cache.put(request, response.clone());
-        }
-        return response;
-    } catch {
-        const cached = await caches.match(request);
-        if (cached) return cached;
-        const offlinePage = await caches.match(OFFLINE_PAGE);
-        return offlinePage || new Response(
-            '<h2>You are offline</h2><p>Please check your connection.</p>',
-            { headers: { 'Content-Type': 'text/html' } }
-        );
+/**
+ * Cache-first: serve from cache, update cache in background.
+ */
+async function cacheFirstStrategy(request) {
+  const cached = await caches.match(request);
+  if (cached) {
+    // Stale-while-revalidate: update cache in background
+    fetch(request).then(response => {
+      if (response.ok) {
+        caches.open(STATIC_CACHE).then(cache => cache.put(request, response));
+      }
+    }).catch(() => {});
+    return cached;
+  }
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, response.clone());
     }
+    return response;
+  } catch {
+    return new Response('Asset unavailable offline.', { status: 503 });
+  }
 }
 
-async function staleWhileRevalidate(request) {
-    const cache  = await caches.open(DYNAMIC_CACHE);
-    const cached = await cache.match(request);
-    const fetchPromise = fetch(request).then(response => {
-        if (response.ok) cache.put(request, response.clone());
-        return response;
-    }).catch(() => null);
-    return cached || fetchPromise;
-}
-
-function isStaticAsset(url) {
-    const ext = url.pathname.split('.').pop().toLowerCase();
-    return ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf'].includes(ext);
-}
-
+// ─── Push Notifications ─────────────────────────────────────────────────────
 self.addEventListener('push', event => {
-    if (!event.data) return;
-    let data = {};
-    try { data = event.data.json(); } catch { data = { title: 'BMIS', body: event.data.text() }; }
-    const title = data.notification?.title || 'Barangay San Pedro';
-    const options = {
-        body:  data.notification?.body || '',
-        icon:  '/icons/pwa/icon-192x192.png',
-        badge: '/icons/pwa/icon-72x72.png',
-        tag:   'bmis-push',
-        data:  data.data || {}
-    };
-    event.waitUntil(self.registration.showNotification(title, options));
+  let data = { title: 'Barangay San Pedro', body: 'You have a new notification.' };
+  try { data = { ...data, ...event.data.json() }; } catch {}
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body:    data.body,
+      icon:    'icons/pwa/icon-192x192.png',
+      badge:   'icons/pwa/icon-96x96.png',
+      tag:     data.tag  || 'bmis-notification',
+      data:    data.url  || '/',
+      vibrate: [200, 100, 200],
+      actions: [
+        { action: 'open',    title: 'Open',    icon: '/icons/pwa/icon-72x72.png' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ],
+    })
+  );
 });
 
 self.addEventListener('notificationclick', event => {
-    event.notification.close();
-    const targetUrl = event.notification.data?.url || '/resident_homepage.php';
+  event.notification.close();
+  if (event.action === 'dismiss') return;
+  const url = event.notification.data || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const client of list) {
+        if (client.url === url && 'focus' in client) return client.focus();
+      }
+      return clients.openWindow(url);
+    })
+  );
+});
+
+// ─── Background Sync ────────────────────────────────────────────────────────
+self.addEventListener('sync', event => {
+  if (event.tag === 'sync-pending-forms') {
+    event.waitUntil(syncPendingForms());
+  }
+});
+
+async function syncPendingForms() {
+  console.log('[SW] Background sync: syncing pending form submissions…');
+}
+self.addEventListener('install', event => {
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-            for (const client of clientList) {
-                if (client.url.includes(targetUrl) && 'focus' in client) return client.focus();
-            }
-            return clients.openWindow(targetUrl);
-        })
+        caches.open(STATIC_CACHE).then(cache =>
+            Promise.allSettled(
+                STATIC_ASSETS.map(url =>
+                    cache.add(new Request(url, { cache: 'reload' }))
+                        .catch(err => console.warn('[SW] Skipped:', url, err))
+                )
+            )
+        ).then(() => self.skipWaiting())
     );
 });

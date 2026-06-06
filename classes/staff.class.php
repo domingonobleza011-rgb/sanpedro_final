@@ -229,10 +229,61 @@ public function update_staff() {
         $stmt->execute($params);
         
         // --- THE FIX: Refresh the current page with the ID ---
-        echo "<script type='text/javascript'>
-                alert('Staff Account Updated Successfully');
-                window.location.href = window.location.pathname + window.location.search;
-              </script>";
+       echo "
+<div id='bmis-toast' style='
+  position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+  display: flex; align-items: flex-start; gap: 14px;
+  background: #fff;
+  border: 0.5px solid rgba(0,0,0,.1);
+  border-left: 3px solid #1D9E75;
+  border-radius: 14px;
+  padding: 16px 20px;
+  width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  font-family: \"DM Sans\", sans-serif;
+  animation: bmisSlideIn .3s cubic-bezier(.22,.68,0,1.2);
+'>
+  <div style='
+    width: 36px; height: 36px; flex-shrink: 0;
+    border-radius: 50%; background: #E1F5EE;
+    display: flex; align-items: center; justify-content: center;
+  '>
+    <i class=\"fas fa-check\" style='color: #0F6E56; font-size: 15px;'></i>
+  </div>
+  <div style='flex: 1;'>
+    <p style='margin: 0 0 2px; font-size: 14px; font-weight: 600; color: #0f1825;'>Account Updated</p>
+    <p style='margin: 0; font-size: 12.5px; color: #7a91b0;'>Staff account was updated successfully.</p>
+    <div style='margin-top: 10px; height: 3px; border-radius: 99px; background: #eee; overflow: hidden;'>
+      <div id='bmisBar' style='height:100%; width:100%; background:#1D9E75; border-radius:99px; transition: width 3s linear;'></div>
+    </div>
+  </div>
+  <button onclick=\"document.getElementById('bmis-toast').remove()\" style='
+    background: none; border: none; cursor: pointer;
+    color: #a0b4cc; font-size: 15px; padding: 0; line-height: 1;
+  '><i class=\"fas fa-times\"></i></button>
+</div>
+<style>
+@keyframes bmisSlideIn {
+  from { opacity: 0; transform: translateY(16px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+</style>
+<script>
+  (function() {
+    var bar = document.getElementById('bmisBar');
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        bar.style.width = '0%';
+      });
+    });
+    setTimeout(function() {
+      var t = document.getElementById('bmis-toast');
+      if (t) t.remove();
+    }, 3200);
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  })();
+<\/script>
+";
     }
 }
         public function delete_staff(){

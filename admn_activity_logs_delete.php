@@ -4,6 +4,7 @@
  * Accepts a JSON POST: { "ids": [1, 2, 3, …] }
  * Returns:            { "success": true }  or  { "success": false, "message": "…" }
  */
+require('secure_header.php');
 require('classes/main.class.php');
 
 header('Content-Type: application/json');

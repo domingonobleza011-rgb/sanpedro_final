@@ -4,6 +4,18 @@ $userdetails = $residentbmis->get_userdata();
 $id_resident = $_GET['id_resident'];
 $resident = $residentbmis->get_single_bspermit($id_resident);
 
+// ── Activity Log: Business Permit Generated ──────────────────────────────────
+if ($resident) {
+    $resident_name = strtoupper(trim(($resident['lname'] ?? '') . ', ' . ($resident['fname'] ?? '') . ' ' . ($resident['mi'] ?? '')));
+    $bsname        = $resident['bsname'] ?? 'N/A';
+    $residentbmis->log_activity(
+        'GENERATE_DOCUMENT',
+        'Business Permit',
+        "Generated Business Permit for {$resident_name} – Business: {$bsname} (Resident ID: {$id_resident})"
+    );
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 // Set the correct time zone
 date_default_timezone_set('Asia/Manila');
 

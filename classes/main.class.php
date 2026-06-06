@@ -1,9 +1,10 @@
-<?php 
-require_once __DIR__ . '/../vendor/autoload.php';
+<?php
+    require_once __DIR__ . '/../vendor/autoload.php';
 function notif($message, $type = 'info') {
     $msg = addslashes($message);
     echo "<script>showNotif('$msg', '$type');</script>";
 }
+
 class BMISClass {
 
 //------------------------------------------ DATABASE CONNECTION ----------------------------------------------------
@@ -15,6 +16,8 @@ class BMISClass {
     protected $con;
 
 
+   
+   
    public function show_404()
     {
         http_response_code(404);
@@ -126,7 +129,7 @@ public function openConn() {
     // ─────────────────────────────────────────────────────────────────────────
     public function log_activity(string $action, string $module, string $description): void {
         try {
-            if (!isset($_SESSION)) { session_start(); }
+            if (session_status() === PHP_SESSION_NONE) { session_start(); }
  
             $userdata   = $_SESSION['userdata'] ?? [];
             $id_admin   = $userdata['id_admin']  ?? null;
@@ -399,68 +402,68 @@ public function openConn() {
 // ============================================================
  
     public function logout(){
-        if(!isset($_SESSION)) { session_start(); }
- 
+        if (session_status() === PHP_SESSION_NONE) { session_start(); }
+
         // Capture user data BEFORE clearing the session
-        $userdata   = $_SESSION['userdata'] ?? [];
-        $fname      = $userdata['firstname'] ?? '';
-        $lname      = $userdata['surname']   ?? '';
-        $role       = $userdata['role']      ?? '';
-        $email      = $userdata['emailadd']  ?? '';
-        $id_admin   = $userdata['id_admin']  ?? null;
- 
+        $userdata = $_SESSION['userdata'] ?? [];
         $user_for_log = [
-            'id_admin' => $id_admin,
-            'fname'    => $fname,
-            'lname'    => $lname,
-            'role'     => $role,
-            'email'    => $email,
+            'id_admin' => $userdata['id_admin']  ?? null,
+            'fname'    => $userdata['firstname'] ?? '',
+            'lname'    => $userdata['surname']   ?? '',
+            'role'     => $userdata['role']      ?? '',
+            'email'    => $userdata['emailadd']  ?? '',
         ];
-        $this->log_login_event('logout', $user_for_log);              // ← NEW
- 
-        $_SESSION['userdata'] = null;
-        unset($_SESSION['userdata']);
+        $this->log_login_event('logout', $user_for_log);
+
+        // Fully destroy the session
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params['path'], $params['domain'],
+                $params['secure'], $params['httponly']
+            );
+        }
+        session_destroy();
     }
  
     public function get_userdata(){
-        if(!isset($_SESSION)) { session_start(); }
-        return $_SESSION['userdata'];
- 
-        if(!isset($_SESSION['userdata'])) {
-            return $_SESSION['userdata'];
-        } else {
-            return null;
-        }
+        if (session_status() === PHP_SESSION_NONE) { session_start(); }
+        return $_SESSION['userdata'] ?? null;
     }
  
     public function set_userdata($array) {
-        if(!isset($_SESSION)) { session_start(); }
- 
+        if (session_status() === PHP_SESSION_NONE) { session_start(); }
+
+        // Build a combined address string if address column doesn't exist
+        $address = $array['address'] 
+            ?? trim(($array['houseno'] ?? '') . ' ' . ($array['street'] ?? '') . ', ' . ($array['brgy'] ?? '') . ', ' . ($array['municipal'] ?? ''));
+
         $_SESSION['userdata'] = array(
-            "id_admin"     => $array['id_admin'],
-            "id_resident"  => $array['id_resident'],
-            "id_user"      => $array['id_user'],
-            "emailadd"     => $array['email'],
-            "password"     => $array['password'],
-            "surname"      => $array['lname'],
-            "firstname"    => $array['fname'],
-            "mname"        => $array['mi'],
-            "age"          => $array['age'],
-            "sex"          => $array['sex'],
-            "status"       => $array['status'],
-            "address"      => $array['address'],
-            "contact"      => $array['contact'],
-            "bdate"        => $array['bdate'],
-            "bplace"       => $array['bplace'],
-            "nationality"  => $array['nationality'],
-            "family_role"  => $array['family_role'],
-            "role"         => $array['role'],
-            "position"     => $array['position'] ?? '',
-            "houseno"      => $array['houseno'],
-            "street"       => $array['street'],
-            "brgy"         => $array['brgy'],
-            "relation"     => $array['relation'],
-            "municipal"    => $array['municipal']
+            "id_admin"     => $array['id_admin']     ?? null,
+            "id_resident"  => $array['id_resident']  ?? null,
+            "id_user"      => $array['id_user']      ?? null,
+            "emailadd"     => $array['email']        ?? '',
+            "password"     => $array['password']     ?? '',
+            "surname"      => $array['lname']        ?? '',
+            "firstname"    => $array['fname']        ?? '',
+            "mname"        => $array['mi']           ?? '',
+            "age"          => $array['age']          ?? '',
+            "sex"          => $array['sex']          ?? '',
+            "status"       => $array['status']       ?? '',
+            "address"      => $address,
+            "contact"      => $array['contact']      ?? '',
+            "bdate"        => $array['bdate']        ?? '',
+            "bplace"       => $array['bplace']       ?? '',
+            "nationality"  => $array['nationality']  ?? '',
+            "family_role"  => $array['family_role']  ?? '',
+            "role"         => $array['role']         ?? '',
+            "position"     => $array['position']     ?? '',
+            "houseno"      => $array['houseno']      ?? '',
+            "street"       => $array['street']       ?? '',
+            "brgy"         => $array['brgy']         ?? '',
+            "relation"     => $array['relation']     ?? '',
+            "municipal"    => $array['municipal']    ?? ''
         );
         return $_SESSION['userdata'];
     }
@@ -497,13 +500,6 @@ public function openConn() {
         $admin = $stmt->fetch();
         return ($stmt->rowCount() > 0) ? $admin : false;
     }
-    public function view_admin(){
-            $connection = $this->openConn();
-            $stmt = $connection->prepare("SELECT * from tbl_admin");
-            $stmt->execute();
-            $view = $stmt->fetchAll();
-            return $view;
-        }
  
     public function admin_changepass() {
         if(isset($_POST['admin_changepass'])) {
@@ -622,7 +618,6 @@ public function admin_delete_announcement(){
     if(isset($_POST['delete_announcement'])) {
         $this->archive_record('tbl_announcement', 'id_announcement', $id_announcement, 'announcement');
         $id_announcement = $_POST['id_announcement'];
-        $this->archive_record('tbl_announcement', 'id_announcement', $id_announcement, 'announcement');
         $connection = $this->openConn();
 
         // Fetch image paths before deleting
@@ -825,25 +820,45 @@ public function verifyIDUpload($id_upload) {
         }
     }
  
-    public function delete_upload_record($id_upload) {
-        try {
-            $con  = $this->openConn();
-            $stmt = $con->prepare("SELECT file_name FROM tbl_id_uploads WHERE id_upload = ?");
-            $stmt->execute([$id_upload]);
-            $file = $stmt->fetch();
- 
-            if ($file) {
-                $path = "uploads/valid_ids/" . $file['file_name'];
-                if (file_exists($path)) { unlink($path); }
+   public function delete_upload_record($id_upload) {
+    try {
+        $con  = $this->openConn();
+        $stmt = $con->prepare("SELECT file_name FROM tbl_id_uploads WHERE id_upload = ?");
+        $stmt->execute([$id_upload]);
+        $file = $stmt->fetch();
+
+        if ($file && !empty($file['file_name'])) {
+            $filename = trim($file['file_name']);
+
+            $paths = [
+                __DIR__ . '/../uploads/valid_ids/' . $filename,
+                $_SERVER['DOCUMENT_ROOT'] . '/uploads/valid_ids/' . $filename,
+                'uploads/valid_ids/' . $filename,
+            ];
+
+            $deleted = false;
+            foreach ($paths as $path) {
+                if (file_exists($path)) {
+                    unlink($path);
+                    error_log("Deleted valid ID file: $path");
+                    $deleted = true;
+                    break;
+                }
             }
- 
-            $stmt = $con->prepare("DELETE FROM tbl_id_uploads WHERE id_upload = ?");
-            return $stmt->execute([$id_upload]);
-        } catch (PDOException $e) {
-            error_log($e->getMessage());
-            return false;
+
+            if (!$deleted) {
+                error_log("delete_upload_record: File not found in any path for: $filename");
+            }
         }
+
+        $stmt = $con->prepare("DELETE FROM tbl_id_uploads WHERE id_upload = ?");
+        return $stmt->execute([$id_upload]);
+
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        return false;
     }
+}
  
     public function getPendingIDUploads() {
         try {
@@ -874,7 +889,7 @@ public function verifyIDUpload($id_upload) {
 public function approveResidentVerification($id_resident, $id_upload, $admin_name) {
     try {
         $connection = $this->openConn();
- 
+
         // 1. Mark resident as verified
         $stmt1 = $connection->prepare(
             "UPDATE tbl_resident 
@@ -882,30 +897,51 @@ public function approveResidentVerification($id_resident, $id_upload, $admin_nam
              WHERE id_resident = ?"
         );
         $stmt1->execute([$admin_name, $id_resident]);
- 
+
         // 2. Mark upload as approved
         $stmt2 = $connection->prepare(
             "UPDATE tbl_id_uploads SET status = 'approved' WHERE id_upload = ?"
         );
         $stmt2->execute([$id_upload]);
- 
-        // 3. Send in-system notification
+
+        // 3. Delete the physical file from storage
+        $stmt3 = $connection->prepare("SELECT file_name FROM tbl_id_uploads WHERE id_upload = ?");
+        $stmt3->execute([$id_upload]);
+        $file = $stmt3->fetch(PDO::FETCH_ASSOC);
+
+        if ($file && !empty($file['file_name'])) {
+            $filename = trim($file['file_name']);
+            $paths = [
+                __DIR__ . '/../uploads/valid_ids/' . $filename,
+                $_SERVER['DOCUMENT_ROOT'] . '/uploads/valid_ids/' . $filename,
+                'uploads/valid_ids/' . $filename,
+            ];
+            foreach ($paths as $path) {
+                if (file_exists($path)) {
+                    unlink($path);
+                    error_log("approveResidentVerification: Deleted file -> $path");
+                    break;
+                }
+            }
+        }
+
+        // 4. Send in-system notification
         $notice = "✅ Your account has been verified! You can now request barangay certificates and other services.";
-        $stmt3  = $connection->prepare(
+        $stmt4  = $connection->prepare(
             "INSERT INTO resident_messages (id_resident, message_text, date_sent) 
              VALUES (?, ?, NOW())"
         );
-        $stmt3->execute([$id_resident, $notice]);
- 
-        // 4. Send Firebase push notification (works even when site is closed)
+        $stmt4->execute([$id_resident, $notice]);
+
+        // 5. Send Firebase push notification
         $this->sendFCMNotification(
             $id_resident,
             '✅ Account Verified — Barangay San Pedro',
             'Your account has been verified! You can now request barangay certificates and other services.'
         );
- 
+
         return true;
- 
+
     } catch (PDOException $e) {
         error_log("approveResidentVerification Error: " . $e->getMessage());
         return false;

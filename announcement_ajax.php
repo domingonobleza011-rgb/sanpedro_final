@@ -1,5 +1,7 @@
 <?php
 error_reporting(E_ALL ^ E_WARNING);
+define('BMIS_ROLE_REQUIRED', 'resident');
+require('secure_header.php');
 include('classes/resident.class.php');
 
 $userdetails = $bmis->get_userdata();
@@ -59,6 +61,17 @@ switch ($action) {
             'counts'        => $counts,
             'user_reaction' => $user_reaction,
         ]);
+        break;
+
+    // ── DELETE ANNOUNCEMENT (hide from resident's feed) ───────────
+    case 'delete_announcement':
+        $ann_id = (int)($_POST['announcement_id'] ?? 0);
+        if (!$ann_id) {
+            echo json_encode(['success' => false]);
+            exit;
+        }
+        $bmis->hide_announcement($user_id, $ann_id);
+        echo json_encode(['success' => true]);
         break;
 
     // ── LOAD COMMENTS ─────────────────────────────────────────────

@@ -1,10 +1,10 @@
 <?php
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
-    require_once('classes/conn.php');
-    require('classes/resident.class.php');
-    $userdetails = $bmis->get_userdata();
-    $bmis->validate_staff_or_admin();
+define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
+require('secure_header.php');
+error_reporting(E_ALL ^ E_WARNING);
+require_once('classes/conn.php');
+require('classes/resident.class.php');
+$userdetails = $bmis->get_userdata();
 
     $type_meta = [
         'resident'        => ['label' => 'Resident',              'icon' => 'fa-users',          'color' => 'blue'],
@@ -546,7 +546,6 @@
             <div class="archive-title-icon"><i class="fas fa-archive"></i></div>
             <div>
                 <h1>Archive</h1>
-                <p class="subtitle">Deleted records — restore or permanently remove</p>
             </div>
         </div>
         <div class="archive-stats">

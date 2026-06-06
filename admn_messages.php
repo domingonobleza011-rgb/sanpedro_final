@@ -1,5 +1,5 @@
 <?php 
-    define('BMIS_ROLE_REQUIRED', 'staff');
+    define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
 require('secure_header.php');
 require_once 'classes/main.class.php'; 
 $systemObject = new BMISClass();
@@ -229,16 +229,16 @@ foreach ($id_uploads as $up) {
             <button class="nav-link active" id="verify-tab" data-bs-toggle="tab" data-bs-target="#verify-panel" type="button">
                 <i class="bi bi-shield-check me-1"></i> ID Verifications
                 <?php if ($pending_count > 0): ?>
-                    <span class="badge bg-danger ms-1"><?= $pending_count ?></span>
+                    <span class="badge bg-danger ms-1" id="badge-id-pending"><?= $pending_count ?></span>
+                <?php else: ?>
+                    <span class="badge bg-danger ms-1 d-none" id="badge-id-pending">0</span>
                 <?php endif; ?>
             </button>
         </li>
         <li class="nav-item">
             <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages-panel" type="button">
                 <i class="bi bi-chat-dots-fill me-1"></i> Resident Messages
-                <?php if (count($messages) > 0): ?>
-                    <span class="badge bg-primary ms-1"><?= count($messages) ?></span>
-                <?php endif; ?>
+                <span class="badge bg-primary ms-1" id="badge-msg-count"><?= count($messages) > 0 ? count($messages) : '' ?></span>
             </button>
         </li>
     </ul>
@@ -368,7 +368,7 @@ foreach ($id_uploads as $up) {
                                 <th class="py-3">Delete</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="messages-tbody">
                             <?php if (!empty($messages)): ?>
                                 <?php foreach ($messages as $msg):
                                     $mid      = $msg['id_admin_msg'];
@@ -842,5 +842,38 @@ function closeToast() {
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<script>
+// ── Auto-poll messages & ID uploads every 8 seconds ───────────
+(function () {
+    function poll() {
+        // Don't refresh if a modal is open
+        if (document.querySelector('.modal.show')) return;
+
+        fetch('ajax_messages.php')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                // Update messages tbody
+                var tbody = document.getElementById('messages-tbody');
+                if (tbody) tbody.innerHTML = data.messages_html;
+
+                // Update badges
+                var badgeMsg = document.getElementById('badge-msg-count');
+                if (badgeMsg) {
+                    badgeMsg.textContent = data.msg_count > 0 ? data.msg_count : '';
+                }
+                var badgeId = document.getElementById('badge-id-pending');
+                if (badgeId) {
+                    badgeId.textContent = data.pending_count;
+                    badgeId.classList.toggle('d-none', data.pending_count === 0);
+                }
+            })
+            .catch(function () {});
+    }
+
+    poll();
+    setInterval(poll, 8000);
+})();
+</script>
 </body>
 </html>

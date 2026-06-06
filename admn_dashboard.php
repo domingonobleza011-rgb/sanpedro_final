@@ -533,8 +533,8 @@ hr {
                     <canvas id="genderPieChart"></canvas>
                 </div>
                 <div class="d-flex justify-content-center gap-3 mt-3" style="font-size:0.78rem; font-weight:600;">
-                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#1a4480;margin-right:5px;"></span>Male (<?= $rescountm ?>)</span>
-                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#e8b86d;margin-right:5px;"></span>Female (<?= $rescountf ?>)</span>
+                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#1a4480;margin-right:5px;"></span>Male (<span data-live="res_male"><?= $rescountm ?></span>)</span>
+                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#e8b86d;margin-right:5px;"></span>Female (<span data-live="res_female"><?= $rescountf ?></span>)</span>
                 </div>
             </div>
         </div>
@@ -554,10 +554,10 @@ hr {
             <!-- Legend -->
             <div class="d-flex flex-wrap justify-content-center gap-3 mt-3" style="font-size:0.78rem; font-weight:600;">
              
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#0d9488;margin-right:5px;"></span>Households (<?= $rescountfh ?>)</span>
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c9943a;margin-right:5px;"></span>Voters (<?= $rescountvoter ?>)</span>
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#dc2626;margin-right:5px;"></span>Seniors (<?= $rescountsenior ?>)</span>
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#6f42c1;margin-right:5px;"></span>PWD (<?= $rescountpwd ?>)</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#0d9488;margin-right:5px;"></span>Households (<span data-live="res_head"><?= $rescountfh ?></span>)</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c9943a;margin-right:5px;"></span>Voters (<span data-live="res_voter"><?= $rescountvoter ?></span>)</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#dc2626;margin-right:5px;"></span>Seniors (<span data-live="res_senior"><?= $rescountsenior ?></span>)</span>
+                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#6f42c1;margin-right:5px;"></span>PWD (<span data-live="res_pwd"><?= $rescountpwd ?></span>)</span>
             </div>
         </div>
     </div>
@@ -579,7 +579,7 @@ hr {
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Total Barangay Staffs</div>
-                                <div class="h5 mb-0 font-weight-bold text-dark"><?= $staffcount?></div>
+                                <div class="h5 mb-0 font-weight-bold text-dark" data-live="staff_total"><?= $staffcount?></div>
                                 <br>
                                 <a href="admn_table_totalstaff.php"> View Records </a>
                         </div>
@@ -600,7 +600,7 @@ hr {
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Total Barangay Male Staff
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-dark"><?= $staffcountm?></div>
+                            <div class="h5 mb-0 font-weight-bold text-dark" data-live="staff_male"><?= $staffcountm?></div>
                             <br>
                             <a href="admn_table_malestaff.php"> View Records </a>
                         </div>
@@ -619,7 +619,7 @@ hr {
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Total Barangay Female Staffs</div>
-                                <div class="h5 mb-0 font-weight-bold text-dark"><?= $staffcountf?></div>
+                                <div class="h5 mb-0 font-weight-bold text-dark" data-live="staff_female"><?= $staffcountf?></div>
                                 <br>
                                 <a href="admn_table_femalestaff.php"> View Records </a>
                         </div>
@@ -657,7 +657,7 @@ hr {
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                 Total Complaints
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-dark"><?= $complaint_total ?></div>
+                            <div class="h5 mb-0 font-weight-bold text-dark" data-live="cmp_total"><?= $complaint_total ?></div>
                             <br>
                             <a href="admn_complaints.php">View All</a>
                         </div>
@@ -678,7 +678,7 @@ hr {
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Pending Complaints
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-dark"><?= $complaint_pending ?></div>
+                            <div class="h5 mb-0 font-weight-bold text-dark" data-live="cmp_pending"><?= $complaint_pending ?></div>
                             <br>
                             <a href="admn_complaints.php?status=pending" class="text-warning fw-semibold">Review Now</a>
                         </div>
@@ -699,7 +699,7 @@ hr {
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Resolved Complaints
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-dark"><?= $complaint_resolved ?></div>
+                            <div class="h5 mb-0 font-weight-bold text-dark" data-live="cmp_resolved"><?= $complaint_resolved ?></div>
                             <br>
                             <a href="admn_complaints.php?status=resolved" class="text-success">View Resolved</a>
                         </div>
@@ -779,6 +779,8 @@ hr {
 
     // ── Show pointer cursor on hover ──
     document.getElementById('genderPieChart').style.cursor = 'pointer';
+    // Expose for live-stats.js SSE updates
+    window.genderChart = chart;
 })();
 </script>
 <script>
@@ -839,6 +841,9 @@ hr {
     });
 
     document.getElementById('residentDoughnutChart').style.cursor = 'pointer';
+    // Expose for live-stats.js SSE updates
+    window.residentChart = chart;
 })();
 </script>
+<script src="js/live-stats.js"></script>
 <?php include('dashboard_sidebar_end.php'); ?>

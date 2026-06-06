@@ -1,4 +1,5 @@
-<!-- Scroll to Top Button-->
+
+    <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
@@ -37,13 +38,10 @@
     <!-- responsive tags for screen compatibility -->
     <meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
     <!-- bootstrap css --> 
-    <link href="../BarangaySystem-master/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
+    <link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
     <!-- fontawesome icons -->
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- PWA Registration -->
-    <script src="/js/pwa.js"></script>
+    <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
 
 </body>
 

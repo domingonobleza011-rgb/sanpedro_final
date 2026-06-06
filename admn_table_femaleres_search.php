@@ -1,6 +1,4 @@
 <?php
-if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); require_once('secure_header.php'); }
-
 	// require the database connection
 	require 'classes/conn.php';
 
@@ -33,11 +31,10 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 
     <tbody>
         <?php
-            $keyword = '%' . $keyword . '%';
-            $stmnt = $conn->prepare("SELECT * FROM `tbl_resident` WHERE `lname` LIKE ? or  `mi` LIKE ? or  `fname` LIKE ? 
-            or  `age` LIKE ? or  `sex` LIKE ? or  `status` LIKE ? or  `address` LIKE ? or  `contact` LIKE ?
-            or  `bdate` LIKE ? or  `bplace` LIKE ? or  `nationality` LIKE ? or  `family_role` LIKE ? or  `role` LIKE ? or  `email` LIKE ?");
-            $stmnt->execute([$keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword]);
+            $stmnt = $conn->prepare("SELECT * FROM `tbl_resident` WHERE `lname` LIKE '%$keyword%' or  `mi` LIKE '%$keyword%' or  `fname` LIKE '%$keyword%' 
+            or  `age` LIKE '%$keyword%' or  `sex` LIKE '%$keyword%' or  `status` LIKE '%$keyword%' or  `address` LIKE '%$keyword%' or  `contact` LIKE '%$keyword%'
+            or  `bdate` LIKE '%$keyword%' or  `bplace` LIKE '%$keyword%' or  `nationality` LIKE '%$keyword%' or  `family_role` LIKE '%$keyword%' or  `role` LIKE '%$keyword%' or  `email` LIKE '%$keyword%'");
+            $stmnt->execute();
             
             while($view = $stmnt->fetch()){
         ?>
@@ -91,22 +88,22 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 
     <tbody>
         <?php if(is_array($view)) {?>
-            <?php foreach($view as $resident) {?>
+            <?php foreach($view as $view) {?>
                 <tr>
                    
-                    <td> <?= $resident['lname'];?> </td>
-                    <td> <?= $resident['fname'];?> </td>
-                    <td> <?= $resident['mi'];?> </td>
-                    <td> <?= $resident['age'];?> </td>
-                    <td> <?= $resident['sex'];?> </td>
-                    <td> <?= $resident['status'];?> </td>
-                    <td> <?= $resident['houseno'];?> </td>
-                    <td> <?= $resident['street'];?> </td>
-                    <td> <?= $resident['brgy'];?> </td>
-                    <td> <?= $resident['contact'];?> </td>
-                    <td> <?= $resident['bdate'];?> </td>
-                    <td> <?= $resident['bplace'];?> </td>
-                    <td> <?= $resident['nationality'];?> </td>
+                    <td> <?= $view['lname'];?> </td>
+                    <td> <?= $view['fname'];?> </td>
+                    <td> <?= $view['mi'];?> </td>
+                    <td> <?= $view['age'];?> </td>
+                    <td> <?= $view['sex'];?> </td>
+                    <td> <?= $view['status'];?> </td>
+                    <td> <?= $view['houseno'];?> </td>
+                    <td> <?= $view['street'];?> </td>
+                    <td> <?= $view['brgy'];?> </td>
+                    <td> <?= $view['contact'];?> </td>
+                    <td> <?= $view['bdate'];?> </td>
+                    <td> <?= $view['bplace'];?> </td>
+                    <td> <?= $view['nationality'];?> </td>
                 </tr>
             <?php
                 }
@@ -122,12 +119,12 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
 <!-- responsive tags for screen compatibility -->
 <meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
 <!-- custom css --> 
-
+<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
 <!-- bootstrap css --> 
-<link href="../BarangaySystem-master/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
+<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
 <!-- fontawesome icons -->
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
 
 <?php
 	}

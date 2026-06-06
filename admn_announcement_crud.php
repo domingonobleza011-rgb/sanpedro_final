@@ -1,10 +1,9 @@
 <?php
-   error_reporting(E_ALL);
-   ini_set('display_errors', 1);
-   require('classes/resident.class.php');
-
-   $userdetails = $bmis->get_userdata();
-   $bmis->validate_staff_or_admin();
+define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
+require('secure_header.php');
+error_reporting(E_ALL ^ E_WARNING);
+require('classes/resident.class.php');
+$userdetails = $bmis->get_userdata();
    $current_admin_id = $userdetails['id_resident'];
 
    if(isset($_POST['create_announce'])) {
@@ -40,11 +39,18 @@
     .clickable-row:hover { background-color: #e9ecef !important; }
 
     /* ── Confirmation modal ── */
-    .bmis-modal-backdrop {
-        display: none; position: fixed; inset: 0; z-index: 9999;
-        background: rgba(0,0,0,0.45); align-items: center; justify-content: center;
-    }
-    .bmis-modal-backdrop.open { display: flex; }
+ .bmis-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.45);
+    align-items: center;
+    justify-content: center;
+}
+.bmis-modal-backdrop.open {
+    display: flex;
+}
     .bmis-modal-card {
         background: #fff; border-radius: 14px; padding: 28px 32px;
         width: 100%; max-width: 430px; margin: 0 16px;
@@ -228,12 +234,12 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
                                         <td><span class="badge bg-light text-dark border"><?= $row['start_date'] ?></span></td>
                                         <td><small class="text-muted"><?= $row['addedby'] ?></small></td>
                                         <td class="text-center">
-                                            <button type="button"
-                                                class="btn btn-link text-danger p-0"
-                                                onclick="event.stopPropagation(); openDeleteModal('<?= $row['id_announcement'] ?>', '<?= addslashes(htmlspecialchars($row['event'])) ?>')">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </td>
+<?php $preview_safe = htmlspecialchars(str_replace(["\r\n", "\r", "\n"], ' ', $row['event']), ENT_QUOTES); ?>
+<button class="btn btn-link text-danger p-0" type="button"
+        onclick="event.stopPropagation(); openDeleteModal('<?= $row['id_announcement'] ?>', '<?= $preview_safe ?>')">
+    <i class="fas fa-trash-alt"></i>
+</button>
+</td>
                                     </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -323,15 +329,18 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
 <script>
 // ── Delete modal ─────────────────────────────────────────────
 function openDeleteModal(id, preview) {
-    document.getElementById('deleteAnnouncementId').value       = id;
+    document.getElementById('deleteAnnouncementId').value = id;
     document.getElementById('deleteAnnouncementPreview').textContent = preview;
+
+    // REMOVE: modal.style.display = 'flex';  ← this inline style overrides CSS later
     document.getElementById('deleteAnnouncementModal').classList.add('open');
 }
 
 function closeDeleteModal() {
-    document.getElementById('deleteAnnouncementModal').classList.remove('open');
+    const modal = document.getElementById('deleteAnnouncementModal');
+    modal.classList.remove('open');
+    modal.style.display = ''; // clear any inline style residue
 }
-
 // Close on backdrop click
 document.getElementById('deleteAnnouncementModal').addEventListener('click', function(e) {
     if (e.target === this) closeDeleteModal();

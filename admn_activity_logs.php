@@ -1,16 +1,14 @@
 <?php
-// ⚠️ ABSOLUTELY NOTHING before this line – no spaces, no BOM
-session_start();
+define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
+require('secure_header.php');
 require('classes/main.class.php');
 
 $userdetails = $bmis->get_userdata();
 
 // ── FLEXIBLE ADMIN CHECK ─────────────────────────────────────────────
-$admin_roles = ['admin', 'Administrator', 'Admin', 'ADMIN', 'administrator', 'user'];
+$admin_roles = ['admin', 'Administrator', 'Admin', 'ADMIN', 'administrator'];
 $user_role   = $userdetails['role'] ?? '';
 $is_admin    = in_array($user_role, $admin_roles);
-// If your system uses a numeric level, replace the above with:
-// $is_admin = ($userdetails['role_level'] ?? 0) == 1;
 
 if (!$is_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
@@ -18,53 +16,47 @@ if (!$is_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// ── CSRF TOKEN (ensure it's always set) ──────────────────────────────
+// ── CSRF TOKEN ────────────────────────────────────────────────────────
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 $csrf_token = $_SESSION['csrf_token'];
 
-// ── BULK DELETE (POST) ───────────────────────────────────────────────
+// ── POST HANDLER ─────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
     $body = json_decode(file_get_contents('php://input'), true);
 
-    if (($body['action'] ?? '') === 'bulk_delete') {
-        // CSRF check
-        if (!isset($body['csrf_token']) || $body['csrf_token'] !== $_SESSION['csrf_token']) {
-            echo json_encode(['success' => false, 'message' => 'CSRF token mismatch.']);
-            exit;
-        }
+    // CSRF check (shared by all POST actions)
+    if (!isset($body['csrf_token']) || $body['csrf_token'] !== $_SESSION['csrf_token']) {
+        echo json_encode(['success' => false, 'message' => 'CSRF token mismatch.']);
+        exit;
+    }
 
+    $action = $body['action'] ?? '';
+
+    // ── BULK DELETE (by checkbox IDs) ─────────────────────────────────
+    if ($action === 'bulk_delete') {
         $ids_raw = $body['ids'] ?? [];
         if (!is_array($ids_raw)) {
             echo json_encode(['success' => false, 'message' => 'Invalid IDs format.']);
             exit;
         }
-
         $ids = array_filter(array_map('intval', $ids_raw), fn($id) => $id > 0);
         if (empty($ids)) {
             echo json_encode(['success' => false, 'message' => 'No valid IDs provided.']);
             exit;
         }
-
         try {
             $conn = $bmis->openConn();
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             $stmt = $conn->prepare("DELETE FROM tbl_activity_log WHERE id_log IN ($placeholders)");
             $stmt->execute(array_values($ids));
             $deleted = $stmt->rowCount();
-
-            // Get new total
             $countStmt = $conn->prepare("SELECT COUNT(*) FROM tbl_activity_log");
             $countStmt->execute();
             $newTotal = (int)$countStmt->fetchColumn();
-
-            echo json_encode([
-                'success'   => true,
-                'deleted'   => $deleted,
-                'new_total' => $newTotal
-            ]);
+            echo json_encode(['success' => true, 'deleted' => $deleted, 'new_total' => $newTotal]);
         } catch (Exception $e) {
             error_log('Bulk delete error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
@@ -72,8 +64,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // ── RANGE COUNT (preview how many will be deleted) ─────────────────
+    if ($action === 'range_count') {
+        $range = $body['range'] ?? '';
+        $cutoff = getRangeCutoff($range);
+        if (!$cutoff) {
+            echo json_encode(['success' => false, 'message' => 'Invalid range.']);
+            exit;
+        }
+        try {
+            $conn  = $bmis->openConn();
+            $stmt  = $conn->prepare("SELECT COUNT(*) FROM tbl_activity_log WHERE created_at < ?");
+            $stmt->execute([$cutoff]);
+            $count = (int)$stmt->fetchColumn();
+            echo json_encode(['success' => true, 'count' => $count, 'cutoff' => $cutoff]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    // ── RANGE DELETE ───────────────────────────────────────────────────
+    if ($action === 'delete_by_range') {
+        $range = $body['range'] ?? '';
+        $cutoff = getRangeCutoff($range);
+        if (!$cutoff) {
+            echo json_encode(['success' => false, 'message' => 'Invalid range.']);
+            exit;
+        }
+        try {
+            $conn  = $bmis->openConn();
+            $stmt  = $conn->prepare("DELETE FROM tbl_activity_log WHERE created_at < ?");
+            $stmt->execute([$cutoff]);
+            $deleted = $stmt->rowCount();
+            $countStmt = $conn->prepare("SELECT COUNT(*) FROM tbl_activity_log");
+            $countStmt->execute();
+            $newTotal = (int)$countStmt->fetchColumn();
+            echo json_encode(['success' => true, 'deleted' => $deleted, 'new_total' => $newTotal]);
+        } catch (Exception $e) {
+            error_log('Range delete error: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
     echo json_encode(['success' => false, 'message' => 'Unknown action.']);
     exit;
+}
+
+// ── HELPER: compute cutoff date from range key ────────────────────────
+function getRangeCutoff(string $range): string|false {
+    $now = new DateTime();
+    return match($range) {
+        'week'    => (clone $now)->modify('-1 week')->format('Y-m-d H:i:s'),
+        'month'   => (clone $now)->modify('-1 month')->format('Y-m-d H:i:s'),
+        '3months' => (clone $now)->modify('-3 months')->format('Y-m-d H:i:s'),
+        '6months' => (clone $now)->modify('-6 months')->format('Y-m-d H:i:s'),
+        'year'    => (clone $now)->modify('-1 year')->format('Y-m-d H:i:s'),
+        default   => false,
+    };
 }
 
 // ── GET: pagination & filters ─────────────────────────────────────────
@@ -104,7 +153,6 @@ include('dashboard_sidebar_start.php');
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <style>
-        /* (keep all original CSS exactly as provided – unchanged) */
         :root {
             --blue-deep:   #1a2e4d;
             --blue-mid:    #2e5fa3;
@@ -117,6 +165,8 @@ include('dashboard_sidebar_start.php');
             --card-shadow: 0 20px 60px rgba(26,46,77,.12),0 2px 8px rgba(26,46,77,.07);
             --danger:      #d63031;
             --danger-bg:   #fde8e8;
+            --orange:      #e17055;
+            --orange-bg:   #fff3ef;
         }
         body { background:var(--mist); font-family:'DM Sans',sans-serif; }
         .page-heading { display:flex; align-items:center; gap:14px; margin-bottom:28px; }
@@ -174,7 +224,19 @@ include('dashboard_sidebar_start.php');
             flex-wrap:wrap; gap:10px;
         }
         .card-header-strip h2 { font-family:'Playfair Display',serif; font-size:18px; color:#fff; margin:0; }
-        .card-header-strip span { font-size:12px; color:rgba(255,255,255,.6); }
+        .card-header-strip .header-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .card-header-strip .total-badge { font-size:12px; color:rgba(255,255,255,.6); }
+
+        /* ── Delete by Range button ── */
+        .btn-purge {
+            padding:7px 15px; border-radius:8px; border:1.5px solid rgba(255,255,255,.3);
+            background:rgba(255,255,255,.12); color:#fff; font-size:12px; font-weight:600;
+            cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+            transition:background .2s,border-color .2s; white-space:nowrap;
+        }
+        .btn-purge:hover { background:rgba(214,48,49,.55); border-color:rgba(214,48,49,.7); }
+        .btn-purge i { font-size:11px; }
+
         .bulk-bar {
             display:none; align-items:center; gap:12px;
             padding:12px 24px; background:#fff8e1;
@@ -261,6 +323,8 @@ include('dashboard_sidebar_start.php');
         .pagination-links a:hover { background:var(--blue-glow); }
         .pagination-links .current { background:var(--blue-mid); color:#fff; border-color:var(--blue-mid); }
         .pagination-links .disabled { color:#c0cdd8; pointer-events:none; }
+
+        /* ── Shared Modal Base ── */
         .modal-overlay {
             display:none; position:fixed; inset:0;
             background:rgba(15,24,37,.45); backdrop-filter:blur(3px);
@@ -282,6 +346,7 @@ include('dashboard_sidebar_start.php');
             font-size:22px; display:flex; align-items:center; justify-content:center;
             margin:0 auto 16px;
         }
+        .modal-icon.orange { background:var(--orange-bg); color:var(--orange); }
         .modal-box h3 { font-family:'Playfair Display',serif; color:var(--blue-deep); margin:0 0 8px; font-size:18px; }
         .modal-box p  { font-size:13px; color:#7a91b0; margin:0 0 24px; }
         .modal-box p strong { color:var(--danger); }
@@ -295,30 +360,84 @@ include('dashboard_sidebar_start.php');
             background:var(--danger); color:#fff; font-size:13px; font-weight:600; cursor:pointer;
             box-shadow:0 4px 12px rgba(214,48,49,.3);
         }
+
+        /* ── Range Delete Modal extras ── */
+        .range-modal-box {
+            max-width:460px;
+        }
+        .range-options {
+            display:grid; grid-template-columns:1fr 1fr; gap:10px;
+            margin:18px 0 20px; text-align:left;
+        }
+        .range-opt {
+            position:relative; cursor:pointer;
+        }
+        .range-opt input[type="radio"] { display:none; }
+        .range-opt label {
+            display:flex; align-items:center; gap:10px;
+            padding:12px 14px; border-radius:10px; border:2px solid var(--border);
+            cursor:pointer; transition:border-color .18s,background .18s;
+            font-size:13px; font-weight:500; color:var(--ink);
+        }
+        .range-opt label .range-icon {
+            width:32px; height:32px; border-radius:8px; flex-shrink:0;
+            background:var(--mist); display:flex; align-items:center; justify-content:center;
+            font-size:14px; color:var(--blue-mid); transition:background .18s,color .18s;
+        }
+        .range-opt label .range-label { flex:1; }
+        .range-opt label .range-label small { display:block; font-size:10px; color:#9ab0c8; font-weight:400; }
+        .range-opt input:checked + label {
+            border-color:var(--danger); background:#fff5f5;
+        }
+        .range-opt input:checked + label .range-icon {
+            background:var(--danger-bg); color:var(--danger);
+        }
+
+        /* preview count pill */
+        .range-preview {
+            font-size:12px; color:#7a91b0; margin:-8px 0 18px;
+            min-height:20px; transition:all .2s;
+        }
+        .range-preview .preview-pill {
+            display:inline-block; background:var(--danger-bg);
+            color:var(--danger); font-weight:700; border-radius:20px;
+            padding:2px 11px; font-size:12px; margin-left:4px;
+        }
+        .range-preview .preview-pill.zero { background:#e8f5e9; color:#2e7d32; }
+        .range-preview.loading { color:#b0bec5; font-style:italic; }
+
+        .btn-modal-confirm.orange { background:var(--orange); box-shadow:0 4px 12px rgba(225,112,85,.3); }
+        .btn-modal-confirm:disabled { opacity:.5; cursor:not-allowed; }
+
+        /* success toast */
+        .toast {
+            position:fixed; bottom:28px; right:28px; z-index:99999;
+            background:var(--blue-deep); color:#fff; border-radius:12px;
+            padding:13px 20px; font-size:13px; font-weight:500;
+            display:flex; align-items:center; gap:10px;
+            box-shadow:0 8px 32px rgba(15,24,37,.22);
+            transform:translateY(20px); opacity:0; pointer-events:none;
+            transition:transform .3s ease, opacity .3s ease;
+        }
+        .toast.show { transform:translateY(0); opacity:1; }
+        .toast i { color:var(--gold); font-size:15px; }
+
         @media(max-width:768px) {
             .filter-card { flex-direction:column; }
             .fg-search { min-width:100%; }
             .log-table thead th:nth-child(7),
             .log-table td:nth-child(7) { display:none; }
+            .range-options { grid-template-columns:1fr; }
         }
     </style>
 </head>
 <body id="page-top">
 <div class="container-fluid mt-4">
-
-    <div class="page-heading">
-        <div class="head-icon"><i class="fas fa-history"></i></div>
-        <div>
-            <h1>Audit &amp; Logs</h1>
-            <p>Track all administrator actions and login events</p>
-        </div>
-    </div>
-
     <div class="tab-bar">
         <a href="admn_activity_logs.php" class="active"><i class="fas fa-tasks mr-1"></i> Activity Logs</a>
         <a href="admn_login_history.php"><i class="fas fa-sign-in-alt mr-1"></i> Login History</a>
     </div>
-
+    
     <form method="GET" action="">
         <div class="filter-card">
             <div class="fg fg-search">
@@ -355,7 +474,14 @@ include('dashboard_sidebar_start.php');
     <div class="main-card">
         <div class="card-header-strip">
             <h2><i class="fas fa-list-alt mr-2"></i>Activity Log</h2>
-            <span id="totalRecordsSpan"><?php echo number_format($total); ?></span>
+            <div class="header-right">
+                <span class="total-badge" id="totalRecordsSpan"><?php echo number_format($total); ?> records</span>
+                <?php if($is_admin): ?>
+                <button type="button" class="btn-purge" id="btnOpenRangeModal">
+                    <i class="fas fa-calendar-times"></i> Delete by Range
+                </button>
+                <?php endif; ?>
+            </div>
         </div>
 
         <?php if(empty($logs)): ?>
@@ -470,7 +596,9 @@ include('dashboard_sidebar_start.php');
 
 </div>
 
-<!-- Confirm Delete Modal -->
+<!-- ══════════════════════════════════════════════════════
+     Modal 1: Bulk Delete (checkbox-selected rows)
+════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal-box">
         <div class="modal-icon"><i class="fas fa-trash-alt"></i></div>
@@ -483,8 +611,91 @@ include('dashboard_sidebar_start.php');
     </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════
+     Modal 2: Delete by Range
+════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="rangeModal">
+    <div class="modal-box range-modal-box">
+        <div class="modal-icon orange"><i class="fas fa-calendar-times"></i></div>
+        <h3>Delete Logs by Date Range</h3>
+        <p style="margin-bottom:6px;">Select a range — all logs <strong style="color:var(--orange);">older than</strong> the chosen period will be permanently removed.</p>
+
+        <div class="range-options">
+            <div class="range-opt">
+                <input type="radio" name="purge_range" id="r_week" value="week">
+                <label for="r_week">
+                    <span class="range-icon"><i class="fas fa-calendar-week"></i></span>
+                    <span class="range-label">Last Week <small>Older than 7 days</small></span>
+                </label>
+            </div>
+            <div class="range-opt">
+                <input type="radio" name="purge_range" id="r_month" value="month">
+                <label for="r_month">
+                    <span class="range-icon"><i class="fas fa-calendar-alt"></i></span>
+                    <span class="range-label">Last Month <small>Older than 30 days</small></span>
+                </label>
+            </div>
+            <div class="range-opt">
+                <input type="radio" name="purge_range" id="r_3months" value="3months">
+                <label for="r_3months">
+                    <span class="range-icon"><i class="fas fa-calendar-check"></i></span>
+                    <span class="range-label">Last 3 Months <small>Older than 90 days</small></span>
+                </label>
+            </div>
+            <div class="range-opt">
+                <input type="radio" name="purge_range" id="r_6months" value="6months">
+                <label for="r_6months">
+                    <span class="range-icon"><i class="fas fa-calendar"></i></span>
+                    <span class="range-label">Last 6 Months <small>Older than 180 days</small></span>
+                </label>
+            </div>
+            <div class="range-opt" style="grid-column:1/-1;">
+                <input type="radio" name="purge_range" id="r_year" value="year">
+                <label for="r_year">
+                    <span class="range-icon"><i class="fas fa-history"></i></span>
+                    <span class="range-label">Last Year <small>Older than 365 days</small></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="range-preview" id="rangePreview">← Select a range to see how many records will be deleted</div>
+
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" id="btnRangeCancel">Cancel</button>
+            <button class="btn-modal-confirm orange" id="btnRangeConfirm" disabled>
+                <i class="fas fa-trash-alt mr-1"></i> Delete These Logs
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg"></span></div>
+
 <script>
 (function () {
+    const CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const totalSpan = document.getElementById('totalRecordsSpan');
+
+    // ── helpers ────────────────────────────────────────────────────────
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function postJSON(body) {
+        return fetch('admn_activity_logs.php', {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify({ ...body, csrf_token: CSRF })
+        }).then(r => r.json());
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // SECTION 1: Bulk delete (checkbox rows)
+    // ════════════════════════════════════════════════════════════════════
     const chkAll        = document.getElementById('chkAll');
     const bulkBar       = document.getElementById('bulkBar');
     const selectedCount = document.getElementById('selectedCount');
@@ -494,105 +705,191 @@ include('dashboard_sidebar_start.php');
     const btnDelete     = document.getElementById('btnDeleteSelected');
     const btnCancel     = document.getElementById('btnModalCancel');
     const btnConfirm    = document.getElementById('btnModalConfirm');
-    const totalSpan     = document.getElementById('totalRecordsSpan');
 
-    if (!chkAll) return;
+    if (chkAll) {
+        function getChecked() {
+            return [...document.querySelectorAll('.row-chk:checked')];
+        }
 
-    function getChecked() {
-        return [...document.querySelectorAll('.row-chk:checked')];
-    }
+        function updateBulkBar() {
+            const checked = getChecked();
+            const n = checked.length;
+            selectedCount.textContent = n;
+            modalCount.textContent    = n;
+            bulkBar.classList.toggle('visible', n > 0);
+            const all = document.querySelectorAll('.row-chk');
+            chkAll.checked       = n === all.length && all.length > 0;
+            chkAll.indeterminate = n > 0 && n < all.length;
+        }
 
-    function updateBulkBar() {
-        const checked = getChecked();
-        const n = checked.length;
-        selectedCount.textContent = n;
-        modalCount.textContent    = n;
-        bulkBar.classList.toggle('visible', n > 0);
-
-        const all = document.querySelectorAll('.row-chk');
-        chkAll.checked       = n === all.length && all.length > 0;
-        chkAll.indeterminate = n > 0 && n < all.length;
-    }
-
-    chkAll.addEventListener('change', function () {
-        document.querySelectorAll('.row-chk').forEach(cb => {
-            cb.checked = this.checked;
-            cb.closest('tr').classList.toggle('row-selected', this.checked);
-        });
-        updateBulkBar();
-    });
-
-    document.querySelectorAll('.row-chk').forEach(cb => {
-        cb.addEventListener('change', function () {
-            this.closest('tr').classList.toggle('row-selected', this.checked);
+        chkAll.addEventListener('change', function () {
+            document.querySelectorAll('.row-chk').forEach(cb => {
+                cb.checked = this.checked;
+                cb.closest('tr').classList.toggle('row-selected', this.checked);
+            });
             updateBulkBar();
         });
-    });
 
-    btnDeselect.addEventListener('click', function () {
         document.querySelectorAll('.row-chk').forEach(cb => {
-            cb.checked = false;
-            cb.closest('tr').classList.remove('row-selected');
+            cb.addEventListener('change', function () {
+                this.closest('tr').classList.toggle('row-selected', this.checked);
+                updateBulkBar();
+            });
         });
-        chkAll.checked = false;
-        chkAll.indeterminate = false;
-        updateBulkBar();
-    });
 
-    btnDelete.addEventListener('click', function () {
-        if (getChecked().length === 0) return;
-        deleteModal.classList.add('open');
-    });
+        btnDeselect.addEventListener('click', function () {
+            document.querySelectorAll('.row-chk').forEach(cb => {
+                cb.checked = false;
+                cb.closest('tr').classList.remove('row-selected');
+            });
+            chkAll.checked = false;
+            chkAll.indeterminate = false;
+            updateBulkBar();
+        });
 
-    btnCancel.addEventListener('click', () => deleteModal.classList.remove('open'));
-    deleteModal.addEventListener('click', e => { if (e.target === deleteModal) deleteModal.classList.remove('open'); });
+        btnDelete.addEventListener('click', function () {
+            if (getChecked().length === 0) return;
+            deleteModal.classList.add('open');
+        });
 
-    btnConfirm.addEventListener('click', function () {
-        const ids = getChecked().map(cb => cb.value);
-        if (!ids.length) return;
+        btnCancel.addEventListener('click', () => deleteModal.classList.remove('open'));
+        deleteModal.addEventListener('click', e => { if (e.target === deleteModal) deleteModal.classList.remove('open'); });
 
-        btnConfirm.disabled = true;
-        btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Deleting…';
+        btnConfirm.addEventListener('click', function () {
+            const ids = getChecked().map(cb => cb.value);
+            if (!ids.length) return;
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            btnConfirm.disabled = true;
+            btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Deleting…';
 
-        fetch('admn_activity_logs.php', {
-            method : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body   : JSON.stringify({
-                action: 'bulk_delete',
-                ids: ids,
-                csrf_token: csrfToken
+            postJSON({ action: 'bulk_delete', ids })
+            .then(data => {
+                if (data.success) {
+                    ids.forEach(id => {
+                        const row = document.querySelector(`tr[data-id="${id}"]`);
+                        if (row) row.remove();
+                    });
+                    if (data.new_total !== undefined) {
+                        totalSpan.textContent = data.new_total.toLocaleString() + ' records';
+                    }
+                    deleteModal.classList.remove('open');
+                    chkAll.checked = false;
+                    chkAll.indeterminate = false;
+                    updateBulkBar();
+                    showToast(`${data.deleted} log(s) deleted successfully.`);
+                    if (document.querySelectorAll('tbody tr').length === 0) location.reload();
+                } else {
+                    alert(data.message || 'Delete failed. Please try again.');
+                }
             })
-        })
-        .then(r => r.json())
+            .catch(() => alert('Network error. Please try again.'))
+            .finally(() => {
+                btnConfirm.disabled = false;
+                btnConfirm.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Yes, Delete';
+            });
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // SECTION 2: Delete by Range
+    // ════════════════════════════════════════════════════════════════════
+    const btnOpenRange  = document.getElementById('btnOpenRangeModal');
+    const rangeModal    = document.getElementById('rangeModal');
+    const btnRangeCancel  = document.getElementById('btnRangeCancel');
+    const btnRangeConfirm = document.getElementById('btnRangeConfirm');
+    const rangePreview    = document.getElementById('rangePreview');
+
+    if (!btnOpenRange) return; // not admin – stop here
+
+    let previewCount  = 0;
+    let selectedRange = '';
+    let previewTimer  = null;
+
+    btnOpenRange.addEventListener('click', () => {
+        // reset state
+        document.querySelectorAll('input[name="purge_range"]').forEach(r => r.checked = false);
+        rangePreview.className = 'range-preview';
+        rangePreview.innerHTML = '← Select a range to see how many records will be deleted';
+        btnRangeConfirm.disabled = true;
+        selectedRange = '';
+        rangeModal.classList.add('open');
+    });
+
+    btnRangeCancel.addEventListener('click', () => rangeModal.classList.remove('open'));
+    rangeModal.addEventListener('click', e => { if (e.target === rangeModal) rangeModal.classList.remove('open'); });
+
+    // Live preview when a range radio changes
+    document.querySelectorAll('input[name="purge_range"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            selectedRange = this.value;
+            btnRangeConfirm.disabled = true;
+
+            rangePreview.className = 'range-preview loading';
+            rangePreview.textContent = 'Counting records…';
+
+            clearTimeout(previewTimer);
+            previewTimer = setTimeout(() => {
+                postJSON({ action: 'range_count', range: selectedRange })
+                .then(data => {
+                    if (!data.success) {
+                        rangePreview.className = 'range-preview';
+                        rangePreview.textContent = 'Could not retrieve count.';
+                        return;
+                    }
+                    previewCount = data.count;
+                    rangePreview.className = 'range-preview';
+                    if (previewCount === 0) {
+                        rangePreview.innerHTML = 'No records found older than this range. <span class="preview-pill zero">0 records</span>';
+                        btnRangeConfirm.disabled = true;
+                    } else {
+                        const cutoffFmt = new Date(data.cutoff).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                        rangePreview.innerHTML = `Records before <strong>${cutoffFmt}</strong> that will be deleted: <span class="preview-pill">${previewCount.toLocaleString()} records</span>`;
+                        btnRangeConfirm.disabled = false;
+                    }
+                })
+                .catch(() => {
+                    rangePreview.className = 'range-preview';
+                    rangePreview.textContent = 'Network error while counting.';
+                });
+            }, 300);
+        });
+    });
+
+    // Confirm range delete
+    btnRangeConfirm.addEventListener('click', function () {
+        if (!selectedRange || previewCount === 0) return;
+
+        // Extra confirmation for large deletions
+        const label = document.querySelector(`input[name="purge_range"]:checked`)
+                              ?.closest('.range-opt')
+                              ?.querySelector('.range-label')
+                              ?.firstChild?.textContent?.trim() ?? selectedRange;
+
+        if (!confirm(`⚠️ You are about to permanently delete ${previewCount.toLocaleString()} log record(s) older than "${label}". This cannot be undone. Continue?`)) return;
+
+        btnRangeConfirm.disabled = true;
+        btnRangeConfirm.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Deleting…';
+
+        postJSON({ action: 'delete_by_range', range: selectedRange })
         .then(data => {
             if (data.success) {
-                ids.forEach(id => {
-                    const row = document.querySelector(`tr[data-id="${id}"]`);
-                    if (row) row.remove();
-                });
+                rangeModal.classList.remove('open');
                 if (data.new_total !== undefined) {
-                    totalSpan.textContent = data.new_total.toLocaleString();
+                    totalSpan.textContent = data.new_total.toLocaleString() + ' records';
                 }
-                deleteModal.classList.remove('open');
-                chkAll.checked = false;
-                chkAll.indeterminate = false;
-                updateBulkBar();
-
-                if (document.querySelectorAll('tbody tr').length === 0) {
-                    location.reload();
-                }
+                showToast(`${data.deleted.toLocaleString()} log(s) purged successfully.`);
+                // Reload after short delay so the toast is visible
+                setTimeout(() => location.reload(), 1800);
             } else {
                 alert(data.message || 'Delete failed. Please try again.');
+                btnRangeConfirm.disabled = false;
+                btnRangeConfirm.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Delete These Logs';
             }
-            btnConfirm.disabled = false;
-            btnConfirm.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Yes, Delete';
         })
         .catch(() => {
             alert('Network error. Please try again.');
-            btnConfirm.disabled = false;
-            btnConfirm.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Yes, Delete';
+            btnRangeConfirm.disabled = false;
+            btnRangeConfirm.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Delete These Logs';
         });
     });
 })();

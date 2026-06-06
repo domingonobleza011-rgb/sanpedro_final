@@ -22,7 +22,8 @@ require('secure_header.php');
       <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
       <!-- responsive tags for screen compatibility -->
       <meta name="viewport" content="width=device-width, initial-scale=1"><!-- bootstrap css --> 
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">      <!-- fontawesome icons --> 
+      <link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+      <!-- fontawesome icons --> 
       <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -377,43 +378,49 @@ require('secure_header.php');
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="small fw-bold">Last Name</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['lname']); ?>" readonly tabindex="-1">
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['lname']); ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="small fw-bold">First Name</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['fname']); ?>" readonly tabindex="-1">
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['fname']); ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="small fw-bold">Middle Name</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['mi']); ?>" readonly tabindex="-1">
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['mi']); ?>" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="small fw-bold">Email Address</label>
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['email']); ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="small fw-bold">Sex</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['sex']); ?>" readonly tabindex="-1">
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['sex']); ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="small fw-bold">Nationality</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['nationality']); ?>" readonly tabindex="-1">
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['nationality']); ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="small fw-bold">Date of Birth</label>
-                            <input type="date" class="form-control bg-light" value="<?= $resident['bdate']; ?>" readonly tabindex="-1">
+                            <input type="date" class="form-control bg-light" value="<?= $resident['bdate']; ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="small fw-bold">Place of Birth</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['bplace']); ?>" readonly tabindex="-1">
+                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['bplace']); ?>" readonly>
                         </div>
                     </div>
                 </div>
@@ -425,7 +432,13 @@ require('secure_header.php');
                 <hr class="mt-0">
 
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="small fw-bold">Age</label>
+                            <input class="form-control" type="number" name="age" value="<?= $resident['age']; ?>">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
                         <div class="form-group">
                             <label class="small fw-bold">Civil Status</label>
                             <select class="form-control" name="status">
@@ -435,7 +448,7 @@ require('secure_header.php');
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-5">
                         <div class="form-group">
                             <label class="small fw-bold">Contact Number</label>
                             <input class="form-control" type="tel" name="contact" maxlength="11" placeholder="09XXXXXXXXX" value="<?= $resident['contact']; ?>">
@@ -467,6 +480,8 @@ require('secure_header.php');
                     <div class="col-auto">
                         <input name="lname" type="hidden" value="<?= $resident['lname']; ?>"/>
                         <input name="mi" type="hidden" value="<?= $resident['mi']; ?>" />
+                        
+                        
                         
                         <button type="submit" name="profile_update" class="btn btn-primary px-5">
                             <i class="fas fa-save me-1"></i> Save Changes
@@ -512,13 +527,13 @@ require('secure_header.php');
             });
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module" src="fcm_init.js"></script>
+        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
+
     </body>
 </html>

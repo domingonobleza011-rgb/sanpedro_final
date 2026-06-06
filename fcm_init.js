@@ -13,11 +13,11 @@ const firebaseConfig = {
 };
 // ── Still needed: VAPID public key ───────────────────────────────────────
 // Firebase Console → Project Settings → Cloud Messaging → Web Push certificates → Generate key pair
-const VAPID_KEY = "BHvAccZM20i0kpi32pW7lNZopdcmMLFVOFwuZYvSCNWiRsB7X0VYofldtoVKawKOCB0x5YWOeg_u-3CpAlUFsHI";
+const VAPID_KEY = "BNH01V-MOZec4-7PMWbVdwcveqUk8uV9FiVXf-d0sfhRx2KXwyjl-zM3QDqbcBnRX3j9J5SDGZ_SetrjGnZKNqQ";
 // ─────────────────────────────────────────────────────────────────────────
 
-import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging.js";
 
 const app       = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
@@ -99,4 +99,4 @@ function showInPageToast(title, body) {
     setTimeout(() => { if (t.parentNode) t.remove(); }, 6000);
 }
 
-initPushNotifications();
+window.initPushNotifications = initPushNotifications;

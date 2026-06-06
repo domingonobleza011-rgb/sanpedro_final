@@ -9,15 +9,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>SK Portal — Barangay San Pedro</title>
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f2d5a">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Brgy San Pedro">
-    <link rel="apple-touch-icon" href="/icons/pwa/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -59,15 +50,15 @@ h4 {
 }
 h4::before {
     content: ''; display: inline-block; width: 4px; height: 20px;
-    background: linear-gradient(to bottom, var(--sk-green-light), var(--sk-green-mid));
+    background: linear-gradient(to bottom, var(--sk-gold), var(--sk-gold-light));
     border-radius: 4px; flex-shrink: 0;
 }
 hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5rem 0 !important; }
 
 .sidebar {
-    background: linear-gradient(180deg, var(--sk-green) 0%, var(--sk-green-mid) 60%, var(--sk-green-light) 100%) !important;
+    background: linear-gradient(180deg, var(--sk-green) 0%, var(--sk-green-mid) 60%, #145230 100%) !important;
     border-right: none !important;
-    box-shadow: 4px 0 24px rgba(15,45,90,0.22);
+    box-shadow: 4px 0 24px rgba(26,107,58,0.18);
 }
 .sidebar-brand {
     padding: 1.6rem 1rem 1.4rem !important;
@@ -98,20 +89,20 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
     font-size: 0.95rem; width: 18px; text-align: center;
     flex-shrink: 0; color: rgba(255,255,255,0.5); transition: color var(--transition);
 }
-.sidebar .nav-item .nav-link:hover { color: var(--white) !important; background: rgba(255,255,255,0.09) !important; border-left-color: rgba(43,94,167,0.6) !important; }
-.sidebar .nav-item .nav-link:hover i, .sidebar .nav-item .nav-link:hover .bi { color: rgba(255,255,255,0.9); }
+.sidebar .nav-item .nav-link:hover { color: var(--white) !important; background: rgba(255,255,255,0.07) !important; border-left-color: rgba(201,148,58,0.5) !important; }
+.sidebar .nav-item .nav-link:hover i, .sidebar .nav-item .nav-link:hover .bi { color: var(--sk-gold-light); }
 .sidebar .nav-item.active .nav-link, .sidebar .nav-item .nav-link.active {
-    color: var(--white) !important; background: rgba(43,94,167,0.25) !important;
-    border-left-color: var(--sk-green-light) !important; font-weight: 500 !important;
+    color: var(--white) !important; background: rgba(201,148,58,0.15) !important;
+    border-left-color: var(--sk-gold) !important; font-weight: 500 !important;
 }
-.topbar { background: var(--white) !important; box-shadow: 0 2px 16px rgba(15,45,90,0.08) !important; border-bottom: 1px solid var(--border) !important; padding: 0 20px !important; height: 60px; align-items: center; }
+.topbar { background: var(--white) !important; box-shadow: 0 2px 16px rgba(26,107,58,0.08) !important; border-bottom: 1px solid var(--border) !important; padding: 0 20px !important; height: 60px; align-items: center; }
 .topbar .nav-item .nav-link { color: var(--text-mid) !important; font-size: 0.875rem; font-weight: 500; padding: 8px 14px !important; border-radius: 8px; transition: all var(--transition); display: flex; align-items: center; gap: 8px; }
 .topbar .nav-item .nav-link:hover { background: var(--cream); color: var(--sk-green) !important; }
 .topbar .text-gray-800 { color: var(--text-dark) !important; font-weight: 500; }
 
 /* SK Badge */
 .sk-badge-sidebar {
-    display: inline-block; background: var(--sk-green-light); color: #fff;
+    display: inline-block; background: var(--sk-gold); color: #fff;
     font-size: 0.6rem; font-weight: 800; letter-spacing: 1px;
     padding: 2px 7px; border-radius: 20px; margin-left: auto; flex-shrink: 0;
     text-transform: uppercase;
@@ -122,14 +113,17 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
 <div id="wrapper">
 
     <!-- SK Sidebar -->
-    <ul class="navbar-nav bg-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+    <ul class="navbar-nav bg-success sidebar sidebar-dark accordion" id="accordionSidebar">
 
-
-            <div class="sidebar-brand d-flex align-items-center justify-content-center">
-                Sk PORTAL<br>
-                
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="sk_dashboard.php">
+            <div class="sidebar-brand-icon">
+                <i class="fas fa-leaf" style="font-size:1.4rem;color:rgba(255,255,255,0.8);"></i>
             </div>
-
+            <div class="sidebar-brand-text ms-2">
+                SK Portal<br>
+                <span style="font-size:0.68rem;font-weight:400;opacity:0.7;">Youth Engagement Module</span>
+            </div>
+        </a>
 
         <hr class="sidebar-divider my-0">
 
@@ -199,12 +193,14 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="index.php">
-                            <span class="mr-2 d-none d-lg-inline text-gray-800 small"><?= $userdetails['surname']?>, <?= $userdetails['firstname']?> <?= $userdetails['mname']?></span>
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
-                           
+                            <span class="mr-2 d-none d-lg-inline text-gray-800 small">
+                               
+                              <?= htmlspecialchars($userdetails['surname'] ?? '') ?>, <?= htmlspecialchars($userdetails['firstname'] ?? '') ?>
+                            </span>
+                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
                         </a>
                     </li>
                 </ul>
             </nav>
-            <script src="/js/pwa.js"></script>
             <!-- End Topbar -->
+

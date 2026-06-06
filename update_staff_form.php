@@ -105,10 +105,7 @@
                                 <label class="form-group">Address</label>
                                 <input class="form-control" type="text" name="address" value="<?= htmlspecialchars($staff['address']);?>">
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-group">Age: </label>
-                                <input type="number" class="form-control" name="age" value="<?= $staff['age'];?>">
-                            </div>
+                           
                             <div class="col-md-2">
                                 <label class="form-group"> Gender: </label>
                                 <select class="form-control" name="sex" required>

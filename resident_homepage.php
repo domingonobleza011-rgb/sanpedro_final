@@ -1,6 +1,5 @@
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php');
 require('secure_header.php'); 
     error_reporting(E_ALL ^ E_WARNING);
     include('classes/resident.class.php');
@@ -47,15 +46,6 @@ require('secure_header.php');
 
     <head> 
     <title> Barangay San Pedro Iriga </title>
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f2d5a">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Brgy San Pedro">
-    <link rel="apple-touch-icon" href="/icons/pwa/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
         <!-- responsive tags for screen compatibility -->
@@ -366,6 +356,7 @@ require('secure_header.php');
         <i class="bi bi-shield-lock"></i>
         <span>Pass</span>
     </a>
+
     <a href="logout.php" class="nav-item text-danger">
         <i class="bi bi-box-arrow-right"></i>
         <span>Exit</span>
@@ -565,36 +556,36 @@ require('secure_header.php');
     margin-bottom: 10px;
 }
 </style>
-
+<button onclick="initPushNotifications()" id="enable-notif-btn" 
+    style="display:none; margin:10px auto;">
+    🔔 Enable Notifications
+</button>
 
         <div id="down1"></div>
 
-        <br>
-
+    
+<br>
         <section class="heading-section" id="services-section"> 
             <div class="container text-center"> 
                 <div class="row"> 
                     <div class="col"> 
                         
-                        <br>
-                        <br>
-
+                       
+<br><br>
                         <div class="header"> 
-                            <h2> Welcome to Barangay San Pedro Iriga City </h2><bR>
-                            <h3> You may select the following services offered below </h3>
+                            <h4> Welcome to Barangay San Pedro Iriga City </h2><bR>
+                            <h4> You may select the following services offered below </h3>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <br>
-            <br>
-
+            
 <div class="container my-5">
 
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if (!$is_verified): ?>
+require_once('secure_header.php'); if (!$is_verified): ?>
 <!-- VERIFICATION NOTICE BANNER -->
 <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 p-4" role="alert" style="border-left: 6px solid #ffc107 !important;">
     <div class="d-flex align-items-start gap-3">
@@ -611,13 +602,13 @@ define('BMIS_ROLE_REQUIRED', 'resident');
 </div>
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- else: ?>
+require_once('secure_header.php'); else: ?>
 <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 py-2 px-4" role="alert">
     <i class="bi bi-patch-check-fill me-2"></i> <strong>Account Verified</strong> &mdash; You have full access to all barangay services.
 </div>
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- endif; ?>
+require_once('secure_header.php'); endif; ?>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
 
@@ -626,21 +617,21 @@ define('BMIS_ROLE_REQUIRED', 'resident');
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if ($is_verified): ?>
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_business.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- else: ?>
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- endif; ?>
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-file-earmark-medical-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Business Permit</h4>
                         </div>
@@ -652,21 +643,21 @@ define('BMIS_ROLE_REQUIRED', 'resident');
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if ($is_verified): ?>
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_brgyid.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- else: ?>
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- endif; ?>
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-person-vcard-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Barangay ID</h4>
                         </div>
@@ -678,21 +669,21 @@ define('BMIS_ROLE_REQUIRED', 'resident');
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if ($is_verified): ?>
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_certofindigency.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- else: ?>
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- endif; ?>
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-briefcase-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Certificate of Indigency</h4>
                         </div>
@@ -704,21 +695,21 @@ define('BMIS_ROLE_REQUIRED', 'resident');
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if ($is_verified): ?>
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_certofres.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- else: ?>
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- endif; ?>
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-house-check-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Certificate of Residency</h4>
                         </div>
@@ -730,21 +721,21 @@ define('BMIS_ROLE_REQUIRED', 'resident');
         <div class="col">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if ($is_verified): ?>
+require_once('secure_header.php'); if ($is_verified): ?>
             <a href="services_brgyclearance.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- else: ?>
+require_once('secure_header.php'); else: ?>
             <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- endif; ?>
+require_once('secure_header.php'); endif; ?>
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
                             <i class="bi bi-shield-lock-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
                             <h4 class="mt-2 text-dark">Barangay Clearance</h4>
                         </div>
@@ -761,7 +752,7 @@ define('BMIS_ROLE_REQUIRED', 'resident');
                     <div class="card h-100 shadow-sm">
                         <div class="card-body text-center">
                             <i class="bi bi-people-fill fs-1"></i>
-                            <h4 class="mt-2 text-dark">Youth Profiling</h4>
+                            <h4 class="mt-2 text-dark">Youth Portal</h4>
                         </div>
                     </div>
                 </div>
@@ -788,12 +779,12 @@ define('BMIS_ROLE_REQUIRED', 'resident');
                         <div class="card-body text-center">
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if (!$is_verified): ?><span class="badge bg-warning text-dark float-end">Action Needed</span><?php endif; ?>
+require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-warning text-dark float-end">Action Needed</span><?php endif; ?>
                             <i class="bi bi-chat-dots-fill fs-1"></i>
                             <h4 class="mt-2 text-dark">Messages</h4>
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
- if (!$is_verified): ?><small class="text-warning fw-bold">Upload ID here</small><?php endif; ?>
+require_once('secure_header.php'); if (!$is_verified): ?><small class="text-warning fw-bold">Upload ID here</small><?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -805,7 +796,7 @@ define('BMIS_ROLE_REQUIRED', 'resident');
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body text-center">
-                            <i class="bi bi-chat-square-text-fill fs-1"></i>
+                            <i class="bi bi-info-circle-fill fs-1"></i>
                             <h4 class="mt-2 text-dark">Complaint</h4>
                         </div>
                     </div>
@@ -838,6 +829,13 @@ define('BMIS_ROLE_REQUIRED', 'resident');
         </div>
     </div>
 </div>
+           
+<script>
+// Show the button only if permission hasn't been granted yet
+if (Notification.permission !== 'granted') {
+    document.getElementById('enable-notif-btn').style.display = 'block';
+}
+</script>
 
 <script>
 function showVerifyAlert() {
@@ -881,14 +879,12 @@ function showVerifyAlert() {
             });
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script type="module" src="fcm_init.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script type="module" src="fcm_init.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- PWA -->
-    <script src="/js/pwa.js"></script>
+        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
     </body>
 </html>

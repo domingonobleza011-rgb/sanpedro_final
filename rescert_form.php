@@ -4,6 +4,17 @@ require('classes/resident.class.php');
 $userdetails = $residentbmis->get_userdata();
 $id_resident = $_GET['id_resident'];
 $resident = $residentbmis->get_single_certofres($id_resident);
+
+// ── Activity Log: Certificate of Residency Generated ────────────────────────
+if ($resident) {
+    $resident_name = strtoupper(trim(($resident['lname'] ?? '') . ', ' . ($resident['fname'] ?? '') . ' ' . ($resident['mi'] ?? '')));
+    $residentbmis->log_activity(
+        'GENERATE_DOCUMENT',
+        'Certificate of Residency',
+        "Generated Certificate of Residency for {$resident_name} (Resident ID: {$id_resident})"
+    );
+}
+// ────────────────────────────────────────────────────────────────────────────
   ?>
 <!DOCTYPE html>
 <html id="clearance">

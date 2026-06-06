@@ -93,7 +93,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SK News & Programs — Barangay San Pedro</title>
+    <title>YOUTH PORTAL — Barangay San Pedro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
@@ -312,7 +312,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 
 <!-- ── HERO ── -->
 <div class="page-hero">
-    <h1><i class="bi bi-megaphone-fill me-2"></i>SK News & Programs</h1>
+    <h1><i class="bi bi-megaphone-fill me-2"></i>YOUTH PORTAL</h1>
     <p>Stay updated with the latest SK announcements and youth programs in Barangay San Pedro.</p>
     <div class="hero-actions">
         <!-- Youth Profiling Button -->

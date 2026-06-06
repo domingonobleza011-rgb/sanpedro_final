@@ -268,3 +268,4 @@ document.getElementById('delEnrollModal').addEventListener('show.bs.modal', func
 </script>
 
 <?php include('dashboard_sidebar_end.php'); ?>
+

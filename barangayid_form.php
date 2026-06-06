@@ -4,6 +4,17 @@ $userdetails = $residentbmis->get_userdata();
 $id_brgyid = $_GET['id_brgyid'];
 $resident = $residentbmis->get_single_brgyid($id_brgyid);
 
+// ── Activity Log: Barangay ID Generated ─────────────────────────────────────
+if ($resident) {
+    $resident_name = strtoupper(trim(($resident['lname'] ?? '') . ', ' . ($resident['fname'] ?? '') . ' ' . ($resident['mi'] ?? '')));
+    $residentbmis->log_activity(
+        'GENERATE_DOCUMENT',
+        'Barangay ID',
+        "Generated Barangay ID for {$resident_name} (ID Record: {$id_brgyid})"
+    );
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 include "classes/conn.php"; 
 
 // Fetch the staff member with position "Punong Barangay"

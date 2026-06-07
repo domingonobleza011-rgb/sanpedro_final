@@ -365,21 +365,20 @@ header("refresh: 0");
     }
 
     public function view_resident_senior(){
-        $connection = $this->openConn();
-        $stmt = $connection->prepare("SELECT * FROM tbl_resident WHERE `age` >= 60");
-        $stmt->execute();
-        $view = $stmt->fetchAll();
-        return $view;
-    }
+    $connection = $this->openConn();
+    $stmt = $connection->prepare("SELECT * FROM tbl_resident WHERE TIMESTAMPDIFF(YEAR, `bdate`, CURDATE()) >= 60");
+    $stmt->execute();
+    $view = $stmt->fetchAll();
+    return $view;
+}
 
-    public function count_resident_senior() {
-        $connection = $this->openConn();
-        $stmt = $connection->prepare("SELECT COUNT(*) FROM tbl_resident WHERE `age` >= 60");
-        $stmt->execute();
-        $rescount = $stmt->fetchColumn();
-
-        return $rescount;
-    }
+public function count_resident_senior() {
+    $connection = $this->openConn();
+    $stmt = $connection->prepare("SELECT COUNT(*) FROM tbl_resident WHERE TIMESTAMPDIFF(YEAR, `bdate`, CURDATE()) >= 60");
+    $stmt->execute();
+    $rescount = $stmt->fetchColumn();
+    return $rescount;
+}
 
     public function view_resident_pwd() {
         $connection = $this->openConn();

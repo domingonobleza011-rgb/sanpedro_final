@@ -458,6 +458,9 @@ hr {
             <a class="collapse-item" href="admn_messages.php">
                 <i class="bi bi-chat-left-text mr-2"></i>Verification &Messages
             </a>
+            <a class="collapse-item" href="admn_password_reset_requests.php">
+                <i class="fas fa-key mr-2"></i>Password Reset Requests
+            </a>
         </div>
     </div>
 </li>

@@ -300,7 +300,26 @@ $view = $staffbmis->view_staff();
     color: #b91c1c;
     font-weight: 600;
 }
+.forgot-link {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
 
+.forgot-link:hover {
+    color: var(--dark-blue);
+    background-color: #e8f0fe;
+    border-color: #c2d4f8;
+    text-decoration: none;
+}
 .login-error-content span {
     font-size: 13px;
     color: #7f1d1d;
@@ -403,7 +422,12 @@ $view = $staffbmis->view_staff();
                         <input type="password" class="form-control" id="passInput" placeholder="Enter password" name="password" required>
                     </div>
 
-                    <div class="form-check mb-4">
+                    <div class="d-flex justify-content-end mb-2">
+    <a href="forgot_password.php" class="forgot-link">
+        <i class="fas fa-key me-1"></i>Forgot Password?
+    </a>
+</div>
+<div class="form-check mb-4">
                         <input type="checkbox" class="form-check-input" id="showCheck" onclick="togglePass()">
                         <label class="form-check-label" for="showCheck" style="font-size: 0.85rem; color: #555;">Show Password</label>
                     </div>

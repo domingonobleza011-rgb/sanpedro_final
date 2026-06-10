@@ -174,10 +174,10 @@ require('secure_header.php');
         <span>Exit</span>
     </a>
 </div>
-
     <div class="container my-5">
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
+                
                 <div class="card shadow border-0">
                     <div class="card-header bg-primary text-white text-center py-3">
                         <h3 class="mb-0">Change Password</h3>
@@ -217,6 +217,10 @@ require('secure_header.php');
                                     Update Password
                                 </button>
                             </div>
+                            <br>
+                            <a href="setup_security_question.php" class="btn btn-outline-primary w-100">
+                <i class="bi bi-key-fill me-2"></i> Set Up Security Question
+            </a>
                         </form>
                     </div>
                 </div>

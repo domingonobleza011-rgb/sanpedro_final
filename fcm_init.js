@@ -11,12 +11,10 @@ const firebaseConfig = {
     appId:             "1:560258747749:web:67b0cf36663c11e74fa58c",
     measurementId:     "G-KZYSHB51M6"
 };
-// ── Still needed: VAPID public key ───────────────────────────────────────
-// Firebase Console → Project Settings → Cloud Messaging → Web Push certificates → Generate key pair
-const VAPID_KEY = "BNH01V-MOZec4-7PMWbVdwcveqUk8uV9FiVXf-d0sfhRx2KXwyjl-zM3QDqbcBnRX3j9J5SDGZ_SetrjGnZKNqQ";
-// ─────────────────────────────────────────────────────────────────────────
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+const VAPID_KEY = "BNH01V-MOZec4-7PMWbVdwcveqUk8uV9FiVXf-d0sfhRx2KXwyjl-zM3QDqbcBnRX3j9J5SDGZ_SetrjGnZKNqQ";
+
+import { initializeApp }                    from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging.js";
 
 const app       = initializeApp(firebaseConfig);
@@ -26,6 +24,7 @@ async function initPushNotifications() {
     if (!('serviceWorker' in navigator)) return;
 
     try {
+        // Register the Firebase-specific background SW
         const reg = await navigator.serviceWorker.register(
             '/firebase-messaging-sw.js',
             { scope: '/' }
@@ -33,31 +32,49 @@ async function initPushNotifications() {
 
         await reg.update();
         const activeReg = await navigator.serviceWorker.ready;
-        console.log('SW active:', activeReg.scope);
+        console.log('[FCM] SW active:', activeReg.scope);
 
         const permission = await Notification.requestPermission();
-        console.log('Permission:', permission);
+        console.log('[FCM] Permission:', permission);
         if (permission !== 'granted') return;
 
         const token = await getToken(messaging, {
-            vapidKey: VAPID_KEY,
+            vapidKey:                 VAPID_KEY,
             serviceWorkerRegistration: activeReg
         });
 
-        console.log('FCM Token:', token);
+        console.log('[FCM] Token:', token);
 
         if (token) {
-            const res = await fetch('save_fcm_token.php', {
-                method: 'POST',
+            const res  = await fetch('save_fcm_token.php', {
+                method:  'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'token=' + encodeURIComponent(token)
+                body:    'token=' + encodeURIComponent(token)
             });
             const data = await res.json();
-            console.log('Token save result:', data);
+            console.log('[FCM] Token save result:', data);
+
+            // Hide the "Enable Notifications" button once subscribed
+            const btn = document.getElementById('enable-notif-btn');
+            if (btn) btn.style.display = 'none';
         }
+
+        // ── Foreground message handler (user IS on the site) ──────────────
+        onMessage(messaging, (payload) => {
+            console.log('[FCM] Foreground message:', payload);
+            const title = payload.notification?.title || 'Barangay San Pedro';
+            const body  = payload.notification?.body  || '';
+            showInPageToast(title, body);
+        });
+
     } catch (err) {
-        console.error('FCM error:', err.code, err.message);
+        console.error('[FCM] Error:', err.code, err.message);
     }
+}
+
+// Auto-init if permission was already granted (returning user)
+if (Notification.permission === 'granted') {
+    initPushNotifications();
 }
 
 // Friendly in-page toast for foreground notifications

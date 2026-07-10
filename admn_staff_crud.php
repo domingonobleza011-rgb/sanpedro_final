@@ -6,7 +6,7 @@ require_once('secure_header.php');
     require('classes/staff.class.php');
     $userdetails = $bmis->get_userdata();
     $bmis->validate_staff_or_admin();
-    $view = $staffbmis->view_staff();
+    $view = $staffbmis->view_staff_paginated(10);
     $staffbmis->create_staff();
     $staffbmis->update_staff();
     $staffbmis->delete_staff();
@@ -518,8 +518,9 @@ hr {
                     </thead>
 
                     <tbody>
-                        <?php if(is_array($view)) {?>
-                            <?php foreach($view as $staff) {?>
+                        <?php require_once 'pagination_helper.php'; $staffRows = $view['rows'] ?? []; ?>
+                        <?php if(!empty($staffRows)) {?>
+                            <?php foreach($staffRows as $staff) {?>
                                 <tr>
                                     <td>    
                                          <form action="" method="post">
@@ -572,6 +573,7 @@ hr {
                     </tbody>
                 </form>
             </table>
+            <?php render_pagination($view); ?>
         </div>
     </div>
 </div>

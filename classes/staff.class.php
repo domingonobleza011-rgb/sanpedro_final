@@ -121,24 +121,6 @@ public function create_staff() {
            
         }
 
-        public function view_single_staff(){
-
-            $id_staff = $_GET['id_staff'];
-            
-            $connection = $this->openConn();
-            $stmt = $connection->prepare("SELECT * FROM tbl_user where id_user = '$id_staff'");
-            $stmt->execute();
-            $view = $stmt->fetch(); 
-            $total = $stmt->rowCount();
- 
-            //eto yung condition na i ch check kung may laman si products at i re return niya kapag meron
-            if($total > 0 )  {
-                return $view;
-            }
-            else{
-                return false;
-            }
-        }
 
 public function update_staff() {
     if (isset($_POST['update_staff'])) {
@@ -148,7 +130,6 @@ public function update_staff() {
         $lname = $_POST['lname'];
         $fname = $_POST['fname'];
         $mi = $_POST['mi'];
-        $age = $_POST['age'];
         $sex = $_POST['sex'];
         $address = $_POST['address'];
         $contact = $_POST['contact'];
@@ -202,7 +183,7 @@ public function update_staff() {
         // --- PREPARE SQL & PARAMS ---
         $params = array_merge(
             $password_param, 
-            [$login_identity, $email_to_save, $phone_to_save, $lname, $fname, $mi, $age, $sex, $address, $contact, $position, $role, $addedby],
+            [$login_identity, $email_to_save, $phone_to_save, $lname, $fname, $mi, $sex, $address, $contact, $position, $role, $addedby],
             $photo_param
         );
         $params[] = $id_user; 
@@ -215,7 +196,6 @@ public function update_staff() {
                 `lname` = ?, 
                 `fname` = ?, 
                 `mi` = ?, 
-                `age` = ?, 
                 `sex` = ?, 
                 `address` = ?, 
                 `contact` = ?, 
@@ -391,7 +371,12 @@ public function update_staff() {
             }
             // 3b. Resident record already exists — nothing extra needed, just remove the staff record
 
-            // 4. Archive and delete from tbl_user
+            // 4. Delete staff photo from uploads if it exists
+            if (!empty($staff['photo']) && file_exists($staff['photo'])) {
+                unlink($staff['photo']);
+            }
+
+            // 5. Archive and delete from tbl_user
             $this->archive_record('tbl_user', 'id_user', $id_user, 'staff');
 
             $stmt_del = $connection->prepare("DELETE FROM tbl_user WHERE id_user = ?");
@@ -493,6 +478,45 @@ public function update_staff() {
 
 
 
+
+    // ─── PAGINATED VIEW METHODS ───────────────────────────────────────────────
+
+    private function paginate(string $sql, array $params, int $perPage = 10): array {
+        $page   = max(1, (int)($_GET['page'] ?? 1));
+        $offset = ($page - 1) * $perPage;
+
+        $connection = $this->openConn();
+
+        $countStmt = $connection->prepare("SELECT COUNT(*) FROM ({$sql}) AS sub");
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetchColumn();
+
+        $dataStmt = $connection->prepare("{$sql} LIMIT {$perPage} OFFSET {$offset}");
+        $dataStmt->execute($params);
+        $rows = $dataStmt->fetchAll();
+
+        return [
+            'rows'      => $rows,
+            'total'     => $total,
+            'page'      => $page,
+            'per_page'  => $perPage,
+            'last_page' => (int)ceil($total / $perPage),
+        ];
     }
-    $staffbmis = new StaffClass();
+
+    public function view_staff_paginated(int $perPage = 10): array {
+        return $this->paginate("SELECT * FROM tbl_user", [], $perPage);
+    }
+
+    public function view_staff_male_paginated(int $perPage = 10): array {
+        return $this->paginate("SELECT * FROM tbl_user WHERE sex = 'Male'", [], $perPage);
+    }
+
+    public function view_staff_female_paginated(int $perPage = 10): array {
+        return $this->paginate("SELECT * FROM tbl_user WHERE sex = 'Female'", [], $perPage);
+    }
+
+}
+
+$staffbmis = new StaffClass();
 ?>

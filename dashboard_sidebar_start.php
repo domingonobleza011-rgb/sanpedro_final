@@ -1,3 +1,91 @@
+<?php
+/* ============================================================
+   ADMIN TOPBAR NOTIFICATIONS
+   Surfaces 3 things the admin needs to act on:
+     1) New certificate / document requests
+     2) New (unread) resident messages
+     3) New pending requests (registrations + password resets)
+   Wrapped defensively so a missing table never breaks a page
+   that includes this sidebar.
+   ============================================================ */
+if (!isset($conn) || !($conn instanceof PDO)) {
+    try {
+        require_once __DIR__ . '/classes/conn.php';
+    } catch (Throwable $e) {
+        $conn = null;
+    }
+}
+
+$notif_cert_total    = 0;
+$notif_cert_items    = [];
+$notif_msg_total     = 0;
+$notif_msg_items     = [];
+$notif_pending_total = 0;
+$notif_pending_items = [];
+
+if (isset($conn) && $conn instanceof PDO) {
+
+    // ── 1) New certificate / document requests ──────────────────
+    // A row in these tables IS the pending request; it's removed
+    // once the admin processes/archives it, so COUNT(*) = "new".
+    $cert_sources = [
+        ['label' => 'Certificate of Residency', 'table' => 'tbl_rescert',    'where' => 'is_deleted = 0', 'page' => 'admn_certofres.php',       'icon' => 'fa-file-word'],
+        ['label' => 'Certificate of Indigency',  'table' => 'tbl_indigency', 'where' => '1=1',             'page' => 'admn_certofindigency.php', 'icon' => 'fa-table'],
+        ['label' => 'Business Permit',           'table' => 'tbl_bspermit', 'where' => '1=1',             'page' => 'admn_bspermit.php',        'icon' => 'fa-file-contract'],
+        ['label' => 'Barangay ID',               'table' => 'tbl_brgyid',   'where' => 'is_deleted = 0', 'page' => 'admn_brgyid.php',          'icon' => 'fa-id-card'],
+        ['label' => 'Barangay Clearance',        'table' => 'tbl_clearance','where' => '1=1',             'page' => 'admn_brgyclearance.php',   'icon' => 'fa-file'],
+    ];
+
+    foreach ($cert_sources as $src) {
+        try {
+            $cnt = (int) $conn->query("SELECT COUNT(*) FROM {$src['table']} WHERE {$src['where']}")->fetchColumn();
+            if ($cnt > 0) {
+                $notif_cert_total += $cnt;
+                $notif_cert_items[] = ['label' => $src['label'], 'count' => $cnt, 'page' => $src['page'], 'icon' => $src['icon']];
+            }
+        } catch (Throwable $e) { /* table may not exist yet - skip */ }
+    }
+
+    // ── 2) New (unread) messages from residents ──────────────────
+    try {
+        $notif_msg_total = (int) $conn->query("SELECT COUNT(*) FROM admin_messages WHERE status = 'unread'")->fetchColumn();
+        if ($notif_msg_total > 0) {
+            $stmt = $conn->query("SELECT m.id_admin_msg, m.message_text, m.date_sent, r.fname, r.lname
+                                   FROM admin_messages m
+                                   LEFT JOIN tbl_resident r ON m.id_resident = r.id_resident
+                                   WHERE m.status = 'unread'
+                                   ORDER BY m.date_sent DESC
+                                   LIMIT 5");
+            $notif_msg_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+    } catch (Throwable $e) { /* table may not exist yet - skip */ }
+
+    // ── 3) New pending requests (registrations + password resets) ─
+    try {
+        $reg_count = (int) $conn->query("SELECT COUNT(*) FROM tbl_resident_pending WHERE application_status = 'pending'")->fetchColumn();
+        if ($reg_count > 0) {
+            $notif_pending_total += $reg_count;
+            $notif_pending_items[] = ['label' => 'New Resident Registration', 'count' => $reg_count, 'page' => 'admn_resident_pending.php', 'icon' => 'fa-user-clock'];
+        }
+    } catch (Throwable $e) { /* table may not exist yet - skip */ }
+
+    try {
+        $pw_count = (int) $conn->query("SELECT COUNT(*) FROM tbl_pw_requests WHERE status = 'pending'")->fetchColumn();
+        if ($pw_count > 0) {
+            $notif_pending_total += $pw_count;
+            $notif_pending_items[] = ['label' => 'Password Reset Request', 'count' => $pw_count, 'page' => 'admn_password_reset_requests.php', 'icon' => 'fa-key'];
+        }
+    } catch (Throwable $e) { /* table may not exist yet - skip */ }
+}
+
+$notif_grand_total = $notif_cert_total + $notif_msg_total + $notif_pending_total;
+
+// Current page + query string, used so "mark as read" actions redirect back here
+$notif_current_page = basename($_SERVER['PHP_SELF']);
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $notif_current_page .= '?' . $_SERVER['QUERY_STRING'];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -411,6 +499,160 @@ hr {
     color: var(--text-dark) !important;
     font-weight: 500;
 }
+
+/* ── Notification Bell Dropdown ── */
+#notifDropdown { position: relative; }
+#notifDropdown .badge-counter {
+    background: var(--danger, #dc2626);
+    color: #fff;
+    border-radius: 50px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 5px;
+    min-width: 16px;
+    text-align: center;
+    line-height: 1.2;
+}
+.notif-dropdown-menu {
+    width: 360px;
+    max-width: 90vw;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: 0;
+}
+.notif-dropdown-menu .dropdown-header {
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.2px;
+}
+.notif-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-light, #718096);
+    background: #fbfcfe;
+}
+.notif-section-title .notif-section-count {
+    margin-left: auto;
+    background: var(--navy-pale, #e8eef7);
+    color: var(--navy, #0f2d5a);
+    border-radius: 20px;
+    padding: 1px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.notif-item {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 16px !important;
+    font-size: 0.83rem;
+    white-space: normal !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #f0f2f6 !important;
+}
+.notif-item i {
+    color: var(--gold, #c9943a);
+    width: 16px;
+    text-align: center;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+.notif-item .notif-item-badge {
+    margin-left: auto;
+    background: var(--warning-pale, #fffbeb);
+    color: var(--warning, #d97706);
+    border: 1px solid var(--warning, #d97706);
+    border-radius: 20px;
+    padding: 0 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.notif-item span { color: var(--text-dark, #1a1a2e); }
+.notif-item small.notif-time {
+    display: block;
+    color: var(--text-light, #718096);
+    font-size: 0.72rem;
+    margin-top: 2px;
+}
+.notif-empty {
+    padding: 12px 16px 16px;
+    font-size: 0.8rem;
+    color: var(--text-light, #718096);
+    font-style: italic;
+}
+.notif-viewall {
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--navy, #0f2d5a) !important;
+    padding: 8px !important;
+}
+.notif-mark-all-form { margin-left: auto; }
+.notif-mark-all {
+    background: none;
+    border: none;
+    color: var(--navy, #0f2d5a);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: normal;
+    cursor: pointer;
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.notif-mark-all:hover { text-decoration: underline; }
+.notif-item-msg {
+    display: flex !important;
+    align-items: flex-start;
+    padding: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #f0f2f6 !important;
+}
+.notif-item-msg .notif-item-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 10px 8px 10px 16px;
+    font-size: 0.83rem;
+    text-decoration: none;
+}
+.notif-item-msg .notif-item-link i {
+    color: var(--gold, #c9943a);
+    width: 16px;
+    text-align: center;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+.notif-item-msg .notif-item-link span { color: var(--text-dark, #1a1a2e); }
+.notif-mark-item-form { flex-shrink: 0; padding-right: 12px; }
+.notif-mark-item {
+    background: var(--success-pale, #ecfdf5);
+    border: 1px solid var(--success, #059669);
+    color: var(--success, #059669);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: background .15s;
+}
+.notif-mark-item:hover { background: var(--success, #059669); color: #fff; }
 </style>
 <body id="page-top">
 
@@ -454,6 +696,9 @@ hr {
             </a>
             <a class="collapse-item" href="admn_resident_crud.php">
                 <i class="fas fa-users mr-2"></i>Barangay Residents
+            </a>
+            <a class="collapse-item" href="admn_resident_pending.php">
+                <i class="fas fa-user-clock mr-2"></i>Pending Registrations
             </a>
             <a class="collapse-item" href="admn_messages.php">
                 <i class="bi bi-chat-left-text mr-2"></i>Verification &Messages
@@ -577,6 +822,98 @@ hr {
                                         </div>
                                     </div>
                                 </form>
+                            </div>
+                        </li>
+
+                        <!-- Nav Item - Notifications -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bell fa-fw"></i>
+                                <?php if ($notif_grand_total > 0): ?>
+                                <span class="badge badge-counter"><?= $notif_grand_total > 99 ? '99+' : $notif_grand_total; ?></span>
+                                <?php endif; ?>
+                            </a>
+                            <!-- Dropdown - Notifications -->
+                            <div class="dropdown-menu dropdown-menu-right notif-dropdown-menu shadow animated--grow-in"
+                                aria-labelledby="notifDropdown">
+                                <h6 class="dropdown-header">
+                                    Notifications <?= $notif_grand_total > 0 ? "($notif_grand_total new)" : '' ?>
+                                </h6>
+
+                                <!-- Certificate Requests -->
+                                <div class="notif-section-title">
+                                    <i class="fas fa-file-alt"></i> Certificate Requests
+                                    <span class="notif-section-count"><?= $notif_cert_total ?></span>
+                                </div>
+                                <?php if ($notif_cert_total === 0): ?>
+                                    <div class="notif-empty">No new certificate requests</div>
+                                <?php else: foreach ($notif_cert_items as $item): ?>
+                                    <a class="dropdown-item notif-item" href="<?= htmlspecialchars($item['page']) ?>">
+                                        <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
+                                        <span><?= htmlspecialchars($item['label']) ?></span>
+                                        <span class="notif-item-badge"><?= (int)$item['count'] ?> new</span>
+                                    </a>
+                                <?php endforeach; endif; ?>
+
+                                <!-- Messages -->
+                                <div class="notif-section-title">
+                                    <i class="bi bi-chat-left-text"></i> Messages
+                                    <span class="notif-section-count"><?= $notif_msg_total ?></span>
+                                    <?php if ($notif_msg_total > 0): ?>
+                                    <form method="post" action="mark_notification_read.php" class="notif-mark-all-form">
+                                        <input type="hidden" name="redirect_to" value="<?= htmlspecialchars($notif_current_page) ?>">
+                                        <button type="submit" name="mark_all_read" value="1" class="notif-mark-all" title="Mark all messages as read">
+                                            <i class="fas fa-check-double"></i> Mark all read
+                                        </button>
+                                    </form>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($notif_msg_total === 0): ?>
+                                    <div class="notif-empty">No new messages</div>
+                                <?php else: foreach ($notif_msg_items as $m):
+                                        $sender = trim(($m['fname'] ?? '') . ' ' . ($m['lname'] ?? ''));
+                                        $sender = $sender !== '' ? $sender : 'Resident';
+                                        $snippet = mb_strimwidth(strip_tags($m['message_text']), 0, 55, '…');
+                                ?>
+                                    <div class="notif-item notif-item-msg">
+                                        <a class="notif-item-link" href="admn_messages.php">
+                                            <i class="bi bi-chat-left-text"></i>
+                                            <span>
+                                                <strong><?= htmlspecialchars($sender) ?></strong>: <?= htmlspecialchars($snippet) ?>
+                                                <small class="notif-time"><?= htmlspecialchars(date('M j, Y g:i A', strtotime($m['date_sent']))) ?></small>
+                                            </span>
+                                        </a>
+                                        <form method="post" action="mark_notification_read.php" class="notif-mark-item-form">
+                                            <input type="hidden" name="redirect_to" value="<?= htmlspecialchars($notif_current_page) ?>">
+                                            <input type="hidden" name="mark_read_id" value="<?= (int)$m['id_admin_msg'] ?>">
+                                            <button type="submit" class="notif-mark-item" title="Mark as read">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                <?php endforeach; ?>
+                                    <a class="dropdown-item notif-viewall" href="admn_messages.php">View all messages</a>
+                                <?php endif; ?>
+
+                                <!-- Pending Requests -->
+                                <div class="notif-section-title">
+                                    <i class="fas fa-user-clock"></i> Pending Requests
+                                    <span class="notif-section-count"><?= $notif_pending_total ?></span>
+                                </div>
+                                <?php if ($notif_pending_total === 0): ?>
+                                    <div class="notif-empty">No new pending requests</div>
+                                <?php else: foreach ($notif_pending_items as $item): ?>
+                                    <a class="dropdown-item notif-item" href="<?= htmlspecialchars($item['page']) ?>">
+                                        <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
+                                        <span><?= htmlspecialchars($item['label']) ?></span>
+                                        <span class="notif-item-badge"><?= (int)$item['count'] ?> new</span>
+                                    </a>
+                                <?php endforeach; endif; ?>
+
+                                <?php if ($notif_grand_total === 0): ?>
+                                    <div class="text-center py-3 text-gray-400 small">You're all caught up 🎉</div>
+                                <?php endif; ?>
                             </div>
                         </li>
 

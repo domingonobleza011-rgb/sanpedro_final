@@ -1,123 +1,100 @@
 <?php
-	// require the database connection 
-	require 'classes/conn.php';
-	if(isset($_POST['search_totalres'])){
-		$keyword = $_POST['keyword'];
-?>
-<table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
-        <thead class="alert-info">
-                <tr>
-                        
-                        <th> fullname </th>
-                        <th> Age </th>
-                        <th> Sex </th>
-                        <th> Status </th>
-                        <th> House No.</th>
-                        <th> Street </th>
-                        <th> Barangay </th>
-                        <th> Municipality </th>
-                        <th> Contact # </th>
-                        <th> Birth date </th>
-                        <th> Birth place </th>
-                        <th> Nationality </th>
-                        <th> Family Head </th>
-                </tr>
-        </thead>
+require 'classes/conn.php';
+require_once 'pagination_helper.php';
 
-        <tbody>
-                <?php
-                        
-                $stmnt = $conn->prepare("SELECT * FROM `tbl_resident` WHERE `lname` LIKE '%$keyword%' or  `mi` LIKE '%$keyword%' or  `fname` LIKE '%$keyword%' 
-                or  `age` LIKE '%$keyword%' or  `sex` LIKE '%$keyword%' or  `status` LIKE '%$keyword%' or  `houseno` LIKE '%$keyword%' or  `contact` LIKE '%$keyword%'
-                or  `bdate` LIKE '%$keyword%' or  `bplace` LIKE '%$keyword%' or  `nationality` LIKE '%$keyword%' or  `family_role` LIKE '%$keyword%' or  `role` LIKE '%$keyword%' or  `email` LIKE '%$keyword%'
-                or  `brgy` LIKE '%$keyword%' or  `street` LIKE '%$keyword%' or  `municipal` LIKE '%$keyword%'");
-                $stmnt->execute();
-                        
-                while($view = $stmnt->fetch()){
-                ?>
-                        <tr>
-                                
-                                <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
-                                <td> <?= $view['age'];?> </td>
-                                <td> <?= $view['sex'];?> </td>
-                                <td> <?= $view['status'];?> </td>
-                                <td> <?= $view['houseno'];?> </td>
-                                <td> <?= $view['street'];?> </td>
-                                <td> <?= $view['brgy'];?> </td>
-                                <td> <?= $view['municipal'];?> </td>
-                                <td> <?= $view['contact'];?> </td>
-                                <td> <?= $view['bdate'];?> </td>
-                                <td> <?= $view['bplace'];?> </td>
-                                <td> <?= $view['nationality'];?> </td>
-                                <td> <?= $view['family_role'];?> </td>
-                        </tr>
-                <?php
-                }
-                ?>
-        </tbody>
+if (isset($_POST['search_totalres'])) {
+    $keyword = $_POST['keyword'];
+    $kw = "%$keyword%";
+    $page    = max(1, (int)($_GET['page'] ?? 1));
+    $perPage = 10;
+
+    $countStmt = $conn->prepare("SELECT COUNT(*) FROM tbl_resident WHERE
+        lname LIKE :kw OR mi LIKE :kw OR fname LIKE :kw OR age LIKE :kw OR sex LIKE :kw OR
+        status LIKE :kw OR houseno LIKE :kw OR contact LIKE :kw OR bdate LIKE :kw OR
+        bplace LIKE :kw OR nationality LIKE :kw OR family_role LIKE :kw OR role LIKE :kw OR
+        email LIKE :kw OR brgy LIKE :kw OR street LIKE :kw OR municipal LIKE :kw");
+    $countStmt->execute([':kw' => $kw]);
+    $total = (int)$countStmt->fetchColumn();
+
+    $offset = ($page - 1) * $perPage;
+    $stmnt = $conn->prepare("SELECT * FROM tbl_resident WHERE
+        lname LIKE :kw OR mi LIKE :kw OR fname LIKE :kw OR age LIKE :kw OR sex LIKE :kw OR
+        status LIKE :kw OR houseno LIKE :kw OR contact LIKE :kw OR bdate LIKE :kw OR
+        bplace LIKE :kw OR nationality LIKE :kw OR family_role LIKE :kw OR role LIKE :kw OR
+        email LIKE :kw OR brgy LIKE :kw OR street LIKE :kw OR municipal LIKE :kw
+        LIMIT $perPage OFFSET $offset");
+    $stmnt->execute([':kw' => $kw]);
+    $rows = $stmnt->fetchAll();
+
+    $paged = ['rows' => $rows, 'total' => $total, 'page' => $page, 'per_page' => $perPage, 'last_page' => (int)ceil($total / $perPage)];
+?>
+<table class="table table-hover text-center table-bordered" style="min-width:1000px;">
+    <thead class="alert-info">
+        <tr>
+            <th>Fullname</th><th>Age</th><th>Sex</th><th>Status</th>
+            <th>House No.</th><th>Street</th><th>Barangay</th><th>Municipality</th>
+            <th>Contact #</th><th>Birth date</th><th>Birth place</th><th>Nationality</th><th>Family Head</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($rows as $row): ?>
+        <tr>
+            <td><?= htmlspecialchars($row['lname']) ?>, <?= htmlspecialchars($row['fname']) ?> <?= htmlspecialchars($row['mi']) ?></td>
+            <td><?= htmlspecialchars($row['age']) ?></td>
+            <td><?= htmlspecialchars($row['sex']) ?></td>
+            <td><?= htmlspecialchars($row['status']) ?></td>
+            <td><?= htmlspecialchars($row['houseno']) ?></td>
+            <td><?= htmlspecialchars($row['street']) ?></td>
+            <td><?= htmlspecialchars($row['brgy']) ?></td>
+            <td><?= htmlspecialchars($row['municipal']) ?></td>
+            <td><?= htmlspecialchars($row['contact']) ?></td>
+            <td><?= htmlspecialchars($row['bdate']) ?></td>
+            <td><?= htmlspecialchars($row['bplace']) ?></td>
+            <td><?= htmlspecialchars($row['nationality']) ?></td>
+            <td><?= htmlspecialchars($row['family_role']) ?></td>
+        </tr>
+        <?php endforeach; ?>
+        <?php if (empty($rows)): ?>
+        <tr><td colspan="13" class="text-muted py-3">No records found.</td></tr>
+        <?php endif; ?>
+    </tbody>
 </table>
+<?php render_pagination($paged); ?>
 
-<?php		
-        }else{
+<?php } else {
+    // $view is the $paged array from view_resident_paginated()
+    $rows  = $view['rows']  ?? [];
+    $paged = $view;
 ?>
-
-<table class="table table-hover text-center table-bordered" style="min-width: 1000px;"> 
-        <thead class="alert-info">
-                <tr>
-                       
-                        <th> Fullname </th>
-                        <th> Age </th>
-                        <th> Sex </th>
-                        <th> Status </th>
-                        <th> Complete Address</th>
-                        <th> Contact # </th>
-                        <th> Birth date </th>
-                        <th> Birth place </th>
-                        <th> Nationality </th>
-                        <th> Family Head </th>
-                        <th> Registered Voter </th>
-                </tr>
-	</thead>
-        <tbody>
-                <?php if(is_array($view)) {?>
-                        <?php foreach($view as $view) {?>
-                                <tr>
-                                       
-                                        <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
-                                        <td> <?= $view['age'];?> </td>
-                                        <td> <?= $view['sex'];?> </td>
-                                        <td> <?= $view['status'];?> </td>
-                                        <td> <?= $view['houseno'];?>,  <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
-                                        <td> <?= $view['contact'];?> </td>
-                                        <td> <?= $view['bdate'];?> </td>
-                                        <td> <?= $view['bplace'];?> </td>
-                                        <td> <?= $view['nationality'];?> </td>
-                                        <td> <?= $view['family_role'];?> </td>
-                                        <td> <?= $view['voter'];?> </td>
-                                </tr>
-                        
-                        <?php
-                                }
-                        ?>
-                <?php
-                        }
-                ?>
-        </tbody>
+<table class="table table-hover text-center table-bordered" style="min-width:1000px;">
+    <thead class="alert-info">
+        <tr>
+            <th>Fullname</th><th>Age</th><th>Sex</th><th>Status</th>
+            <th>Complete Address</th><th>Contact #</th><th>Birth date</th>
+            <th>Birth place</th><th>Nationality</th><th>Family Head</th><th>Registered Voter</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($rows as $row): ?>
+        <tr>
+            <td><?= htmlspecialchars($row['lname']) ?>, <?= htmlspecialchars($row['fname']) ?> <?= htmlspecialchars($row['mi']) ?></td>
+            <td><?= htmlspecialchars($row['age']) ?></td>
+            <td><?= htmlspecialchars($row['sex']) ?></td>
+            <td><?= htmlspecialchars($row['status']) ?></td>
+            <td><?= htmlspecialchars($row['houseno']) ?>, <?= htmlspecialchars($row['street']) ?>, <?= htmlspecialchars($row['brgy']) ?>, <?= htmlspecialchars($row['municipal']) ?></td>
+            <td><?= htmlspecialchars($row['contact']) ?></td>
+            <td><?= htmlspecialchars($row['bdate']) ?></td>
+            <td><?= htmlspecialchars($row['bplace']) ?></td>
+            <td><?= htmlspecialchars($row['nationality']) ?></td>
+            <td><?= htmlspecialchars($row['family_role']) ?></td>
+            <td><?= htmlspecialchars($row['voter']) ?></td>
+        </tr>
+        <?php endforeach; ?>
+        <?php if (empty($rows)): ?>
+        <tr><td colspan="11" class="text-muted py-3">No residents found.</td></tr>
+        <?php endif; ?>
+    </tbody>
 </table>
+<?php render_pagination($paged); ?>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
-<!-- responsive tags for screen compatibility -->
-<meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
-<!-- custom css --> 
-<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
-<!-- bootstrap css --> 
-<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
-<!-- fontawesome icons -->
-<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
-
-<?php
-	}
-$con = null;
-?>
+<?php } $conn = null; ?>

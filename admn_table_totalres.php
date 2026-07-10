@@ -7,7 +7,7 @@ require('secure_header.php');
    require('classes/resident.class.php');
    $userdetails = $bmis->get_userdata();
    $bmis->validate_staff_or_admin();
-   $view = $residentbmis->view_resident();
+   $view = $residentbmis->view_resident_paginated(10);
    $residentbmis->create_resident();
    $residentbmis->update_resident();
    $residentbmis->delete_resident();
@@ -100,4 +100,3 @@ require('secure_header.php');
 <?php 
     include('dashboard_sidebar_end.php');
 ?>
-

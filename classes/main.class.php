@@ -9,6 +9,7 @@ class BMISClass {
 
 //------------------------------------------ DATABASE CONNECTION ----------------------------------------------------
     
+
     protected $server = "mysql:host=localhost;dbname=bmis";
     protected $user = "root";
     protected $pass = "";
@@ -129,7 +130,7 @@ public function openConn() {
     // ─────────────────────────────────────────────────────────────────────────
     public function log_activity(string $action, string $module, string $description): void {
         try {
-            if (session_status() === PHP_SESSION_NONE) { session_start(); }
+            if (!isset($_SESSION)) { session_start(); }
  
             $userdata   = $_SESSION['userdata'] ?? [];
             $id_admin   = $userdata['id_admin']  ?? null;
@@ -316,6 +317,7 @@ public function openConn() {
         }
     }
     public function login() {
+    if (session_status() === PHP_SESSION_NONE) { session_start(); }
     if(isset($_POST['login'])) {
         $identity       = $_POST['login_identity'];
         $password_input = $_POST['password'];
@@ -328,7 +330,7 @@ public function openConn() {
         $user = $stmt->fetch();
 
         if($user && password_verify($password_input, $user['password'])) {
-            if($user['role'] == 'Admin' || $user['role'] == 'administrator') {
+            if(in_array(strtolower($user['role']), ['admin', 'administrator'])) {
                 $this->set_userdata($user);
                 $this->log_login_event('login', $user);
                 header('Location: admn_dashboard.php');
@@ -402,29 +404,27 @@ public function openConn() {
 // ============================================================
  
     public function logout(){
-        if (session_status() === PHP_SESSION_NONE) { session_start(); }
-
+        if(!isset($_SESSION)) { session_start(); }
+ 
         // Capture user data BEFORE clearing the session
-        $userdata = $_SESSION['userdata'] ?? [];
+        $userdata   = $_SESSION['userdata'] ?? [];
+        $fname      = $userdata['firstname'] ?? '';
+        $lname      = $userdata['surname']   ?? '';
+        $role       = $userdata['role']      ?? '';
+        $email      = $userdata['emailadd']  ?? '';
+        $id_admin   = $userdata['id_admin']  ?? null;
+ 
         $user_for_log = [
-            'id_admin' => $userdata['id_admin']  ?? null,
-            'fname'    => $userdata['firstname'] ?? '',
-            'lname'    => $userdata['surname']   ?? '',
-            'role'     => $userdata['role']      ?? '',
-            'email'    => $userdata['emailadd']  ?? '',
+            'id_admin' => $id_admin,
+            'fname'    => $fname,
+            'lname'    => $lname,
+            'role'     => $role,
+            'email'    => $email,
         ];
-        $this->log_login_event('logout', $user_for_log);
-
-        // Fully destroy the session
-        $_SESSION = [];
-        if (ini_get('session.use_cookies')) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params['path'], $params['domain'],
-                $params['secure'], $params['httponly']
-            );
-        }
-        session_destroy();
+        $this->log_login_event('logout', $user_for_log);              // ← NEW
+ 
+        $_SESSION['userdata'] = null;
+        unset($_SESSION['userdata']);
     }
  
     public function get_userdata(){
@@ -435,35 +435,31 @@ public function openConn() {
     public function set_userdata($array) {
         if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
-        // Build a combined address string if address column doesn't exist
-        $address = $array['address'] 
-            ?? trim(($array['houseno'] ?? '') . ' ' . ($array['street'] ?? '') . ', ' . ($array['brgy'] ?? '') . ', ' . ($array['municipal'] ?? ''));
-
         $_SESSION['userdata'] = array(
-            "id_admin"     => $array['id_admin']     ?? null,
-            "id_resident"  => $array['id_resident']  ?? null,
-            "id_user"      => $array['id_user']      ?? null,
-            "emailadd"     => $array['email']        ?? '',
-            "password"     => $array['password']     ?? '',
-            "surname"      => $array['lname']        ?? '',
-            "firstname"    => $array['fname']        ?? '',
-            "mname"        => $array['mi']           ?? '',
-            "age"          => $array['age']          ?? '',
-            "sex"          => $array['sex']          ?? '',
-            "status"       => $array['status']       ?? '',
-            "address"      => $address,
-            "contact"      => $array['contact']      ?? '',
-            "bdate"        => $array['bdate']        ?? '',
-            "bplace"       => $array['bplace']       ?? '',
-            "nationality"  => $array['nationality']  ?? '',
-            "family_role"  => $array['family_role']  ?? '',
-            "role"         => $array['role']         ?? '',
-            "position"     => $array['position']     ?? '',
-            "houseno"      => $array['houseno']      ?? '',
-            "street"       => $array['street']       ?? '',
-            "brgy"         => $array['brgy']         ?? '',
-            "relation"     => $array['relation']     ?? '',
-            "municipal"    => $array['municipal']    ?? ''
+            "id_admin"     => $array['id_admin']    ?? null,
+            "id_resident"  => $array['id_resident'] ?? null,
+            "id_user"      => $array['id_user']     ?? null,
+            "emailadd"     => $array['email']       ?? '',
+            "password"     => $array['password']    ?? '',
+            "surname"      => $array['lname']       ?? '',
+            "firstname"    => $array['fname']       ?? '',
+            "mname"        => $array['mi']          ?? '',
+            "age"          => $array['age']         ?? '',
+            "sex"          => $array['sex']         ?? '',
+            "status"       => $array['status']      ?? '',
+            "address"      => $array['address']     ?? '',
+            "contact"      => $array['contact']     ?? '',
+            "bdate"        => $array['bdate']       ?? '',
+            "bplace"       => $array['bplace']      ?? '',
+            "nationality"  => $array['nationality'] ?? '',
+            "family_role"  => $array['family_role'] ?? '',
+            "role"         => $array['role']        ?? '',
+            "position"     => $array['position']    ?? '',
+            "houseno"      => $array['houseno']     ?? '',
+            "street"       => $array['street']      ?? '',
+            "brgy"         => $array['brgy']        ?? '',
+            "relation"     => $array['relation']    ?? '',
+            "municipal"    => $array['municipal']   ?? ''
         );
         return $_SESSION['userdata'];
     }
@@ -490,15 +486,6 @@ public function openConn() {
                 notif('An account with that email already exists.', 'warning');
             }
         }
-    }
- 
-    public function get_single_admin($id_admin){
-        $id_admin = $_GET['id_admin'];
-        $connection = $this->openConn();
-        $stmt = $connection->prepare("SELECT * FROM tbl_admin where id_admin = ?");
-        $stmt->execute([$id_admin]);
-        $admin = $stmt->fetch();
-        return ($stmt->rowCount() > 0) ? $admin : false;
     }
  
     public function admin_changepass() {
@@ -597,26 +584,9 @@ public function openConn() {
         return $stmt->fetchAll();
     }
  
-    public function update_announcement() {
-        if (isset($_POST['update_announce'])) {
-            $id_announcement = $_GET['id_announcement'];
-            $event      = $_POST['event'];
-            $start_date = $_POST['start_date'];
-            $end_date   = $_POST['end_date'];
-            $addedby    = $_POST['addedby'];
- 
-            $connection = $this->openConn();
-            $stmt = $connection->prepare("UPDATE tbl_announcement SET event=?, start_date=?, end_date=?, addedby=? WHERE id_announcement=?");
-            $stmt->execute([$event, $start_date, $end_date, $addedby, $id_announcement]);
- 
-            notif('Announcement updated successfully.', 'success');
-            header("refresh: 0");
-        }
-    }
- 
 public function admin_delete_announcement(){
     if(isset($_POST['delete_announcement'])) {
-        $this->archive_record('tbl_announcement', 'id_announcement', $id_announcement, 'announcement');
+        $this->archive_record('tbl_announcement', 'id_announcement', $_POST['id_announcement'], 'announcement');
         $id_announcement = $_POST['id_announcement'];
         $connection = $this->openConn();
 
@@ -1508,29 +1478,6 @@ public function delete_certofres(){
         }
     }
  
-    public function update_bspermit() {
-        if (isset($_POST['update_bspermit'])) {
-            $id_bspermit = $_GET['id_bspermit'];
-            $lname       = $_POST['lname'];
-            $fname       = $_POST['fname'];
-            $mi          = $_POST['mi'];
-            $bsname      = $_POST['bsname'];
-            $houseno     = $_POST['houseno'];
-            $street      = $_POST['street'];
-            $brgy        = $_POST['brgy'];
-            $municipal   = $_POST['municipal'];
-            $bsindustry  = $_POST['bsindustry'];
-            $aoe         = $_POST['aoe'];
- 
-            $connection = $this->openConn();
-            $stmt = $connection->prepare("UPDATE tbl_bspermit SET lname=?, fname=?, mi=?, bsname=?, houseno=?, street=?, brgy=?, municipal=?, bsindustry=?, aoe=? WHERE id_bspermit=?");
-            $stmt->execute([$lname, $fname, $mi, $bsname, $houseno, $street, $brgy, $municipal, $bsindustry, $aoe, $id_bspermit]);
- 
-            notif('Barangay Business Permit updated successfully.', 'success');
-            header("refresh: 0");
-        }
-    }
- 
 public function get_single_youth($id_youth) {
     $connection = $this->openConn();
     $stmt = $connection->prepare("SELECT * FROM tbl_youth WHERE id_youth = ?");
@@ -1797,6 +1744,37 @@ public function delete_comment($comment_id, $user_id) {
         $row = $stmt->fetch();
         return $row ? $row['reaction_type'] : null;
     }
+
+    /**
+ * Counts pending/unread items across modules that actually track a status.
+ * Returns an associative array so the sidebar/topbar can show per-module badges.
+ */
+public function countPendingRequests(): array {
+    $counts = [
+        'clearance'  => 0,
+        'id_uploads' => 0,
+        'messages'   => 0,
+    ];
+    try {
+        $con = $this->openConn();
+
+        $stmt = $con->prepare("SELECT COUNT(*) FROM tbl_clearance WHERE status = 'Pending'");
+        $stmt->execute();
+        $counts['clearance'] = (int) $stmt->fetchColumn();
+
+        $stmt = $con->prepare("SELECT COUNT(*) FROM tbl_id_uploads WHERE status = 'pending'");
+        $stmt->execute();
+        $counts['id_uploads'] = (int) $stmt->fetchColumn();
+
+        $stmt = $con->prepare("SELECT COUNT(*) FROM admin_messages WHERE status = 'unread'");
+        $stmt->execute();
+        $counts['messages'] = (int) $stmt->fetchColumn();
+
+    } catch (\Throwable $e) {
+        error_log("countPendingRequests error: " . $e->getMessage());
+    }
+    return $counts;
+}
  
 }
  

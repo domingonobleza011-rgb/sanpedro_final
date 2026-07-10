@@ -7,7 +7,7 @@ require('secure_header.php');
    require('classes/staff.class.php');
    $userdetails = $bmis->get_userdata();
    $bmis->validate_staff_or_admin();
-   $view = $staffbmis->view_staff();
+   $view = $staffbmis->view_staff_paginated(2);
    
 ?>
 

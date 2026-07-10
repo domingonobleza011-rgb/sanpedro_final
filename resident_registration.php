@@ -95,22 +95,43 @@
                             </div>
 
                             <div class="row g-3 mtop">
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <label class="form-label">House No:</label>
                                     <input type="text" class="form-control" name="houseno" required>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <label class="form-label">Street:</label>
                                     <input type="text" class="form-control" name="street" required>
                                 </div>
+                                <div class="row g-3 mtop">
+                                <div class="col-md-3">
+                                    <label class="form-label">Region:</label>
+                                    <select class="form-select" id="regionSelect" required>
+                                        <option value="">Loading regions...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Province:</label>
+                                    <select class="form-select" id="provinceSelect" required disabled>
+                                        <option value="">Select Region first</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">City/Municipality:</label>
+                                    <select class="form-select" id="citymunSelect" name="municipal" required disabled>
+                                        <option value="">Select Province first</option>
+                                    </select>
+                                </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Barangay:</label>
-                                    <input type="text" class="form-control" name="brgy" required>
+                                    <select class="form-select" id="barangaySelect" name="brgy" required disabled>
+                                        <option value="">Select City/Municipality first</option>
+                                    </select>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Municipality:</label>
-                                    <input type="text" class="form-control" name="municipal" required>
-                                </div>
+                                <input type="hidden" id="regionCode" name="region_code">
+                                <input type="hidden" id="provinceCode" name="province_code">
+                                <input type="hidden" id="citymunCode" name="municipal_code">
+                                <input type="hidden" id="barangayCode" name="brgy_code">
                             </div>
 
                             <div class="row g-3 mtop">
@@ -176,12 +197,21 @@
                                 </div>
                             </div>
 
+                            <div class="row g-3 mtop mb-2">
+                                <div class="col-md-12">
+                                    <label class="form-label">Upload Valid ID (Government-issued):</label>
+                                    <input type="file" class="form-control" name="valid_id_file" accept=".jpg,.jpeg,.png,.pdf" required>
+                                    <small class="text-muted d-block mt-1">Accepted formats: JPG, PNG, or PDF (max 5MB). Your registration will be reviewed by the barangay admin before your account is activated.</small>
+                                </div>
+                            </div>
+
                             <hr>
 
                             <div class="row mtop">
     <div class="col-12">
         <div class="form-check">
             <input class="form-check-input" type="checkbox" id="termsCheck" required>
+
             <label class="form-check-label" for="termsCheck">
                 I agree to the 
                 <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" style="text-decoration: none;">
@@ -285,6 +315,119 @@
             break;
     }
 });
+// ===== PSGC Cascading Address Dropdown (Region -> Province -> City/Municipality -> Barangay) =====
+(function () {
+    const PSGC_API = 'https://psgc.cloud/api/v2';
+
+    const regionSelect   = document.getElementById('regionSelect');
+    const provinceSelect = document.getElementById('provinceSelect');
+    const citymunSelect  = document.getElementById('citymunSelect');
+    const barangaySelect = document.getElementById('barangaySelect');
+
+    const regionCode   = document.getElementById('regionCode');
+    const provinceCode = document.getElementById('provinceCode');
+    const citymunCode  = document.getElementById('citymunCode');
+    const barangayCode = document.getElementById('barangayCode');
+
+    function resetSelect(select, placeholder, disabled = true) {
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        select.disabled = disabled;
+    }
+
+    function fillSelect(select, items, placeholder) {
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        items
+            .slice()
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.name;         // stored as text to match existing `brgy` / `municipal` columns
+                opt.dataset.code = item.code;  // PSGC code kept in the hidden field
+                opt.textContent = item.name;
+                select.appendChild(opt);
+            });
+        select.disabled = false;
+    }
+
+    async function fetchJSON(url) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('PSGC API request failed: ' + url);
+        const data = await res.json();
+        // psgc.cloud wraps paginated results in a `data` key
+        return Array.isArray(data) ? data : (data.data || []);
+    }
+
+    // 1. Load regions on page load
+    fetchJSON(`${PSGC_API}/regions`)
+        .then(regions => fillSelect(regionSelect, regions, 'Select Region'))
+        .catch(() => resetSelect(regionSelect, 'Unable to load regions'));
+
+    // 2. Region -> Provinces (some regions like NCR have no provinces; fall back to cities/municipalities)
+    regionSelect.addEventListener('change', function () {
+        const selectedOption = this.selectedOptions[0];
+        regionCode.value = selectedOption ? (selectedOption.dataset.code || '') : '';
+
+        resetSelect(provinceSelect, 'Select Region first');
+        resetSelect(citymunSelect, 'Select Province first');
+        resetSelect(barangaySelect, 'Select City/Municipality first');
+        provinceCode.value = '';
+        citymunCode.value = '';
+        barangayCode.value = '';
+
+        if (!regionCode.value) return;
+
+        fetchJSON(`${PSGC_API}/regions/${regionCode.value}/provinces`)
+            .then(provinces => {
+                if (provinces.length > 0) {
+                    fillSelect(provinceSelect, provinces, 'Select Province');
+                } else {
+                    // No provinces under this region (e.g. NCR) -> load cities/municipalities directly
+                    resetSelect(provinceSelect, 'Not applicable (no province)', true);
+                    return fetchJSON(`${PSGC_API}/regions/${regionCode.value}/cities-municipalities`)
+                        .then(citymuns => fillSelect(citymunSelect, citymuns, 'Select City/Municipality'));
+                }
+            })
+            .catch(() => resetSelect(provinceSelect, 'Unable to load provinces'));
+    });
+
+    // 3. Province -> Cities/Municipalities
+    provinceSelect.addEventListener('change', function () {
+        const selectedOption = this.selectedOptions[0];
+        provinceCode.value = selectedOption ? (selectedOption.dataset.code || '') : '';
+
+        resetSelect(citymunSelect, 'Select Province first');
+        resetSelect(barangaySelect, 'Select City/Municipality first');
+        citymunCode.value = '';
+        barangayCode.value = '';
+
+        if (!provinceCode.value) return;
+
+        fetchJSON(`${PSGC_API}/provinces/${provinceCode.value}/cities-municipalities`)
+            .then(citymuns => fillSelect(citymunSelect, citymuns, 'Select City/Municipality'))
+            .catch(() => resetSelect(citymunSelect, 'Unable to load cities/municipalities'));
+    });
+
+    // 4. City/Municipality -> Barangays
+    citymunSelect.addEventListener('change', function () {
+        const selectedOption = this.selectedOptions[0];
+        citymunCode.value = selectedOption ? (selectedOption.dataset.code || '') : '';
+
+        resetSelect(barangaySelect, 'Select City/Municipality first');
+        barangayCode.value = '';
+
+        if (!citymunCode.value) return;
+
+        fetchJSON(`${PSGC_API}/cities-municipalities/${citymunCode.value}/barangays`)
+            .then(barangays => fillSelect(barangaySelect, barangays, 'Select Barangay'))
+            .catch(() => resetSelect(barangaySelect, 'Unable to load barangays'));
+    });
+
+    // 5. Barangay -> capture its code
+    barangaySelect.addEventListener('change', function () {
+        const selectedOption = this.selectedOptions[0];
+        barangayCode.value = selectedOption ? (selectedOption.dataset.code || '') : '';
+    });
+})();
     </script>
 </body>
 </html>

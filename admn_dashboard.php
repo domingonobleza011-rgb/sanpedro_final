@@ -1,5 +1,6 @@
 <?php
-    error_reporting(E_ALL ^ E_WARNING);
+      error_reporting(E_ALL ^ E_WARNING);
+   ini_set('display_errors',1);
 define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
 include('secure_header.php'); 
     include('classes/staff.class.php');
@@ -789,7 +790,7 @@ hr {
     var chart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Total Residents', 'Households', 'Registered Voters', 'Senior Residents', 'PWD'],
+            labels: ['Households', 'Registered Voters', 'Senior Residents', 'PWD'],
             datasets: [{
                 data: [
                     <?= (int)$rescountfh ?>,

@@ -710,8 +710,17 @@ $view = $staffbmis->view_staff();
                               </div>';
                     }
                     ?>
+                </div>
+            </div>
+            
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- ── Role Detail Modal ────────────────────────────────────────────────────── -->
+<!-- ── Role Detail Modal (sibling modal, NOT nested inside officialsModal) ── -->
 <div class="modal fade" id="officialRoleModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
@@ -746,15 +755,7 @@ $view = $staffbmis->view_staff();
     </div>
 </div>
 <!-- ─────────────────────────────────────────────────────────────────────────── -->
-                </div>
-            </div>
-            
-            <div class="modal-footer border-0 bg-light">
-                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -811,6 +812,20 @@ $view = $staffbmis->view_staff();
             const roleModal = new bootstrap.Modal(document.getElementById('officialRoleModal'));
             roleModal.show();
         }
+
+        // When the role detail modal closes, restore the officials modal's
+        // backdrop/scroll-lock instead of letting both disappear.
+        document.getElementById('officialRoleModal').addEventListener('hidden.bs.modal', function () {
+            const officialsModalEl = document.getElementById('officialsModal');
+            if (officialsModalEl.classList.contains('show')) {
+                document.body.classList.add('modal-open');
+                if (!document.querySelector('.modal-backdrop')) {
+                    const backdrop = document.createElement('div');
+                    backdrop.classList.add('modal-backdrop', 'fade', 'show');
+                    document.body.appendChild(backdrop);
+                }
+            }
+        });
     </script>
     <script src="/js/pwa.js"></script>
 </body>

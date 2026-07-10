@@ -1,6 +1,6 @@
 <?php
    error_reporting(E_ALL ^ E_WARNING);
-   ini_set('display_errors', 0);
+   ini_set('display_errors', 1);
 define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
 require('secure_header.php');
    require('classes/resident.class.php');
@@ -77,24 +77,35 @@ require('secure_header.php');
                 </thead>
                 <tbody>
                 <?php
+                    require_once 'pagination_helper.php';
+                    $page    = max(1, (int)($_GET['page'] ?? 1));
+                    $perPage = 10;
+                    $pwdWhere = "(pwd = 'Yes' OR pwd = '1' OR pwd = 1) AND is_archived = 0";
+
                     if (isset($_POST['search_pwd'])) {
                         $keyword = $_POST['keyword'];
-                        $stmnt = $conn->prepare("SELECT * FROM tbl_resident
-                            WHERE pwd = 'Yes' AND is_archived = 0
-                            AND (lname LIKE :kw OR fname LIKE :kw OR mi LIKE :kw
-                            OR sex LIKE :kw OR status LIKE :kw OR houseno LIKE :kw
-                            OR street LIKE :kw OR brgy LIKE :kw OR municipal LIKE :kw
-                            OR contact LIKE :kw OR email LIKE :kw)");
-                        $stmnt->execute([':kw' => "%$keyword%"]);
+                        $kw = "%$keyword%";
+                        $searchExtra = " AND (lname LIKE :kw OR fname LIKE :kw OR mi LIKE :kw OR sex LIKE :kw OR status LIKE :kw OR houseno LIKE :kw OR street LIKE :kw OR brgy LIKE :kw OR municipal LIKE :kw OR contact LIKE :kw OR email LIKE :kw)";
+                        $countStmt = $conn->prepare("SELECT COUNT(*) FROM tbl_resident WHERE $pwdWhere $searchExtra");
+                        $countStmt->execute([':kw' => $kw]);
+                        $total = (int)$countStmt->fetchColumn();
+                        $offset = ($page - 1) * $perPage;
+                        $stmnt = $conn->prepare("SELECT * FROM tbl_resident WHERE $pwdWhere $searchExtra LIMIT $perPage OFFSET $offset");
+                        $stmnt->execute([':kw' => $kw]);
                         $rows = $stmnt->fetchAll();
                     } else {
-                        $stmnt = $conn->prepare("SELECT * FROM tbl_resident WHERE pwd = 'Yes' AND is_archived = 0");
+                        $countStmt = $conn->prepare("SELECT COUNT(*) FROM tbl_resident WHERE $pwdWhere");
+                        $countStmt->execute();
+                        $total = (int)$countStmt->fetchColumn();
+                        $offset = ($page - 1) * $perPage;
+                        $stmnt = $conn->prepare("SELECT * FROM tbl_resident WHERE $pwdWhere LIMIT $perPage OFFSET $offset");
                         $stmnt->execute();
                         $rows = $stmnt->fetchAll();
                     }
+                    $paged = ['rows' => $rows, 'total' => $total, 'page' => $page, 'per_page' => $perPage, 'last_page' => (int)ceil($total / $perPage)];
 
                     if (count($rows) > 0) {
-                        $i = 1;
+                        $i = ($page - 1) * $perPage + 1;
                         foreach ($rows as $row) { ?>
                             <tr>
                                 <td><?= $i++ ?></td>
@@ -115,6 +126,7 @@ require('secure_header.php');
                     <?php } ?>
                 </tbody>
             </table>
+            <?php render_pagination($paged); ?>
             </div>
         </div>
         <div class="col-md-1"></div>

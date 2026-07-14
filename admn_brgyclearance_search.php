@@ -16,16 +16,16 @@
     <table class="table table-hover text-center table-bordered" style="min-width: 1000px;">
         <thead class="alert-info">
         <tr>
-            <th style="width: 10%;"> Actions</th>
-            <th style="width: 10%;"> Resident ID </th>
-            <th style="width: 10%;"> Fullname </th>
-            <th style="width: 10%;"> Purpose </th>
-            <th style="width: 10%;"> Address </th>
-            <th style="width: 10%;"> Street </th>
-            <th style="width: 10%;"> Barangay </th>
-            <th style="width: 10%;"> Municipality </th>
-            <th style="width: 10%;"> Status </th>
-            <th style="width: 10%;"> Age </th>
+            <th> Actions</th>
+            <th> Resident ID </th>
+            <th> Fullname </th>
+            <th> Purpose </th>
+            <th> Address </th>
+            <th> Street </th>
+            <th> Barangay </th>
+            <th> Municipality </th>
+            <th> Status </th>
+            <th> Age </th>
         </tr>
     </thead>
     <tbody>
@@ -33,8 +33,8 @@
             <tr>
                 <td>
                     <form action="" method="post">
-                        <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="brgyclearance_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a>
-                        <input type="hidden" name="id_clearance" value="<?= $view['id']; ?>">
+                        <a class="btn btn-success" target="blank" style="width: 20px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="brgyclearance_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a>
+                        <input type="hidden" name="id_clearance" value="<?= $view['id_clearance']; ?>">
                         <button class="btn btn-danger"  style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_clearance"> Archive </button>
                         <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'] ?>_<?= $view['id_clearance'] ?>" data-bs-toggle="modal" data-bs-target="#messageModal<?= $view['id_resident'] ?>_<?= $view['id_clearance'] ?>">
                             <i class="fas fa-comment-alt"></i> Message
@@ -86,24 +86,25 @@
 
 <?php
 	}else{
+	    // Preserve the original list — don't let the loops below overwrite $view
+	    $clearance_list = is_array($view) ? $view : [];
 ?>
 
 <div class="table-responsive" style="width: 100%; overflow-x: auto;">
     <table class="table table-hover text-center table-bordered" style="min-width: 1000px;">
         <thead class="alert-info">
         <tr>
-            <th style="width: 10%;"> Actions</th>
-            <th style="width: 10%;"> Resident ID </th>
-            <th style="width: 10%;"> Full Name </th>
-            <th style="width: 10%;"> Purpose </th>
-            <th style="width: 10%;"> Address </th>
-            <th style="width: 10%;"> Status </th>
-            <th style="width: 10%;"> Age </th>
+            <th> Actions</th>
+            <th> Resident ID </th>
+            <th> Full Name </th>
+            <th> Purpose </th>
+            <th> Address </th>
+            <th> Status </th>
+            <th> Age </th>
         </tr>
     </thead>
     <tbody>
-        <?php if (is_array($view)) : ?>
-            <?php foreach($view as $view): ?>
+        <?php foreach ($clearance_list as $view): ?>
                 <tr>
                     <td>
                         <form action="" method="post">
@@ -122,13 +123,11 @@
                     <td> <?= $view['status'];?> </td>
                     <td> <?= $view['age'];?> </td>
                 </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
+        <?php endforeach; ?>
     </tbody>
 </table>
 
-<?php if (is_array($view)) : ?>
-    <?php foreach($view as $view): ?>
+<?php foreach ($clearance_list as $view): ?>
         <div class="modal fade" id="messageModal<?= $view['id_resident'] ?>_<?= $view['id_clearance'] ?>" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content" style="border-radius:20px;overflow:hidden;">
@@ -157,8 +156,7 @@
                 </div>
             </div>
         </div>
-    <?php endforeach; ?>
-<?php endif; ?>
+<?php endforeach; ?>
 
 <?php
 	}

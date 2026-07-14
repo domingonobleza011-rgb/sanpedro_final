@@ -21,6 +21,37 @@ $userdetails = $bmis->get_userdata();
     }
 
     $view = $bmis->view_active_announcements($current_user_id);
+
+    /**
+     * Escapes announcement text for safe HTML output, then turns any
+     * http://, https://, or www. links inside it into clickable <a> tags
+     * that open in a new tab. Apply nl2br() AFTER this, not before.
+     */
+    function bmis_linkify_announcement($text) {
+        $escaped = htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+
+        return preg_replace_callback(
+            '/((https?:\/\/|www\.)[^\s<]+)/i',
+            function ($m) {
+                $url = $m[0];
+
+                // Don't swallow trailing punctuation into the link (e.g. "visit site.com.")
+                $trailing = '';
+                while ($url !== '' && strpos('.,!?;:)"\'', substr($url, -1)) !== false) {
+                    $trailing = substr($url, -1) . $trailing;
+                    $url = substr($url, 0, -1);
+                }
+
+                $href = (stripos($url, 'http') === 0) ? $url : 'https://' . $url;
+
+                return '<a href="' . $href . '" target="_blank" rel="noopener noreferrer" '
+                     . 'onclick="event.stopPropagation();" '
+                     . 'style="color:#1877f2; font-weight:600; text-decoration:underline; word-break:break-all;">'
+                     . $url . '</a>' . $trailing;
+            },
+            $escaped
+        );
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -174,7 +205,7 @@ if(is_array($view) && count($view) > 0):
         </div>
         <?php if(!empty($ann['event'])): ?>
         <div class="fb-card-body">
-            <p class="fb-post-text"><?= nl2br(htmlspecialchars($ann['event'])); ?></p>
+            <p class="fb-post-text"><?= nl2br(bmis_linkify_announcement($ann['event'])); ?></p>
         </div>
         <?php endif; ?>
         <?php if($hasImg): 

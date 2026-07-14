@@ -730,10 +730,16 @@ public function resident_changepass() {
                 $age       = $birthDate->diff($today)->y;
             }
 
-            // 6. Insert into tbl_user (staff table)
+            // 6. Carry over the resident's verification status so it can be
+            //    restored correctly if this person is later demoted back.
+            $res_is_verified = isset($resident['is_verified']) ? (int)$resident['is_verified'] : 0;
+            $res_verified_at = $resident['verified_at'] ?? null;
+            $res_verified_by = $resident['verified_by'] ?? null;
+
+            // 7. Insert into tbl_user (staff table)
             $insertStmt = $connection->prepare("INSERT INTO tbl_user 
-                (login_identity, email, phone_number, password, lname, fname, mi, age, sex, address, contact, position, role, addedby)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'user', ?)");
+                (login_identity, email, phone_number, password, lname, fname, mi, age, sex, address, contact, position, role, addedby, res_is_verified, res_verified_at, res_verified_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'user', ?, ?, ?, ?)");
 
             $insertStmt->execute([
                 $login_identity,
@@ -748,7 +754,10 @@ public function resident_changepass() {
                 $address,
                 $resident['contact'],
                 $position,
-                $addedby
+                $addedby,
+                $res_is_verified,
+                $res_verified_at,
+                $res_verified_by
             ]);
 
             $this->log_activity('PROMOTE_Resident', 'Resident', "Promoted Resident #{$id_resident} ({$resident['lname']}, {$resident['fname']}) to Staff — Position: {$position}");

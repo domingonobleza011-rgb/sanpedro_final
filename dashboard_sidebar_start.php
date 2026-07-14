@@ -34,6 +34,7 @@ if (isset($conn) && $conn instanceof PDO) {
         ['label' => 'Business Permit',           'table' => 'tbl_bspermit', 'where' => '1=1',             'page' => 'admn_bspermit.php',        'icon' => 'fa-file-contract'],
         ['label' => 'Barangay ID',               'table' => 'tbl_brgyid',   'where' => 'is_deleted = 0', 'page' => 'admn_brgyid.php',          'icon' => 'fa-id-card'],
         ['label' => 'Barangay Clearance',        'table' => 'tbl_clearance','where' => '1=1',             'page' => 'admn_brgyclearance.php',   'icon' => 'fa-file'],
+        ['label' => 'Complaints',                'table' => 'tbl_complaints', 'where' => '1=1',           'page' => 'admn_complaints.php',      'icon' => 'fa-file'],
     ];
 
     foreach ($cert_sources as $src) {
@@ -804,7 +805,7 @@ hr {
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
                             <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-search fa-fw"></i>
                             </a>
                             <!-- Dropdown - Messages -->
@@ -828,7 +829,7 @@ hr {
                         <!-- Nav Item - Notifications -->
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell fa-fw"></i>
                                 <?php if ($notif_grand_total > 0): ?>
                                 <span class="badge badge-counter"><?= $notif_grand_total > 99 ? '99+' : $notif_grand_total; ?></span>
@@ -843,7 +844,7 @@ hr {
 
                                 <!-- Certificate Requests -->
                                 <div class="notif-section-title">
-                                    <i class="fas fa-file-alt"></i> Certificate Requests
+                                    <i class="fas fa-file-alt"></i> Barangay Services Requests
                                     <span class="notif-section-count"><?= $notif_cert_total ?></span>
                                 </div>
                                 <?php if ($notif_cert_total === 0): ?>
@@ -930,7 +931,7 @@ hr {
                                 aria-labelledby="userDropdown">
 
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="logout.php" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="logout.php" data-toggle="modal" data-target="#logoutModal" data-bs-toggle="modal" data-bs-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>

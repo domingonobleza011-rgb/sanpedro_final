@@ -23,6 +23,37 @@ $userdetails = $bmis->get_userdata();
 
    $dt = new DateTime("now", new DateTimeZone('Asia/Manila'));
    $cdate = $dt->format('Y/m/d');   
+
+   /**
+    * Escapes announcement text for safe HTML output, then turns any
+    * http://, https://, or www. links inside it into clickable <a> tags
+    * that open in a new tab.
+    */
+   function bmis_linkify_announcement($text) {
+       $escaped = htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+
+       return preg_replace_callback(
+           '/((https?:\/\/|www\.)[^\s<]+)/i',
+           function ($m) {
+               $url = $m[0];
+
+               // Don't swallow trailing punctuation into the link (e.g. "visit site.com.")
+               $trailing = '';
+               while ($url !== '' && strpos('.,!?;:)"\'', substr($url, -1)) !== false) {
+                   $trailing = substr($url, -1) . $trailing;
+                   $url = substr($url, 0, -1);
+               }
+
+               $href = (stripos($url, 'http') === 0) ? $url : 'https://' . $url;
+
+               return '<a href="' . $href . '" target="_blank" rel="noopener noreferrer" '
+                    . 'onclick="event.stopPropagation();" '
+                    . 'style="color:#1a4480; font-weight:600; text-decoration:underline; word-break:break-all;">'
+                    . $url . '</a>' . $trailing;
+           },
+           $escaped
+       );
+   }
 ?>
 
 <?php include('dashboard_sidebar_start.php'); ?>
@@ -228,7 +259,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
                                     <tr class="clickable-row" onclick="loadPreview('<?= $row['id_announcement'] ?>')">
                                         <td class="ps-4">
                                             <div class="text-truncate" style="max-width: 200px;">
-                                                <?= htmlspecialchars($row['event']) ?>
+                                                <?= bmis_linkify_announcement($row['event']) ?>
                                             </div>
                                         </td>
                                         <td><span class="badge bg-light text-dark border"><?= $row['start_date'] ?></span></td>

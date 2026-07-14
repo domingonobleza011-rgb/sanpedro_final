@@ -272,7 +272,7 @@ try {
                             </div>
                             <div class="post-card-meta">
                                 <?= htmlspecialchars($post['post_type']) ?> &middot; 
-                                By <?= htmlspecialchars($post['posted_by']) ?> &middot; 
+                                By <?= htmlspecialchars($post['posted_by'] ?? 'Unknown') ?> &middot; 
                                 <?= date('M d, Y', strtotime($post['date_posted'])) ?>
                             </div>
                         </div>

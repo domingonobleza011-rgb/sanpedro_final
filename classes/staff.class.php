@@ -327,6 +327,12 @@ public function update_staff() {
             $email  = $staff['email']  ?? null;
             $phone  = $staff['phone_number'] ?? null;
 
+            // The resident's verification status as it was right before promotion.
+            // Falls back to "not verified" if this staff record predates the carry-over columns.
+            $res_is_verified = isset($staff['res_is_verified']) ? (int)$staff['res_is_verified'] : 0;
+            $res_verified_at = $staff['res_verified_at'] ?? null;
+            $res_verified_by = $staff['res_verified_by'] ?? null;
+
             // 2. Check if this person already has a resident record (by email or phone)
             $checkStmt = $connection->prepare("SELECT COUNT(*) FROM tbl_resident WHERE email = ? OR phone_number = ?");
             $checkStmt->execute([$email, $phone]);
@@ -349,8 +355,10 @@ public function update_staff() {
 
                 $insertStmt = $connection->prepare("INSERT INTO tbl_resident
                     (email, phone_number, password, lname, fname, mi, sex, houseno, street, brgy, municipal,
-                     address, contact, role, addedby, status, voter, family_role, nationality, bplace, bdate, pwd)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'resident', ?, 'Single', 'No', 'No', 'Filipino', '', CURDATE(), 'No')");
+                     address, contact, role, addedby, status, voter, family_role, nationality, bplace, bdate, pwd,
+                     is_verified, verified_at, verified_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'resident', ?, 'Single', 'No', 'No', 'Filipino', '', CURDATE(), 'No',
+                     ?, ?, ?)");
 
                 $insertStmt->execute([
                     $email,
@@ -366,10 +374,20 @@ public function update_staff() {
                     $municipal,
                     $staff['address'],
                     $staff['contact'],
-                    $addedby
+                    $addedby,
+                    $res_is_verified,
+                    $res_verified_at,
+                    $res_verified_by
                 ]);
+            } else {
+                // 3b. Resident record already exists — restore its verification status
+                // to match what it was right before this person was promoted, in case
+                // it changed (or drifted) while they were staff.
+                $updateStmt = $connection->prepare("UPDATE tbl_resident
+                    SET is_verified = ?, verified_at = ?, verified_by = ?
+                    WHERE email = ? OR phone_number = ?");
+                $updateStmt->execute([$res_is_verified, $res_verified_at, $res_verified_by, $email, $phone]);
             }
-            // 3b. Resident record already exists — nothing extra needed, just remove the staff record
 
             // 4. Delete staff photo from uploads if it exists
             if (!empty($staff['photo']) && file_exists($staff['photo'])) {

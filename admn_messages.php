@@ -1,6 +1,6 @@
 <?php 
-     error_reporting(E_ALL ^ E_WARNING);
-   ini_set('display_errors',0);
+error_reporting(E_ALL ^ E_WARNING);
+   ini_set('display_errors',1);
     define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
 require('secure_header.php');
 require_once('classes/conn.php'); // needed so the shared notification sidebar gets a working $conn

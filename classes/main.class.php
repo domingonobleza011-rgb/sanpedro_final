@@ -31,7 +31,14 @@ public function openConn() {
         try {
             $this->con = new PDO($this->server, $this->user, $this->pass, $this->options);
         } catch (PDOException $e) {
-            notif("Database Connection Error: " . $e->getMessage(), 'error');
+            // Log the real reason instead of only echoing a <script> tag (which
+            // does nothing when this runs mid-redirect/mid-POST-handler).
+            // Rethrow so callers' own catch (PDOException) blocks actually run,
+            // instead of leaving $this->con as null and causing an uncaught
+            // "call to a member function on null" fatal error further down
+            // (which renders as a blank page when display_errors is off).
+            error_log("Database Connection Error: " . $e->getMessage());
+            throw $e;
         }
     }
     return $this->con;
@@ -586,7 +593,7 @@ public function openConn() {
  
 public function admin_delete_announcement(){
     if(isset($_POST['delete_announcement'])) {
-        $this->archive_record('tbl_announcement', 'id_announcement', $id_announcement, 'announcement');
+        $this->archive_record('tbl_announcement', 'id_announcement', 'announcement');
         $id_announcement = $_POST['id_announcement'];
         $connection = $this->openConn();
 

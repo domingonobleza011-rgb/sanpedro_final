@@ -10,7 +10,7 @@ class BMISClass {
 //------------------------------------------ DATABASE CONNECTION ----------------------------------------------------
     
 
-    protected $server = "mysql:host=localhost;dbname=bmis";
+     protected $server = "mysql:host=localhost;dbname=bmis";
     protected $user = "root";
     protected $pass = "";
     protected $options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC);
@@ -586,7 +586,7 @@ public function openConn() {
  
 public function admin_delete_announcement(){
     if(isset($_POST['delete_announcement'])) {
-        $this->archive_record('tbl_announcement', 'id_announcement', $_POST['id_announcement'], 'announcement');
+        $this->archive_record('tbl_announcement', 'id_announcement', $id_announcement, 'announcement');
         $id_announcement = $_POST['id_announcement'];
         $connection = $this->openConn();
 
@@ -726,6 +726,37 @@ public function admin_delete_announcement(){
             $sql  = "DELETE FROM admin_messages WHERE id_admin_msg = ?";
             $stmt = $connection->prepare($sql);
             return $stmt->execute([$id_admin_msg]);
+        } catch (PDOException $e) {
+            notif("Database Error: " . $e->getMessage(), 'error');
+            die();
+        }
+    }
+
+    public function replyToMessage($id_admin_msg, $reply_text, $admin_name) {
+        try {
+            $connection = $this->openConn();
+
+            // Find which resident this message belongs to
+            $stmt = $connection->prepare("SELECT id_resident FROM admin_messages WHERE id_admin_msg = ?");
+            $stmt->execute([$id_admin_msg]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                return false;
+            }
+            $id_resident = $row['id_resident'];
+
+            // Record the reply against the original message, for the admin's own view
+            $sql1  = "UPDATE admin_messages
+                      SET reply_text = ?, reply_date = NOW(), replied_by = ?, status = 'replied'
+                      WHERE id_admin_msg = ?";
+            $stmt1 = $connection->prepare($sql1);
+            $stmt1->execute([$reply_text, $admin_name, $id_admin_msg]);
+
+            // Push the reply into resident_messages — this is what resident_messages.php
+            // actually reads (via getResidentMessages) to show admin-side bubbles.
+            $sql2  = "INSERT INTO resident_messages (id_resident, message_text, date_sent) VALUES (?, ?, NOW())";
+            $stmt2 = $connection->prepare($sql2);
+            return $stmt2->execute([$id_resident, $reply_text]);
         } catch (PDOException $e) {
             notif("Database Error: " . $e->getMessage(), 'error');
             die();
@@ -1744,37 +1775,6 @@ public function delete_comment($comment_id, $user_id) {
         $row = $stmt->fetch();
         return $row ? $row['reaction_type'] : null;
     }
-
-    /**
- * Counts pending/unread items across modules that actually track a status.
- * Returns an associative array so the sidebar/topbar can show per-module badges.
- */
-public function countPendingRequests(): array {
-    $counts = [
-        'clearance'  => 0,
-        'id_uploads' => 0,
-        'messages'   => 0,
-    ];
-    try {
-        $con = $this->openConn();
-
-        $stmt = $con->prepare("SELECT COUNT(*) FROM tbl_clearance WHERE status = 'Pending'");
-        $stmt->execute();
-        $counts['clearance'] = (int) $stmt->fetchColumn();
-
-        $stmt = $con->prepare("SELECT COUNT(*) FROM tbl_id_uploads WHERE status = 'pending'");
-        $stmt->execute();
-        $counts['id_uploads'] = (int) $stmt->fetchColumn();
-
-        $stmt = $con->prepare("SELECT COUNT(*) FROM admin_messages WHERE status = 'unread'");
-        $stmt->execute();
-        $counts['messages'] = (int) $stmt->fetchColumn();
-
-    } catch (\Throwable $e) {
-        error_log("countPendingRequests error: " . $e->getMessage());
-    }
-    return $counts;
-}
  
 }
  

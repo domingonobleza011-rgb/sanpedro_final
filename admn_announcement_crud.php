@@ -266,8 +266,10 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
                                         <td><small class="text-muted"><?= $row['addedby'] ?></small></td>
                                         <td class="text-center">
 <?php $preview_safe = htmlspecialchars(str_replace(["\r\n", "\r", "\n"], ' ', $row['event']), ENT_QUOTES); ?>
-<button class="btn btn-link text-danger p-0" type="button"
-        onclick="event.stopPropagation(); openDeleteModal('<?= $row['id_announcement'] ?>', '<?= $preview_safe ?>')">
+<button type="button" class="btn-perma-delete"
+        data-id="<?= htmlspecialchars($row['id_announcement'], ENT_QUOTES) ?>"
+        data-preview="<?= htmlspecialchars(str_replace(["\r\n","\r","\n"], ' ', $row['event']), ENT_QUOTES) ?>"
+        onclick="event.stopPropagation(); openDeleteModal(this.dataset.id, this.dataset.preview)">
     <i class="fas fa-trash-alt"></i>
 </button>
 </td>
@@ -442,10 +444,9 @@ function loadPreview(id) {
 }
 </script>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 <?php include('dashboard_sidebar_end.php'); ?>

@@ -48,7 +48,6 @@
     $stmt->execute();
     $rejected_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    include('dashboard_sidebar_start.php');
 ?>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -72,7 +71,9 @@ body { font-family: 'DM Sans', -apple-system, sans-serif !important; background:
 .nav-tabs .nav-link.active { color: var(--navy); font-weight: 700; border-bottom: 3px solid var(--gold); }
 .nav-tabs .nav-link { color: #64748b; }
 </style>
-
+<?php 
+    include('dashboard_sidebar_start.php');
+?>
 <div class="container-fluid">
     <h1 class="mb-4 text-center page-title" style="font-weight:700;">Pending Resident Registrations</h1>
 
@@ -136,10 +137,10 @@ body { font-family: 'DM Sans', -apple-system, sans-serif !important; background:
                                     <td class="text-start"><small><?= $address ?></small></td>
                                     <td>
                                         <?php if (!empty($p['valid_id_file'])): ?>
-                                        <a href="uploads/valid_ids/<?= htmlspecialchars($p['valid_id_file']) ?>"
-                                           target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                                            onclick="openValidIdModal('uploads/valid_ids/<?= htmlspecialchars($p['valid_id_file']) ?>', '<?= $fullname ?>')">
                                             <i class="bi bi-eye me-1"></i> View ID
-                                        </a>
+                                        </button>
                                         <?php else: ?>
                                             <span class="text-muted small">No file</span>
                                         <?php endif; ?>
@@ -240,6 +241,22 @@ body { font-family: 'DM Sans', -apple-system, sans-serif !important; background:
     </div>
 </div>
 
+<!-- Valid ID Viewer Modal -->
+<div class="modal fade" id="validIdModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Valid ID — <span id="validIdApplicantName"></span></h5>
+                <button type="button" class="btn-close" onclick="closeValidIdModal()"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="validIdImage" src="" alt="Valid ID" class="img-fluid rounded d-none" style="max-height: 75vh;">
+                <iframe id="validIdFrame" src="" class="w-100 d-none" style="height: 75vh; border: 0;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function openRejectModal(id, name) {
     document.getElementById('rejectIdPending').value = id;
@@ -247,6 +264,64 @@ function openRejectModal(id, name) {
     var modal = new bootstrap.Modal(document.getElementById('rejectModal'));
     modal.show();
 }
-</script>
 
+function openValidIdModal(fileUrl, name) {
+    var img = document.getElementById('validIdImage');
+    var frame = document.getElementById('validIdFrame');
+    var isPdf = fileUrl.toLowerCase().endsWith('.pdf');
+
+    if (isPdf) {
+        img.classList.add('d-none');
+        img.src = '';
+        frame.src = fileUrl;
+        frame.classList.remove('d-none');
+    } else {
+        frame.classList.add('d-none');
+        frame.src = '';
+        img.src = fileUrl;
+        img.classList.remove('d-none');
+    }
+
+    document.getElementById('validIdApplicantName').textContent = name;
+
+    var modalEl = document.getElementById('validIdModal');
+    modalEl.style.display = 'block';
+    modalEl.classList.add('show');
+    modalEl.removeAttribute('aria-hidden');
+    modalEl.setAttribute('aria-modal', 'true');
+    document.body.classList.add('modal-open');
+
+    if (!document.getElementById('validIdBackdrop')) {
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'validIdBackdrop';
+        backdrop.onclick = closeValidIdModal;
+        document.body.appendChild(backdrop);
+    }
+}
+
+function closeValidIdModal() {
+    var modalEl = document.getElementById('validIdModal');
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    modalEl.removeAttribute('aria-modal');
+    document.body.classList.remove('modal-open');
+
+    var backdrop = document.getElementById('validIdBackdrop');
+    if (backdrop) backdrop.remove();
+
+    // Stop any playing/loading media when closed
+    document.getElementById('validIdImage').src = '';
+    document.getElementById('validIdFrame').src = '';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeValidIdModal();
+});
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 <?php include('dashboard_sidebar_end.php'); ?>

@@ -8,6 +8,36 @@ require_once('classes/conn.php');
 
 $userdetails = $bmis->get_userdata();
 $id_resident = $userdetails['id_resident'] ?? 0;
+
+// ── AGE GATE: block residents aged 60+ from youth profiling ──────────────────
+$_age_for_gate = 0;
+if (!empty($userdetails['bdate'])) {
+    $_age_for_gate = (new DateTime())->diff(new DateTime($userdetails['bdate']))->y;
+} elseif (!empty($userdetails['age'])) {
+    $_age_for_gate = (int)$userdetails['age'];
+}
+if ($_age_for_gate >= 60) {
+    echo "<!DOCTYPE html><html><head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <title>Not Eligible - Barangay San Pedro</title>
+        <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+        <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'>
+        </head><body class='bg-light d-flex align-items-center justify-content-center' style='min-height:100vh;'>
+        <div class='text-center p-4' style='max-width:420px;'>
+            <div style='font-size:4rem;'>&#x1F9D3;</div>
+            <h4 class='fw-bold mt-3'>Not Eligible for Youth Profiling</h4>
+            <p class='text-muted'>Youth profiling is only available for residents <strong>below 60 years old</strong>.
+            Based on your birthdate, your current age is <strong>{$_age_for_gate}</strong>.</p>
+            <a href='resident_homepage.php' class='btn btn-primary rounded-pill px-4'>
+                <i class='bi bi-house-door-fill me-1'></i> Back to Home
+            </a>
+        </div>
+        </body></html>";
+    exit();
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 $bmis->create_youth();
 
 // ── RESOLVE YOUTH ID FIRST (always by id_resident only, no name fallback) ────
@@ -313,7 +343,6 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 <!-- ── HERO ── -->
 <div class="page-hero">
     <h1><i class="bi bi-megaphone-fill me-2"></i>YOUTH PORTAL</h1>
-    <p>Stay updated with the latest SK announcements and youth programs in Barangay San Pedro.</p>
     <div class="hero-actions">
         <!-- Youth Profiling Button -->
         <button type="button"
@@ -575,7 +604,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
      YOUTH PROFILING MODAL
 ══════════════════════════════════════ -->
 <div class="modal fade" id="youthProfilingModal" tabindex="-1" aria-labelledby="youthProfilingTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
         <div class="modal-content" style="border-radius:15px;overflow:hidden;border:none;">
             <div class="modal-header modal-header-blue">
                 <h5 class="modal-title fw-bold" id="youthProfilingTitle">
@@ -584,45 +613,56 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" class="was-validated" enctype="multipart/form-data">
-                <div class="modal-body p-4">
+                <div class="modal-body p-3 p-md-4" style="max-height:75vh;overflow-y:auto;">
 
-                    <!-- Name -->
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="fw-bold small text-uppercase form-label">Last Name</label>
-                            <input name="lname" type="text" class="form-control" placeholder="Required"
+                    <!-- Personal Info -->
+                    <h6 class="text-primary fw-bold mb-2"><i class="fas fa-user me-1"></i> Personal Information</h6>
+                    <hr class="mt-0 mb-3">
+                    <div class="row g-2 mb-2">
+                        <div class="col-12 col-md-4">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Last Name</label>
+                            <input name="lname" type="text" class="form-control form-control-sm" placeholder="Required"
                                 value="<?= isset($userdetails['lname']) ? htmlspecialchars($userdetails['lname']) : '' ?>" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="fw-bold small text-uppercase form-label">First Name</label>
-                            <input name="fname" type="text" class="form-control" placeholder="Required"
+                        <div class="col-12 col-md-4">
+                            <label class="fw-bold small text-uppercase form-label mb-1">First Name</label>
+                            <input name="fname" type="text" class="form-control form-control-sm" placeholder="Required"
                                 value="<?= isset($userdetails['fname']) ? htmlspecialchars($userdetails['fname']) : '' ?>" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="fw-bold small text-uppercase form-label">M.I.</label>
-                            <input name="mi" type="text" class="form-control" placeholder="Optional"
-                                value="<?= isset($userdetails['mi']) ? htmlspecialchars($userdetails['mi']) : '' ?>">
+                        <div class="col-12 col-md-4">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Middle Name</label>
+                            <input name="mi" type="text" class="form-control form-control-sm" placeholder="Required" required>
                         </div>
                     </div>
 
                     <!-- Demographics -->
-                    <div class="row g-3 mt-1">
-                        <div class="col-4">
-                            <label class="fw-bold small text-uppercase form-label">Age</label>
-                            <input name="age" type="number" class="form-control"
-                                value="<?= isset($userdetails['age']) ? htmlspecialchars($userdetails['age']) : '' ?>" required>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6 col-md-4">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Age</label>
+                            <?php
+                                $computed_age = '';
+                                if (!empty($userdetails['bdate'])) {
+                                    $bdate_obj = new DateTime($userdetails['bdate']);
+                                    $computed_age = (new DateTime())->diff($bdate_obj)->y;
+                                } elseif (!empty($userdetails['age'])) {
+                                    $computed_age = $userdetails['age'];
+                                }
+                            ?>
+                            <input name="age" type="number" class="form-control form-control-sm"
+                                value="<?= htmlspecialchars($computed_age) ?>" required
+                                 title="Auto-computed from your birthdate">
                         </div>
-                        <div class="col-4">
-                            <label class="fw-bold small text-uppercase form-label">Sex</label>
-                            <select name="sex" class="form-select" required>
+                        <div class="col-6 col-md-4">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Sex</label>
+                            <select name="sex" class="form-select form-select-sm" required>
                                 <option value="" disabled selected>Select</option>
                                 <option value="Male"   <?= (isset($userdetails['sex']) && $userdetails['sex']==='Male')   ? 'selected':'' ?>>Male</option>
                                 <option value="Female" <?= (isset($userdetails['sex']) && $userdetails['sex']==='Female') ? 'selected':'' ?>>Female</option>
                             </select>
                         </div>
-                        <div class="col-4">
-                            <label class="fw-bold small text-uppercase form-label">Civil Status</label>
-                            <select name="civil_status" class="form-select" required>
+                        <div class="col-12 col-md-4">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Civil Status</label>
+                            <select name="civil_status" class="form-select form-select-sm" required>
                                 <option value="Single">Single</option>
                                 <option value="Married">Married</option>
                                 <option value="Solo Parent">Solo Parent</option>
@@ -632,27 +672,30 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                     </div>
 
                     <!-- Contact & Education -->
-                    <h6 class="text-primary fw-bold mt-4 mb-2"><i class="fas fa-at me-1"></i> Contact & Education</h6>
-                    <hr class="mt-0">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="fw-bold small text-uppercase form-label">Contact Number</label>
-                            <div class="input-group">
-                                <span class="input-group-text small">+63</span>
-                                <input type="text" class="form-control" name="contact_number" placeholder="9XXXXXXXXX" required pattern="\d{10}">
+                    <h6 class="text-primary fw-bold mt-3 mb-2"><i class="fas fa-at me-1"></i> Contact & Education</h6>
+                    <hr class="mt-0 mb-3">
+                    <div class="row g-2">
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Contact Number</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">+63</span>
+                                <input type="text" class="form-control" name="contact_number"
+                                    placeholder="9XXXXXXXXX" required pattern="\d{10}" inputmode="numeric">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="fw-bold small text-uppercase form-label">Email Address</label>
-                            <input type="email" class="form-control" name="email_address" placeholder="name@example.com" required>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Email Address</label>
+                            <input type="email" class="form-control form-control-sm" name="email_address"
+                                placeholder="name@example.com" required inputmode="email">
                         </div>
-                        <div class="col-md-6">
-                            <label class="fw-bold small text-uppercase form-label">Educational Attainment</label>
-                            <input type="text" class="form-control" name="educ_attain" placeholder="e.g. College Undergraduate" required>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Educational Attainment</label>
+                            <input type="text" class="form-control form-control-sm" name="educ_attain"
+                                placeholder="e.g. College Undergraduate" required>
                         </div>
-                        <div class="col-md-6">
-                            <label class="fw-bold small text-uppercase form-label">Employment Status</label>
-                            <select name="emp_status" class="form-select" required>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold small text-uppercase form-label mb-1">Employment Status</label>
+                            <select name="emp_status" class="form-select form-select-sm" required>
                                 <option value="Employed">Employed</option>
                                 <option value="Unemployed">Unemployed</option>
                                 <option value="Self-Employed">Self-Employed</option>
@@ -660,15 +703,16 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="fw-bold small text-uppercase form-label">Special Skills / Interests</label>
-                            <textarea class="form-control" name="skill_name" rows="2" placeholder="e.g. Graphic Design, Public Speaking, Sports" required></textarea>
+                            <label class="fw-bold small text-uppercase form-label mb-1">Special Skills / Interests</label>
+                            <textarea class="form-control form-control-sm" name="skill_name" rows="2"
+                                placeholder="e.g. Graphic Design, Public Speaking, Sports" required></textarea>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light p-3">
+                <div class="modal-footer bg-light p-3 gap-2 flex-nowrap">
                     <input name="id_youth" type="hidden" value="<?= $userdetails['id_resident'] ?? '' ?>">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button name="create_youth" type="submit" class="btn btn-primary px-5 fw-bold">
+                    <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button name="create_youth" type="submit" class="btn btn-primary btn-sm px-4 fw-bold rounded-pill flex-grow-1 flex-md-grow-0">
                         <i class="fas fa-save me-1"></i> Save Profile
                     </button>
                 </div>

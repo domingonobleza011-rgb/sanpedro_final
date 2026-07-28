@@ -1,11 +1,12 @@
 /**
  * live-stats.js
- * Connects to sse_stats.php and updates all stat elements in real-time.
- * Include this file at the bottom of any page that shows live counters.
+ * Polls poll_stats.php every 60 seconds and updates all stat elements.
+ * (Replaces the old SSE / sse_stats.php approach to avoid eating
+ *  InfinityFree's daily hit limit with persistent connections.)
  *
  * How to mark elements for live updates:
  *   Add  data-live="KEY"  to any element whose text should update.
- *   Keys match the fields returned by sse_stats.php:
+ *   Keys returned by poll_stats.php:
  *
  *   res_male, res_female, res_head, res_member, res_voter,
  *   res_senior, res_pwd, staff_total, staff_male, staff_female,
@@ -14,6 +15,8 @@
 
 (function () {
     'use strict';
+
+    var POLL_INTERVAL = 60000; // 60 seconds — change to 30000 if you want 30 s
 
     // ── Notification toast ────────────────────────────────────
     function showToast(msg, type) {
@@ -42,12 +45,10 @@
         toast.innerHTML = c.icon + ' ' + msg;
         document.body.appendChild(toast);
 
-        // Fade in
         requestAnimationFrame(function () {
             toast.style.opacity = '1';
         });
 
-        // Fade out after 4 s
         setTimeout(function () {
             toast.style.opacity = '0';
             setTimeout(function () { toast.remove(); }, 400);
@@ -71,7 +72,6 @@
     var prev = {};
 
     function applyStats(stats) {
-        // Update all [data-live="KEY"] elements
         Object.keys(stats).forEach(function (key) {
             var els = document.querySelectorAll('[data-live="' + key + '"]');
             els.forEach(function (el) {
@@ -79,19 +79,16 @@
             });
         });
 
-        // ── Smart notifications ───────────────────────────────
+        // ── Smart notifications (only after first successful poll) ──
         if (Object.keys(prev).length) {
-            // New complaint arrived
             if (stats.cmp_pending > prev.cmp_pending) {
                 var diff = stats.cmp_pending - prev.cmp_pending;
                 showToast(diff + ' new complaint' + (diff > 1 ? 's' : '') + ' received!', 'warning');
             }
-            // New message
             if (stats.msg_count > prev.msg_count) {
                 var d = stats.msg_count - prev.msg_count;
                 showToast(d + ' new message' + (d > 1 ? 's' : '') + ' from residents.', 'info');
             }
-            // New ID upload
             if (stats.id_pending > prev.id_pending) {
                 showToast('New ID verification request pending.', 'info');
             }
@@ -100,10 +97,8 @@
         prev = Object.assign({}, stats);
     }
 
-    // ── Inline chart label updater (dashboard charts) ─────────
-    // If Chart.js charts exist, update their labels too
+    // ── Chart updater ─────────────────────────────────────────
     function tryUpdateCharts(stats) {
-        // Gender pie: window.genderChart expected
         if (window.genderChart && window.genderChart.data) {
             window.genderChart.data.datasets[0].data = [stats.res_male, stats.res_female];
             window.genderChart.data.labels = [
@@ -112,7 +107,6 @@
             ];
             window.genderChart.update('none');
         }
-        // Resident doughnut: window.residentChart expected
         if (window.residentChart && window.residentChart.data) {
             window.residentChart.data.datasets[0].data = [
                 stats.res_head, stats.res_voter, stats.res_senior, stats.res_pwd,
@@ -121,42 +115,32 @@
         }
     }
 
-    // ── SSE connection ────────────────────────────────────────
-    var evtSource;
-    var retryDelay = 3000;
-
-    function connect() {
-        evtSource = new EventSource('sse_stats.php');
-
-        evtSource.addEventListener('stats', function (e) {
-            try {
-                var stats = JSON.parse(e.data);
+    // ── Single poll request ───────────────────────────────────
+    function poll() {
+        fetch('poll_stats.php')
+            .then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function (stats) {
                 applyStats(stats);
                 tryUpdateCharts(stats);
-                retryDelay = 3000; // reset backoff on success
-            } catch (err) {
-                console.warn('[SSE] parse error', err);
-            }
-        });
-
-        evtSource.onerror = function () {
-            evtSource.close();
-            // Exponential backoff, max 30 s
-            retryDelay = Math.min(retryDelay * 1.5, 30000);
-            setTimeout(connect, retryDelay);
-        };
+            })
+            .catch(function (err) {
+                console.warn('[live-stats] poll failed:', err);
+            });
     }
 
-    // Start when DOM is ready
+    // ── Start polling ─────────────────────────────────────────
+    function init() {
+        poll();                            // immediate first fetch on page load
+        setInterval(poll, POLL_INTERVAL);  // then every 60 s
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', connect);
+        document.addEventListener('DOMContentLoaded', init);
     } else {
-        connect();
+        init();
     }
-
-    // Clean up on page unload
-    window.addEventListener('beforeunload', function () {
-        if (evtSource) evtSource.close();
-    });
 
 })();

@@ -20,25 +20,13 @@ $bmis = new BMISClass();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if (isset($_POST['add_youth'])) {
-        $stmt = $conn->prepare("INSERT INTO tbl_youth (lname, fname, mi, age, bdate, gender, address, contact, email, emp_status, skills)
-                                VALUES (?,?,?,?,?,?,?,?,?,?,?)");
-        $stmt->execute([
-            $_POST['lname'], $_POST['fname'], $_POST['mi'],
-            $_POST['age'],   $_POST['bdate'], $_POST['gender'],
-            $_POST['address'], $_POST['contact'], $_POST['email'],
-            $_POST['emp_status'], $_POST['skills']
-        ]);
-        header('Location: sk_youth_records.php?success=added'); exit;
-    }
-
     if (isset($_POST['edit_youth'])) {
-        $stmt = $conn->prepare("UPDATE tbl_youth SET lname=?, fname=?, mi=?, age=?, bdate=?, gender=?, address=?, contact=?, email=?, emp_status=?, skills=? WHERE id_youth=?");
+        $stmt = $conn->prepare("UPDATE tbl_youth SET lname=?, fname=?, mi=?, age=?, sex=?, civil_status=?, contact_number=?, email_address=?, educ_attain=?, emp_status=?, skill_name=? WHERE id_youth=?");
         $stmt->execute([
             $_POST['lname'], $_POST['fname'], $_POST['mi'],
-            $_POST['age'],   $_POST['bdate'], $_POST['gender'],
-            $_POST['address'], $_POST['contact'], $_POST['email'],
-            $_POST['emp_status'], $_POST['skills'], $_POST['id_youth']
+            $_POST['age'],   $_POST['sex'],   $_POST['civil_status'],
+            $_POST['contact_number'], $_POST['email_address'], $_POST['educ_attain'],
+            $_POST['emp_status'], $_POST['skill_name'], $_POST['id_youth']
         ]);
         header('Location: sk_youth_records.php?success=updated'); exit;
     }
@@ -69,13 +57,11 @@ $offset   = ($page - 1) * $per_page;
 
 if ($keyword) {
     $like  = "%$keyword%";
-    $total = (int)$conn->prepare("SELECT COUNT(*) FROM tbl_youth WHERE lname LIKE ? OR fname LIKE ? OR email LIKE ?")
-                        ->execute([$like,$like,$like]) ? 0 : 0; // placeholder, see below
-    $stmtC = $conn->prepare("SELECT COUNT(*) FROM tbl_youth WHERE lname LIKE ? OR fname LIKE ? OR email LIKE ?");
+    $stmtC = $conn->prepare("SELECT COUNT(*) FROM tbl_youth WHERE lname LIKE ? OR fname LIKE ? OR email_address LIKE ?");
     $stmtC->execute([$like,$like,$like]);
     $total = (int)$stmtC->fetchColumn();
 
-    $stmtR = $conn->prepare("SELECT * FROM tbl_youth WHERE lname LIKE ? OR fname LIKE ? OR email LIKE ? ORDER BY id_youth DESC LIMIT $per_page OFFSET $offset");
+    $stmtR = $conn->prepare("SELECT * FROM tbl_youth WHERE lname LIKE ? OR fname LIKE ? OR email_address LIKE ? ORDER BY id_youth DESC LIMIT $per_page OFFSET $offset");
     $stmtR->execute([$like,$like,$like]);
 } else {
     $stmtC = $conn->query("SELECT COUNT(*) FROM tbl_youth");
@@ -215,9 +201,7 @@ table tbody tr td:first-child {
             <button type="button" id="bulkDeleteBtn" class="btn btn-sm btn-danger d-none" data-bs-toggle="modal" data-bs-target="#bulkDelModal">
                 <i class="fas fa-trash me-1"></i> Delete Selected (<span id="selectedCount">0</span>)
             </button>
-            <button class="btn-sk btn" data-bs-toggle="modal" data-bs-target="#addModal">
-                <i class="fas fa-user-plus me-1"></i> Add Youth Member
-            </button>
+
         </div>
     </div>
 </div>
@@ -260,7 +244,7 @@ table tbody tr td:first-child {
                 </td>
                 <td><?= htmlspecialchars($y['skill_name']) ?></td>
                 <td>
-                    <button class="action-btn edit-btn me-1"
+                    <button type="button" class="action-btn edit-btn me-1"
                         data-bs-toggle="modal" data-bs-target="#editModal"
                         data-id="<?= $y['id_youth'] ?>"
                         data-fname="<?= htmlspecialchars($y['fname'],ENT_QUOTES) ?>"
@@ -291,47 +275,6 @@ table tbody tr td:first-child {
     </div>
 </div>
 
-<!-- Add Modal -->
-
-<!-- Add Modal -->
-<div class="modal fade" id="addModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Add Youth Member</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="POST">
-      <div class="modal-body">
-        <div class="row g-3">
-            <div class="col-md-4"><label class="form-label fw-semibold">Last Name</label><input name="lname" class="form-control" required></div>
-            <div class="col-md-4"><label class="form-label fw-semibold">First Name</label><input name="fname" class="form-control" required></div>
-            <div class="col-md-4"><label class="form-label fw-semibold">Middle Initial</label><input name="mi" class="form-control" maxlength="5"></div>
-            <div class="col-md-3"><label class="form-label fw-semibold">Age</label><input name="age" class="form-control" type="number" min="15" max="30" required></div>
-            <div class="col-md-3"><label class="form-label fw-semibold">Sex</label>
-                <select name="sex" class="form-select" required><option value="">--</option><option>Male</option><option>Female</option></select>
-            </div>
-            <div class="col-md-6"><label class="form-label fw-semibold">Civil Status</label>
-                <select name="civil_status" class="form-select" required><option value="">--</option><option>Single</option><option>Married</option><option>Solo Parent</option><option>Widowed</option></select>
-            </div>
-            <div class="col-md-6"><label class="form-label fw-semibold">Contact Number</label><input name="contact_number" class="form-control" maxlength="15"></div>
-            <div class="col-md-6"><label class="form-label fw-semibold">Email Address</label><input name="email_address" class="form-control" type="email"></div>
-            <div class="col-md-6"><label class="form-label fw-semibold">Educational Attainment</label><input name="educ_attain" class="form-control" placeholder="e.g. College Graduate"></div>
-            <div class="col-md-6"><label class="form-label fw-semibold">Employment Status</label>
-                <select name="emp_status" class="form-select" required><option value="">--</option><option>Employed</option><option>Unemployed</option><option>Self-Employed</option><option>Student</option></select>
-            </div>
-            <div class="col-12"><label class="form-label fw-semibold">Skills</label><input name="skill_name" class="form-control" placeholder="e.g. Programming, Arts, Sports"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" name="add_youth" class="btn-sk btn"><i class="fas fa-save me-1"></i> Save Record</button>
-      </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <!-- Edit Modal -->
 <div class="modal fade" id="editModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
@@ -347,7 +290,7 @@ table tbody tr td:first-child {
             <div class="col-md-4"><label class="form-label fw-semibold">Last Name</label><input name="lname" id="edit_lname" class="form-control" required></div>
             <div class="col-md-4"><label class="form-label fw-semibold">First Name</label><input name="fname" id="edit_fname" class="form-control" required></div>
             <div class="col-md-4"><label class="form-label fw-semibold">Middle Initial</label><input name="mi" id="edit_mi" class="form-control" maxlength="5"></div>
-            <div class="col-md-3"><label class="form-label fw-semibold">Age</label><input name="age" id="edit_age" class="form-control" type="number" min="15" max="30" required></div>
+            <div class="col-md-3"><label class="form-label fw-semibold">Age</label><input name="age" id="edit_age" class="form-control" type="number" min="15" max="59" required></div>
             <div class="col-md-3"><label class="form-label fw-semibold">Sex</label>
                 <select name="sex" id="edit_sex" class="form-select" required><option value="">--</option><option>Male</option><option>Female</option></select>
             </div>
@@ -473,18 +416,18 @@ function submitBulkDelete() {
 <script>
 document.getElementById('editModal').addEventListener('show.bs.modal', function(e) {
     const b = e.relatedTarget;
-    document.getElementById('edit_id').value    = b.dataset.id;
-    document.getElementById('edit_lname').value = b.dataset.lname;
-    document.getElementById('edit_fname').value = b.dataset.fname;
-    document.getElementById('edit_mi').value    = b.dataset.mi;
-    document.getElementById('edit_age').value   = b.dataset.age;
-    document.getElementById('edit_sex').value   = b.dataset.sex;
-    document.getElementById('edit_civil').value = b.dataset.civil;
-    document.getElementById('edit_contact').value= b.dataset.contact;
-    document.getElementById('edit_email').value = b.dataset.email;
-    document.getElementById('edit_educ').value  = b.dataset.educ;
-    document.getElementById('edit_emp').value   = b.dataset.emp;
-    document.getElementById('edit_skill').value = b.dataset.skill;
+    document.getElementById('edit_id').value      = b.dataset.id;
+    document.getElementById('edit_lname').value   = b.dataset.lname;
+    document.getElementById('edit_fname').value   = b.dataset.fname;
+    document.getElementById('edit_mi').value      = b.dataset.mi;
+    document.getElementById('edit_age').value     = b.dataset.age;
+    document.getElementById('edit_sex').value     = b.dataset.sex;
+    document.getElementById('edit_civil').value   = b.dataset.civil;
+    document.getElementById('edit_contact').value = b.dataset.contact;
+    document.getElementById('edit_email').value   = b.dataset.email;
+    document.getElementById('edit_educ').value    = b.dataset.educ;
+    document.getElementById('edit_emp').value     = b.dataset.emp;
+    document.getElementById('edit_skill').value   = b.dataset.skill;
 });
 document.getElementById('delModal').addEventListener('show.bs.modal', function(e) {
     const b = e.relatedTarget;
@@ -494,6 +437,3 @@ document.getElementById('delModal').addEventListener('show.bs.modal', function(e
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <?php include('dashboard_sidebar_end.php'); ?>
-
-
-

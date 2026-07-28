@@ -3,7 +3,8 @@
  * admn_password_reset_requests.php
  * Admin page: view, approve, or reject resident password reset requests.
  */
-error_reporting(E_ALL ^ E_WARNING);
+      error_reporting(E_ALL ^ E_WARNING);
+   ini_set('display_errors',1);
 require_once __DIR__ . '/classes/security.php';
 bmis_session_start();
 $userdetails = bmis_require_admin();
@@ -69,8 +70,6 @@ $requests = $conn->query(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Password Reset Requests — Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 </head>
 <body class="bg-light">
 <?php include('dashboard_sidebar_start.php'); ?>
@@ -175,6 +174,9 @@ $requests = $conn->query(
     </div>
 </div>
 <?php include('dashboard_sidebar_end.php'); ?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 </body>
 </html>

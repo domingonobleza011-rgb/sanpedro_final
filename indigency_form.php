@@ -247,10 +247,18 @@ h1 {
     </div>
 </body>
 </html>
-    <div class="text-center">
-        <button type="button" class="btn btn-success noprint" onclick="window.print()">
-            Print Certificate
-        </button>
+    <div class="noprint" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 30px 0;">
+    <button 
+        type="button" 
+        class="noprint" 
+        id="printpagebutton" 
+        style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px; background-color: #198754; color: #fff; border: none; cursor: pointer;" 
+        onclick="window.print()">
+        Print Certificate
+    </button>
+    <a href="admn_certofindigency.php" class="noprint" style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px; background-color: #6c757d; color: #fff; border: none; text-decoration: none; display: inline-block; text-align: center;">
+        Back to Admin
+    </a>
     </div>
     </body>
     <?php
@@ -262,11 +270,7 @@ h1 {
         window.onload = function() {
         window.print();
     };
-    
-    // Optional: Close the window/tab automatically after printing or canceling
-    window.onafterprint = function() {
-        window.close();
-    };
+
 function PrintElem(elem) {
     // This ensures any elements with the 'noprint' class are hidden
     // and the window focus is on the current document for the printer.

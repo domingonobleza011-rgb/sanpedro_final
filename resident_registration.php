@@ -200,8 +200,44 @@
                             <div class="row g-3 mtop mb-2">
                                 <div class="col-md-12">
                                     <label class="form-label">Upload Valid ID (Government-issued):</label>
-                                    <input type="file" class="form-control" name="valid_id_file" accept=".jpg,.jpeg,.png,.pdf" required>
-                                    <small class="text-muted d-block mt-1">Accepted formats: JPG, PNG, or PDF (max 5MB). Your registration will be reviewed by the barangay admin before your account is activated.</small>
+
+                                    <div class="btn-group mb-2" role="group" aria-label="Valid ID input method">
+                                        <button type="button" id="idModeUploadBtn" class="btn btn-outline-secondary btn-sm active">
+                                            <i class="fa-solid fa-file-arrow-up me-1"></i> Upload File
+                                        </button>
+                                        <button type="button" id="idModeCameraBtn" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fa-solid fa-camera me-1"></i> Take Photo
+                                        </button>
+                                    </div>
+
+                                    <!-- Upload panel -->
+                                    <div id="idUploadPanel">
+                                        <input type="file" class="form-control" id="valid_id_file_input" name="valid_id_file" accept=".jpg,.jpeg,.png,.pdf" required>
+                                    </div>
+
+                                    <!-- Camera panel -->
+                                    <div id="idCameraPanel" class="d-none">
+                                        <div id="idCameraLive">
+                                            <video id="idVideo" class="w-100 rounded border bg-dark" style="max-height:360px; object-fit:cover;" autoplay playsinline muted></video>
+                                            <div class="mt-2 d-flex gap-2">
+                                                <button type="button" id="idCaptureBtn" class="btn btn-primary btn-sm">
+                                                    <i class="fa-solid fa-camera me-1"></i> Capture Photo
+                                                </button>
+                                            </div>
+                                            <div id="idCameraError" class="text-danger small mt-2 d-none"></div>
+                                        </div>
+                                        <div id="idCameraPreviewWrap" class="d-none">
+                                            <img id="idCameraPreview" class="w-100 rounded border" style="max-height:360px; object-fit:contain;" alt="Captured ID preview">
+                                            <div class="mt-2">
+                                                <button type="button" id="idRetakeBtn" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fa-solid fa-rotate-left me-1"></i> Retake
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <canvas id="idCanvas" class="d-none"></canvas>
+                                    </div>
+
+                                    <small class="text-muted d-block mt-1">Accepted formats: JPG, PNG, or PDF (max 5MB), or take a live photo. Your registration will be reviewed by the barangay admin before your account is activated.</small>
                                 </div>
                             </div>
 
@@ -427,6 +463,111 @@
         const selectedOption = this.selectedOptions[0];
         barangayCode.value = selectedOption ? (selectedOption.dataset.code || '') : '';
     });
+})();
+
+// ---- Valid ID: Upload vs. Take Photo ----
+(function () {
+    const uploadBtn   = document.getElementById('idModeUploadBtn');
+    const cameraBtn    = document.getElementById('idModeCameraBtn');
+    const uploadPanel  = document.getElementById('idUploadPanel');
+    const cameraPanel  = document.getElementById('idCameraPanel');
+    const fileInput    = document.getElementById('valid_id_file_input');
+
+    const video        = document.getElementById('idVideo');
+    const canvas       = document.getElementById('idCanvas');
+    const liveWrap      = document.getElementById('idCameraLive');
+    const previewWrap  = document.getElementById('idCameraPreviewWrap');
+    const previewImg   = document.getElementById('idCameraPreview');
+    const captureBtn   = document.getElementById('idCaptureBtn');
+    const retakeBtn    = document.getElementById('idRetakeBtn');
+    const cameraError  = document.getElementById('idCameraError');
+
+    let stream = null;
+
+    function stopStream() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+    }
+
+    function showError(msg) {
+        cameraError.textContent = msg;
+        cameraError.classList.remove('d-none');
+    }
+
+    async function startCamera() {
+        cameraError.classList.add('d-none');
+        previewWrap.classList.add('d-none');
+        liveWrap.classList.remove('d-none');
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showError('Camera access is not supported on this browser. Please use the Upload File option instead.');
+            return;
+        }
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+            });
+            video.srcObject = stream;
+        } catch (err) {
+            showError('Could not access the camera. Please allow camera permission, or use the Upload File option instead.');
+        }
+    }
+
+    function switchToUpload() {
+        uploadBtn.classList.add('active');
+        cameraBtn.classList.remove('active');
+        uploadPanel.classList.remove('d-none');
+        cameraPanel.classList.add('d-none');
+        stopStream();
+    }
+
+    function switchToCamera() {
+        cameraBtn.classList.add('active');
+        uploadBtn.classList.remove('active');
+        cameraPanel.classList.remove('d-none');
+        uploadPanel.classList.add('d-none');
+        startCamera();
+    }
+
+    uploadBtn.addEventListener('click', switchToUpload);
+    cameraBtn.addEventListener('click', switchToCamera);
+
+    captureBtn.addEventListener('click', function () {
+        if (!stream) return;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(function (blob) {
+            if (!blob) return;
+
+            const fileName = 'valid_id_capture_' + Date.now() + '.jpg';
+            const file = new File([blob], fileName, { type: 'image/jpeg' });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            previewImg.src = URL.createObjectURL(blob);
+            liveWrap.classList.add('d-none');
+            previewWrap.classList.remove('d-none');
+            stopStream();
+        }, 'image/jpeg', 0.92);
+    });
+
+    retakeBtn.addEventListener('click', function () {
+        fileInput.value = '';
+        previewWrap.classList.add('d-none');
+        liveWrap.classList.remove('d-none');
+        startCamera();
+    });
+
+    // If the user re-selects Upload File normally, camera-captured file is replaced naturally.
+    window.addEventListener('beforeunload', stopStream);
 })();
     </script>
 </body>

@@ -17,8 +17,6 @@ if ($userdetails['role'] !== 'user' || ($userdetails['position'] ?? '') !== 'Sk 
 require_once('classes/main.class.php');
 // ADD
 if (isset($_POST['add_post'])) {
-    $poster = trim(($userdetails['firstname'] ?? '') . ' ' . ($userdetails['surname'] ?? ''));
-    if ($poster === '') { $poster = 'SK Chairperson'; }
     $stmt = $conn->prepare("INSERT INTO tbl_youth_bulletin (post_title,post_content,post_type,posted_by,is_pinned) VALUES (?,?,?,?,?)");
     $stmt->execute([$_POST['post_title'],$_POST['post_content'],$_POST['post_type'],$poster,isset($_POST['is_pinned'])?1:0]);
     header("Location: sk_announcements.php?success=added"); exit;
@@ -142,7 +140,7 @@ $post_types = ['Announcement','Opportunity','Reminder','Achievement','General'];
             <div class="post-title"><?= htmlspecialchars($post['post_title']) ?></div>
             <div class="post-content"><?= nl2br(htmlspecialchars($post['post_content'])) ?></div>
             <div class="post-meta">
-                <span><i class="fas fa-user"></i><?= htmlspecialchars($post['posted_by'] ?? 'Unknown') ?></span>
+                <span><i class="fas fa-user"></i><?= htmlspecialchars($post['posted_by']) ?></span>
                 <span><i class="fas fa-calendar"></i><?= date('M d, Y', strtotime($post['date_posted'])) ?></span>
                 <span><i class="fas fa-clock"></i><?= date('h:i A', strtotime($post['date_posted'])) ?></span>
             </div>
@@ -272,3 +270,7 @@ document.getElementById('delPostModal').addEventListener('show.bs.modal', functi
 </script>
 
 <?php include('dashboard_sidebar_end.php'); ?>
+
+
+
+

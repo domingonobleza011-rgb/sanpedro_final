@@ -279,14 +279,19 @@ h1 {
     </div>
 </html>
 
+    <div class="noprint" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 30px 0;">
     <button 
         type="button" 
-        class="btn btn-success noprint" 
+        class="noprint" 
         id="printpagebutton" 
-        style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px;" 
+        style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px; background-color: #198754; color: #fff; border: none; cursor: pointer;" 
         onclick="PrintElem('#clearance')">
-        Print 
+        Print Certificate
     </button>
+    <a href="admn_certofres.php" class="noprint" style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px; background-color: #6c757d; color: #fff; border: none; text-decoration: none; display: inline-block; text-align: center;">
+        Back to Admin
+    </a>
+    </div>
 </body>
     <?php
     

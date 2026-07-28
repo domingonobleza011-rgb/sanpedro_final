@@ -525,7 +525,7 @@ hr {
                                     <td>    
                                          <form action="" method="post">
                                             <a href="update_staff_form.php?id_user=<?= $staff['id_user'];?>" style="width: 110px; font-size: 15px; border-radius:30px; margin-bottom: 2px;" class="btn btn-success"> Update </a>
-                                            <button type="button" class="btn btn-warning text-white" style="width: 110px; font-size: 15px; border-radius:30px; margin-bottom: 2px;" data-toggle="modal" data-target="#demoteModal<?= $staff['id_user'] ?>">
+                                            <button type="button" class="btn btn-warning text-white" style="width: 110px; font-size: 15px; border-radius:30px; margin-bottom: 2px;" data-bs-toggle="modal" data-bs-target="#demoteModal<?= $staff['id_user'] ?>">
                                                  Demote
                                             </button>
                                             <input type="hidden" name="id_user" value="<?= $staff['id_user'];?>">
@@ -537,7 +537,7 @@ hr {
                                                 <div class="modal-content" style="border-radius: 20px; overflow: hidden;">
                                                     <div class="modal-header text-white" style="background: linear-gradient(135deg, #7b4d00, #b8860b);">
                                                         <h5 class="modal-title"><i class="fas fa-user-minus mr-2"></i> Demote to Resident</h5>
-                                                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                        <button type="button" class="close text-white" data-bs-dismiss="modal">&times;</button>
                                                     </div>
                                                     <form action="admn_staff_crud.php" method="POST">
                                                         <div class="modal-body text-left">
@@ -548,7 +548,7 @@ hr {
                                                             <p class="text-muted mb-0"><small>Their staff account will be removed. They will retain their resident record and can still log in as a resident.</small></p>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:30px;">Cancel</button>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:30px;">Cancel</button>
                                                             <input type="hidden" name="demote_id_user" value="<?= $staff['id_user'] ?>">
                                                             <button type="submit" name="demote_staff" class="btn text-white" style="border-radius:30px; width: 140px; background: linear-gradient(135deg, #7b4d00, #b8860b);">
                                                                 Confirm Demote
@@ -577,18 +577,11 @@ hr {
         </div>
     </div>
 </div>
-
-<!-- End of Main Content -->
-
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+
 <?php if (!empty($_SESSION['swal'])): ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

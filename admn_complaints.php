@@ -140,9 +140,7 @@ if ($sidebar_exists) include('dashboard_sidebar_start.php');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Complaint Management – Barangay Admin</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 :root {
@@ -556,7 +554,7 @@ body { font-family:'DM Sans',system-ui,sans-serif !important; background:var(--c
  
 </div>
  
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
 (function () {
     var params = new URLSearchParams(window.location.search);
@@ -591,9 +589,13 @@ body { font-family:'DM Sans',system-ui,sans-serif !important; background:var(--c
             }).catch(function(){});
     }
     poll();
-    setInterval(poll, 5000);
+    setInterval(poll, 60000);
 })();
 </script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 <?php if ($sidebar_exists) include('dashboard_sidebar_end.php'); ?>
 </body>
 </html>

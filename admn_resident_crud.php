@@ -503,7 +503,7 @@ hr {
     <div class="row justify-content-center">
         <div class="col-md-12 col-lg-12">
             <div class="mb-3 text-left">
-                <button type="button" class="btn btn-primary btn-pill shadow-sm" data-toggle="modal" data-target="#addResidentModal">
+                <button type="button" class="btn btn-primary btn-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addResidentModal">
                     <i class="fas fa-plus"></i> Add New Barangay Resident
                 </button>
             </div>
@@ -597,7 +597,7 @@ hr {
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="exampleModalLabel text-center">Add New Barangay Resident</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -696,7 +696,7 @@ hr {
                     <input type="hidden" name="role" value="resident">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:30px;">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:30px;">Close</button>
                     <button type="submit" name="add_resident" class="btn btn-primary" style="width: 150px; border-radius:30px;">Submit Data</button>
                 </div>
             </form>
@@ -710,15 +710,9 @@ hr {
     
 </div>
 <!-- End of Main Content -->
-
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 <?php if (!empty($_SESSION['swal'])): ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

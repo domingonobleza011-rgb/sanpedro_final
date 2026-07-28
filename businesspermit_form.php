@@ -210,6 +210,7 @@ h1 {
         </div>
     </div>
 
+    <div class="d-flex justify-content-center noprint" style="gap: 15px; margin-bottom: 30px;">
     <button 
         type="button" 
         class="btn btn-success noprint" 
@@ -218,6 +219,10 @@ h1 {
         onclick="PrintElem('#clearance')">
         Print Clearance
     </button>
+    <a href="admn_bspermit.php" class="btn btn-secondary noprint" style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px;">
+        Back to Admin
+    </a>
+    </div>
 </body>
     <?php
     

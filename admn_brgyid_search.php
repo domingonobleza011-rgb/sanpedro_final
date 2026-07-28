@@ -36,7 +36,7 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
             <tr>
                 <td>    
                     <form action="" method="post">
-                        <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="barangayid_form.php?id_brgyid=<?= $view['id_brgyid'];?>">Generate</a> 
+                        <a class="btn btn-success" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="barangayid_form.php?id_brgyid=<?= $view['id_brgyid'];?>">Generate</a> 
                         <input type="hidden" name="id_brgyid" value="<?= $view['id']; ?>">
                         <button class="btn btn-danger" style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_brgyid"> Delete </button>
                         <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
@@ -117,7 +117,7 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
                 <tr>
                     <td>    
                         <form action="" method="post">
-                            <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="barangayid_form.php?id_brgyid=<?= $row['id_brgyid'];?>">Generate</a> 
+                            <a class="btn btn-success" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="barangayid_form.php?id_brgyid=<?= $row['id_brgyid'];?>">Generate</a> 
                             <input type="hidden" name="id_brgyid" value="<?= $row['id_brgyid']; ?>">
                             <button class="btn btn-danger" style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_brgyid"> Delete </button>
                             <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $row['id_resident'];?>">

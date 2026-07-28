@@ -1,7 +1,5 @@
 <?php
 error_reporting(E_ALL ^ E_WARNING);
-define('BMIS_ROLE_REQUIRED', 'resident');
-require('secure_header.php');
 include('classes/resident.class.php');
 
 $userdetails = $bmis->get_userdata();

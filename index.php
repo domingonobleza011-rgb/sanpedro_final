@@ -1,6 +1,6 @@
 <?php
-error_reporting(E_ALL ^ E_WARNING);
-
+      error_reporting(E_ALL ^ E_WARNING);
+   ini_set('display_errors',1);
 // Start session using the same helper used by all other pages
 require_once __DIR__ . '/classes/security.php';
 bmis_session_start();
@@ -49,10 +49,11 @@ $view = $staffbmis->view_staff();
 
         /* Remove all default margins and padding for true full screen */
         body, html {
-            height: 100%;
+            min-height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevents accidental scrolling */
+            overflow-x: hidden;   /* no horizontal scroll */
+            overflow-y: auto;     /* allow vertical scroll when content is taller than viewport */
             font-family: 'Segoe UI', Roboto, sans-serif;
         }
         .navbar {
@@ -70,6 +71,7 @@ $view = $staffbmis->view_staff();
             font-weight: bold;
             color: var(--primary-blue) !important;
             font-size: 1.2rem;
+            white-space: nowrap;
         }
 
         .nav-link {
@@ -84,8 +86,33 @@ $view = $staffbmis->view_staff();
         }
         .main-container {
             display: flex;
-            height: 100vh;
-            width: 100vw;
+            min-height: 100vh;
+            min-height: 100dvh; /* accounts for mobile browser address bar so height doesn't overshoot */
+            width: 100%;
+            padding-top: 62px; /* clears the fixed navbar so content never sits under it */
+        }
+
+        /* Small phones: tighten navbar and shrink label text so it doesn't wrap/overflow */
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 8px 12px;
+            }
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            .nav-link {
+                margin-left: 10px;
+                font-size: 0.85rem;
+            }
+            .nav-link-text {
+                display: none; /* icon-only nav links on phones to save space */
+            }
+            .nav-link i {
+                font-size: 1.1rem;
+            }
+            .main-container {
+                padding-top: 54px;
+            }
         }
 
         /* Left Section: Information (Branding) */
@@ -103,6 +130,7 @@ $view = $staffbmis->view_staff();
 
         .info-panel img {
             width: 120px;
+            max-width: 30%;
             margin-bottom: 2rem;
         }
 
@@ -111,6 +139,17 @@ $view = $staffbmis->view_staff();
             font-weight: 800;
             font-size: 2.2rem;
             margin-bottom: 3rem;
+        }
+
+        /* Scale branding down on smaller desktop/tablet widths before the panel hides */
+        @media (max-width: 1200px) {
+            .info-panel h1 {
+                font-size: 1.7rem;
+                margin-bottom: 2rem;
+            }
+            .info-panel p {
+                font-size: 0.9rem;
+            }
         }
 
         .content-box {
@@ -139,7 +178,9 @@ $view = $staffbmis->view_staff();
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 5%;
+            padding: 5% 5% 2.5rem;
+            min-height: calc(100vh - 62px);
+            min-height: calc(100dvh - 62px);
         }
 
         .form-container {
@@ -151,6 +192,32 @@ $view = $staffbmis->view_staff();
             font-weight: 700;
             font-size: 2rem;
             margin-bottom: 0.5rem;
+        }
+
+        /* Below 992px the info-panel is hidden (login-only view). Top-align instead of
+           vertically centering: centering relied on 100vh, which real mobile browsers
+           recompute as the address bar shows/hides, so the form jumped around and left
+           a big gap above "Welcome" that desktop's resized emulator doesn't show. */
+        @media (max-width: 992px) {
+            .login-panel {
+                justify-content: flex-start;
+                min-height: auto;
+                padding-top: 2rem;
+            }
+        }
+
+        /* Tighter spacing and full-width form on phones */
+        @media (max-width: 576px) {
+            .login-panel {
+                padding: 6% 6% 2rem;
+                padding-top: 1.5rem;
+            }
+            .login-panel h2 {
+                font-size: 1.5rem;
+            }
+            .form-container br {
+                display: none; /* drop the manual spacer <br> tags on small screens */
+            }
         }
 
         .subtitle {
@@ -262,6 +329,31 @@ $view = $staffbmis->view_staff();
         border-bottom: none;
         padding: 25px;
     }
+
+    /* Officials modal: fit small screens without side gutters, shrink header text */
+    @media (max-width: 576px) {
+        #officialsModal .modal-dialog,
+        #officialRoleModal .modal-dialog {
+            margin: 0.75rem;
+        }
+        #officialsModal .modal-header,
+        #officialRoleModal .modal-header {
+            padding: 16px;
+        }
+        #officialsModal .modal-title {
+            font-size: 1rem;
+        }
+        #officialsModal .modal-body {
+            padding: 1rem !important;
+        }
+        .official-card {
+            padding: 0.75rem !important;
+        }
+        .official-card .mx-auto {
+            width: 76px !important;
+            height: 76px !important;
+        }
+    }
               .login-error-alert {
     display: flex;
     align-items: center;
@@ -300,6 +392,11 @@ $view = $staffbmis->view_staff();
     color: #b91c1c;
     font-weight: 600;
 }
+
+.login-error-content span {
+    font-size: 13px;
+    color: #7f1d1d;
+}
 .forgot-link {
     font-size: 0.82rem;
     font-weight: 600;
@@ -320,11 +417,6 @@ $view = $staffbmis->view_staff();
     border-color: #c2d4f8;
     text-decoration: none;
 }
-.login-error-content span {
-    font-size: 13px;
-    color: #7f1d1d;
-}
-
 .login-error-close {
     background: none;
     border: none;
@@ -358,15 +450,15 @@ $view = $staffbmis->view_staff();
 <body>
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#"><i class="fas fa-landmark"></i> SAN PEDRO IRIGA</a>
-        
+        <a class="navbar-brand" href="#"><i class="fas fa-landmark"></i> <span class="brand-text">SAN PEDRO IRIGA</span></a>
+
         <!-- Use navbar-nav for automatic side-by-side alignment in large screens -->
-        <div class="navbar-nav ms-auto d-flex flex-row">
+        <div class="navbar-nav ms-auto d-flex flex-row flex-wrap justify-content-end">
             <a class="nav-link me-3" data-bs-toggle="modal" data-bs-target="#officialsModal" href="#">
-                <i class="fas fa-users"></i> Barangay Officials
+                <i class="fas fa-users"></i> <span class="nav-link-text">Barangay Officials</span>
             </a>
             <a class="nav-link" href="resident_registration.php">
-                <i class="fas fa-user-plus"></i> Register
+                <i class="fas fa-user-plus"></i> <span class="nav-link-text">Register</span>
             </a>
         </div>
     </div>
@@ -389,6 +481,8 @@ $view = $staffbmis->view_staff();
 
         <div class="login-panel">
             <div class="form-container">
+                <br>
+                <br>
                 <h2>Welcome </h2>
                 <p class="subtitle">Please enter your credentials to log in.</p>
 <?php if (!empty($_SESSION['login_error'])): ?>
@@ -421,26 +515,28 @@ $view = $staffbmis->view_staff();
                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                         <input type="password" class="form-control" id="passInput" placeholder="Enter password" name="password" required>
                     </div>
+                    
 
-                    <div class="d-flex justify-content-end mb-2">
+                    <div class="form-check mb-4">
+                        <input type="checkbox" class="form-check-input" id="showCheck" onclick="togglePass()">
+                        <label class="form-check-label" for="showCheck" style="font-size: 0.85rem; color: #555;">Show Password</label>
+                    </div>
+                    
+
+                    <button type="submit" name="login" class="btn btn-primary btn-signin w-100">SIGN IN</button>
+                </form>
+                <br>
+<div class="d-flex justify-content-end mb-2">
     <a href="forgot_password.php" class="forgot-link">
         <i class="fas fa-key me-1"></i>Forgot Password?
     </a>
 </div>
-<div class="form-check mb-4">
-                        <input type="checkbox" class="form-check-input" id="showCheck" onclick="togglePass()">
-                        <label class="form-check-label" for="showCheck" style="font-size: 0.85rem; color: #555;">Show Password</label>
-                    </div>
-
-                    <button type="submit" name="login" class="btn btn-primary btn-signin w-100">SIGN IN</button>
-                </form>
-
+                
                 <p class="reg-text">
                     Don't have an account? <a href="resident_registration.php">Register here</a>
                 </p>
             </div>
         </div>
-<!-- Modal -->
 <div class="modal fade" id="officialsModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">

@@ -1,5 +1,6 @@
 <?php
-error_reporting(E_ALL ^ E_WARNING);
+ error_reporting(E_ALL ^ E_WARNING);
+   ini_set('display_errors',1);
 require_once __DIR__ . '/classes/security.php';
 bmis_session_start();
 date_default_timezone_set('Asia/Manila');
@@ -16,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['find_account'])) {
     $stmt = $conn->prepare(
         "SELECT id_resident, fname, lname, security_question, security_answer
          FROM tbl_resident
-         WHERE (email = ? OR phone_number = ?) AND is_archived = 0 LIMIT 1"
+         WHERE (email = ? OR phone_number = ?) LIMIT 1"
     );
     $stmt->execute([$identity, $identity]);
     $resident = $stmt->fetch(PDO::FETCH_ASSOC);

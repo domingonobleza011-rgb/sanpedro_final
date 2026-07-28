@@ -49,13 +49,13 @@
             <tr>
                 <td>
                     <form action="" method="post">
-                        <button type="button" class="btn btn-primary btn-sm" style="width:90px;font-size:17px;border-radius:30px;" data-toggle="modal" data-target="#viewModal<?= $row['id_resident'] ?>">
+                        <button type="button" class="btn btn-primary btn-sm" style="width:90px;font-size:17px;border-radius:30px;" data-bs-toggle="modal" data-bs-target="#viewModal<?= $row['id_resident'] ?>">
                             <i class="fa fa-eye"></i> View
                         </button>
-                        <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;" data-toggle="modal" data-target="#messageModal<?= $row['id_resident'] ?>">
+                        <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;" data-bs-toggle="modal" data-bs-target="#messageModal<?= $row['id_resident'] ?>">
                             <i class="fas fa-comment-alt"></i> Message
                         </button>
-                        <button type="button" class="btn btn-warning btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;" data-toggle="modal" data-target="#promoteModal<?= $row['id_resident'] ?>">
+                        <button type="button" class="btn btn-warning btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;" data-bs-toggle="modal" data-bs-target="#promoteModal<?= $row['id_resident'] ?>">
                             <i class="fas fa-user-tie"></i> Promote
                         </button>
                         <input type="hidden" name="id_resident" value="<?= $row['id_resident'] ?>">
@@ -72,7 +72,7 @@
                         <div class="modal-content">
                             <div class="modal-header bg-primary text-white">
                                 <h5 class="modal-title">Resident Information</h5>
-                                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                <button type="button" class="close text-white" data-bs-dismiss="modal">&times;</button>
                             </div>
                             <div class="modal-body text-left">
                                 <p><strong>Resident ID:</strong> <?= $row['id_resident'] ?></p>
@@ -108,7 +108,7 @@
                         <div class="modal-content" style="border-radius:20px;overflow:hidden;">
                             <div class="modal-header bg-info text-white">
                                 <h5 class="modal-title"><i class="fas fa-paper-plane mr-2"></i> Send Message</h5>
-                                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                <button type="button" class="close text-white" data-bs-dismiss="modal">&times;</button>
                             </div>
                             <form action="send_resident_msg.php" method="POST">
                                 <div class="modal-body text-left">
@@ -123,7 +123,7 @@
                                     <input type="hidden" name="id_resident" value="<?= $row['id_resident'] ?>">
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:30px;">Cancel</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:30px;">Cancel</button>
                                     <button type="submit" name="send_msg" class="btn btn-info text-white" style="border-radius:30px;width:120px;">Send</button>
                                 </div>
                             </form>
@@ -137,7 +137,7 @@
                         <div class="modal-content" style="border-radius:20px;overflow:hidden;">
                             <div class="modal-header text-white" style="background:linear-gradient(135deg,#b8860b,#daa520);">
                                 <h5 class="modal-title"><i class="fas fa-user-tie mr-2"></i> Promote to Barangay Staff</h5>
-                                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                <button type="button" class="close text-white" data-bs-dismiss="modal">&times;</button>
                             </div>
                             <form action="admn_resident_crud.php" method="POST">
                                 <div class="modal-body text-left">
@@ -170,7 +170,7 @@
                                     <input type="hidden" name="promote_id_resident" value="<?= $row['id_resident'] ?>">
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:30px;">Cancel</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:30px;">Cancel</button>
                                     <button type="submit" name="promote_resident" class="btn text-white" style="border-radius:30px;width:140px;background:linear-gradient(135deg,#b8860b,#daa520);">
                                         <i class="fas fa-level-up-alt mr-1"></i> Promote
                                     </button>

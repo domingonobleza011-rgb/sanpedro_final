@@ -1,7 +1,8 @@
 <?php
-define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
-require('secure_header.php');
+// ⚠️ ABSOLUTELY NOTHING before this line – no spaces, no BOM
+session_start();
 require('classes/main.class.php');
+require_once('classes/conn.php');
 
 $userdetails = $bmis->get_userdata();
 
@@ -149,7 +150,7 @@ include('dashboard_sidebar_start.php');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo $csrf_token; ?>">
     <title>BMIS - Activity Logs</title>
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+ <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <style>

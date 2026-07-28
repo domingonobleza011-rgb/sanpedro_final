@@ -504,7 +504,7 @@ hr {
 /* ── Notification Bell Dropdown ── */
 #notifDropdown { position: relative; }
 #notifDropdown .badge-counter {
-    background: var(--danger, #dc2626);
+    background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     border-radius: 50px;
     font-size: 0.65rem;
@@ -513,52 +513,120 @@ hr {
     min-width: 16px;
     text-align: center;
     line-height: 1.2;
+    box-shadow: 0 0 0 2px #fff;
 }
 .notif-dropdown-menu {
-    width: 360px;
+    width: 380px;
     max-width: 90vw;
-    max-height: 480px;
+    max-height: 500px;
     overflow-y: auto;
+    overflow-x: hidden; /* without this, overflow-y:auto silently makes overflow-x 'auto' too */
+    scrollbar-gutter: stable; /* reserves scrollbar space so it never eats into item width */
     padding: 0;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(15,45,90,0.16), 0 2px 8px rgba(15,45,90,0.08);
 }
-.notif-dropdown-menu .dropdown-header {
+.notif-dropdown-menu::-webkit-scrollbar { width: 8px; }
+.notif-dropdown-menu::-webkit-scrollbar-track { background: var(--navy-pale, #e8eef7); }
+.notif-dropdown-menu::-webkit-scrollbar-thumb {
+    background: var(--gold, #c9943a);
+    border-radius: 8px;
+    border: 2px solid var(--navy-pale, #e8eef7);
+}
+
+/* Header */
+.notif-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 26px 16px 18px;
+    background: linear-gradient(135deg, var(--navy, #0f2d5a), var(--navy-mid, #1a4480));
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.notif-dropdown-header .notif-header-title {
+    font-family: 'Playfair Display', serif;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 1.05rem;
+    color: #fff;
     letter-spacing: 0.2px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
+.notif-dropdown-header .notif-header-title i { color: var(--gold-light, #e8b86d); font-size: 0.95rem; }
+.notif-dropdown-header .notif-header-count {
+    background: var(--gold, #c9943a);
+    color: var(--navy, #0f2d5a);
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 2px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
 .notif-section-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px 6px;
-    font-size: 0.75rem;
+    padding: 12px 26px 8px 18px;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-light, #718096);
-    background: #fbfcfe;
+    letter-spacing: 0.08em;
+    color: var(--navy-mid, #1a4480);
+    background: var(--navy-pale, #e8eef7);
+    flex-wrap: wrap;
+    row-gap: 4px;
+    border-bottom: 1px solid #e0e8f4;
+}
+.notif-section-title i {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--gold, #c9943a);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(15,45,90,0.12);
 }
 .notif-section-title .notif-section-count {
     margin-left: auto;
-    background: var(--navy-pale, #e8eef7);
-    color: var(--navy, #0f2d5a);
+    background: var(--navy, #0f2d5a);
+    color: #fff;
     border-radius: 20px;
     padding: 1px 9px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
 }
 .notif-item {
     display: flex !important;
     align-items: flex-start;
-    gap: 10px;
-    padding: 10px 16px !important;
+    gap: 12px;
+    padding: 12px 26px 12px 18px !important;
     font-size: 0.83rem;
     white-space: normal !important;
     border-left: none !important;
     border-right: none !important;
     border-bottom: 1px solid #f0f2f6 !important;
+    transition: background-color 0.15s ease;
 }
-.notif-item i {
+.notif-item:hover, .notif-item-msg:hover { background: var(--navy-pale, #e8eef7) !important; }
+.notif-icon-wrap {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: var(--gold-pale, #fdf3e3);
+    color: var(--gold, #c9943a);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.notif-item i:not(.notif-icon-wrap i) {
     color: var(--gold, #c9943a);
     width: 16px;
     text-align: center;
@@ -567,12 +635,13 @@ hr {
 }
 .notif-item .notif-item-badge {
     margin-left: auto;
-    background: var(--warning-pale, #fffbeb);
-    color: var(--warning, #d97706);
-    border: 1px solid var(--warning, #d97706);
+    margin-right: 2px;
+    background: var(--gold-pale, #fdf3e3);
+    color: #a2691f;
+    border: 1px solid var(--gold-light, #e8b86d);
     border-radius: 20px;
-    padding: 0 8px;
-    font-size: 0.72rem;
+    padding: 1px 9px;
+    font-size: 0.7rem;
     font-weight: 700;
     flex-shrink: 0;
 }
@@ -581,37 +650,52 @@ hr {
     display: block;
     color: var(--text-light, #718096);
     font-size: 0.72rem;
-    margin-top: 2px;
+    margin-top: 3px;
 }
 .notif-empty {
-    padding: 12px 16px 16px;
+    padding: 16px 18px 20px;
     font-size: 0.8rem;
     color: var(--text-light, #718096);
     font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.notif-empty::before {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: var(--gold-light, #e8b86d);
 }
 .notif-viewall {
     text-align: center;
     font-size: 0.78rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--navy, #0f2d5a) !important;
-    padding: 8px !important;
+    padding: 10px !important;
+    background: var(--navy-pale, #e8eef7);
+    border-top: 1px solid #e0e8f4;
+    transition: background-color 0.15s ease;
 }
+.notif-viewall:hover { background: #dbe5f4; text-decoration: none !important; }
 .notif-mark-all-form { margin-left: auto; }
 .notif-mark-all {
     background: none;
     border: none;
-    color: var(--navy, #0f2d5a);
+    color: var(--navy-mid, #1a4480);
     font-size: 0.68rem;
     font-weight: 700;
     text-transform: none;
     letter-spacing: normal;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 3px 8px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     gap: 4px;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
-.notif-mark-all:hover { text-decoration: underline; }
+.notif-mark-all:hover { background: #fff; color: var(--gold, #c9943a); }
 .notif-item-msg {
     display: flex !important;
     align-items: flex-start;
@@ -619,30 +703,35 @@ hr {
     border-left: none !important;
     border-right: none !important;
     border-bottom: 1px solid #f0f2f6 !important;
+    transition: background-color 0.15s ease;
 }
 .notif-item-msg .notif-item-link {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
     flex: 1;
     min-width: 0;
-    padding: 10px 8px 10px 16px;
+    padding: 12px 8px 12px 18px;
     font-size: 0.83rem;
     text-decoration: none;
 }
-.notif-item-msg .notif-item-link i {
-    color: var(--gold, #c9943a);
-    width: 16px;
-    text-align: center;
-    margin-top: 2px;
+.notif-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy, #0f2d5a), var(--navy-light, #2b5ea7));
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    margin-top: 1px;
 }
 .notif-item-msg .notif-item-link span { color: var(--text-dark, #1a1a2e); }
-.notif-mark-item-form { flex-shrink: 0; padding-right: 12px; }
+.notif-mark-item-form { flex-shrink: 0; padding-right: 20px; padding-top: 10px; }
 .notif-mark-item {
-    background: var(--success-pale, #ecfdf5);
-    border: 1px solid var(--success, #059669);
-    color: var(--success, #059669);
+    background: var(--gold-pale, #fdf3e3);
+    border: 1px solid var(--gold-light, #e8b86d);
+    color: #a2691f;
     border-radius: 50%;
     width: 26px;
     height: 26px;
@@ -651,9 +740,26 @@ hr {
     justify-content: center;
     font-size: 0.7rem;
     cursor: pointer;
-    transition: background .15s;
+    transition: background .15s, color .15s;
 }
-.notif-mark-item:hover { background: var(--success, #059669); color: #fff; }
+.notif-mark-item:hover { background: var(--navy, #0f2d5a); color: #fff; border-color: var(--navy); }
+.notif-caught-up {
+    text-align: center;
+    padding: 28px 18px;
+    color: var(--text-light, #718096);
+}
+.notif-caught-up i {
+    font-size: 1.6rem;
+    color: var(--gold, #c9943a);
+    display: block;
+    margin-bottom: 8px;
+}
+.notif-caught-up span {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--navy, #0f2d5a);
+    font-size: 0.95rem;
+}
 </style>
 <body id="page-top">
 
@@ -809,7 +915,7 @@ hr {
                                 <i class="fas fa-search fa-fw"></i>
                             </a>
                             <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
+                            <div class="dropdown-menu dropdown-menu-end p-3 shadow animated--grow-in"
                                 aria-labelledby="searchDropdown">
                                 <form class="form-inline mr-auto w-100 navbar-search">
                                     <div class="input-group">
@@ -836,11 +942,14 @@ hr {
                                 <?php endif; ?>
                             </a>
                             <!-- Dropdown - Notifications -->
-                            <div class="dropdown-menu dropdown-menu-right notif-dropdown-menu shadow animated--grow-in"
+                            <div class="dropdown-menu dropdown-menu-end notif-dropdown-menu shadow animated--grow-in"
                                 aria-labelledby="notifDropdown">
-                                <h6 class="dropdown-header">
-                                    Notifications <?= $notif_grand_total > 0 ? "($notif_grand_total new)" : '' ?>
-                                </h6>
+                                <div class="notif-dropdown-header">
+                                    <p class="notif-header-title"><i class="fas fa-bell"></i> Notifications</p>
+                                    <?php if ($notif_grand_total > 0): ?>
+                                    <span class="notif-header-count"><?= $notif_grand_total ?> new</span>
+                                    <?php endif; ?>
+                                </div>
 
                                 <!-- Certificate Requests -->
                                 <div class="notif-section-title">
@@ -851,7 +960,7 @@ hr {
                                     <div class="notif-empty">No new certificate requests</div>
                                 <?php else: foreach ($notif_cert_items as $item): ?>
                                     <a class="dropdown-item notif-item" href="<?= htmlspecialchars($item['page']) ?>">
-                                        <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
+                                        <span class="notif-icon-wrap"><i class="fas <?= htmlspecialchars($item['icon']) ?>"></i></span>
                                         <span><?= htmlspecialchars($item['label']) ?></span>
                                         <span class="notif-item-badge"><?= (int)$item['count'] ?> new</span>
                                     </a>
@@ -879,7 +988,7 @@ hr {
                                 ?>
                                     <div class="notif-item notif-item-msg">
                                         <a class="notif-item-link" href="admn_messages.php">
-                                            <i class="bi bi-chat-left-text"></i>
+                                            <span class="notif-avatar"><?= htmlspecialchars(mb_strtoupper(mb_substr($sender, 0, 1))) ?></span>
                                             <span>
                                                 <strong><?= htmlspecialchars($sender) ?></strong>: <?= htmlspecialchars($snippet) ?>
                                                 <small class="notif-time"><?= htmlspecialchars(date('M j, Y g:i A', strtotime($m['date_sent']))) ?></small>
@@ -894,7 +1003,7 @@ hr {
                                         </form>
                                     </div>
                                 <?php endforeach; ?>
-                                    <a class="dropdown-item notif-viewall" href="admn_messages.php">View all messages</a>
+                                    <a class="dropdown-item notif-viewall" href="admn_messages.php">View all messages <i class="fas fa-arrow-right ms-1"></i></a>
                                 <?php endif; ?>
 
                                 <!-- Pending Requests -->
@@ -906,14 +1015,17 @@ hr {
                                     <div class="notif-empty">No new pending requests</div>
                                 <?php else: foreach ($notif_pending_items as $item): ?>
                                     <a class="dropdown-item notif-item" href="<?= htmlspecialchars($item['page']) ?>">
-                                        <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
+                                        <span class="notif-icon-wrap"><i class="fas <?= htmlspecialchars($item['icon']) ?>"></i></span>
                                         <span><?= htmlspecialchars($item['label']) ?></span>
                                         <span class="notif-item-badge"><?= (int)$item['count'] ?> new</span>
                                     </a>
                                 <?php endforeach; endif; ?>
 
                                 <?php if ($notif_grand_total === 0): ?>
-                                    <div class="text-center py-3 text-gray-400 small">You're all caught up 🎉</div>
+                                    <div class="notif-caught-up">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>You're all caught up</span>
+                                    </div>
                                 <?php endif; ?>
                             </div>
                         </li>
@@ -927,7 +1039,7 @@ hr {
                                 </a>
                             </li>
                             <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
 
                                 <div class="dropdown-divider"></div>

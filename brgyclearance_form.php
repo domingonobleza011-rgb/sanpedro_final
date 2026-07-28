@@ -1,9 +1,20 @@
 <?php
-ini_set('display_errors',0);
 require('classes/resident.class.php');
 $userdetails = $residentbmis->get_userdata();
 $id_resident = $_GET['id_resident'];
-$resident = $residentbmis->get_single_clearance($id_resident);
+$resident = $residentbmis->get_single_bspermit($id_resident);
+
+// ── Activity Log: Business Permit Generated ──────────────────────────────────
+if ($resident) {
+    $resident_name = strtoupper(trim(($resident['lname'] ?? '') . ', ' . ($resident['fname'] ?? '') . ' ' . ($resident['mi'] ?? '')));
+    $bsname        = $resident['bsname'] ?? 'N/A';
+    $residentbmis->log_activity(
+        'GENERATE_DOCUMENT',
+        'Business Permit',
+        "Generated Business Permit for {$resident_name} – Business: {$bsname} (Resident ID: {$id_resident})"
+    );
+}
+// ────────────────────────────────────────────────────────────────────────────
 
 // Set the correct time zone
 date_default_timezone_set('Asia/Manila');
@@ -15,7 +26,7 @@ $date_expires = date('m/d/Y', strtotime('+1 year'));
 <!DOCTYPE html>
 <html id="clearance">
 <style>
-    body {
+   body {
     background-color: #f0f0f0;
     font-family: 'Arial', sans-serif;
     margin: 0;
@@ -115,8 +126,7 @@ h1 {
 
 /* Print Settings */
 @media print {
-
-.noprint {
+    .noprint {
             display: none !important;
         }
     body { background: none; }
@@ -136,38 +146,26 @@ h1 {
  <head>
     <meta charset="UTF-8">
     <title><?= $resident['lname'];?>,     <?= $resident['fname'];?>    <?= $resident['mi'];?></title>
-    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
-    <!-- bootstrap 3.0.2 -->
-    <link href="../BarangaySystem-master/master/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <!-- font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Ionicons -->
-    <link href="../BarangaySystem-master/bootstrap/css/ionicons.min.css" rel="stylesheet" type="text/css" />
-    <link href="../BarangaySystem-master/bootstrap/css/morris-0.4.3.min.css" rel="stylesheet" type="text/css" />
-    <!-- Theme style -->
-    <link href="../BarangaySystem-master/bootstrap/css/AdminLTE.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link href="../BarangaySystem-master/bootstrap/css/select2.css" rel="stylesheet" type="text/css" />
-    <script src="../BarangaySystem-master/bootstrap/css/jquery-1.12.3.js" type="text/javascript"></script>  
-    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <!-- responsive tags for screen compatibility -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- custom css --> 
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
+        <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 </head>
- <body class="skin-black" >
-     <!-- header logo: style can be found in header.less -->
-    
-    
-     <?php 
-     
-     include "classes/conn.php"; 
+<body class="skin-black">
+    <?php include "classes/conn.php"; 
+    // Fetch the staff member with position "Punong Barangay"
+    $stmt_pb = $conn->prepare("SELECT fname, mi, lname FROM tbl_user WHERE position = 'Punong Barangay' LIMIT 1");
+    $stmt_pb->execute();
+    $punong = $stmt_pb->fetch(PDO::FETCH_ASSOC);
+    $punong_name = $punong ? strtoupper($punong['lname'] . ', ' . $punong['fname'] . ' ' . $punong['mi']) : 'PUNONG BARANGAY';
+    ?>
 
-     // Fetch the staff member with position "Punong Barangay"
-     $stmt_pb = $conn->prepare("SELECT fname, mi, lname FROM tbl_user WHERE position = 'Punong Barangay' LIMIT 1");
-     $stmt_pb->execute();
-     $punong = $stmt_pb->fetch(PDO::FETCH_ASSOC);
-     $punong_name = $punong ? strtoupper($punong['lname'] . ', ' . $punong['fname'] . ' ' . $punong['mi']) : 'PUNONG BARANGAY';
-
-     ?> 
-       
-        <div class="certificate">
+    <div class="certificate">
         <div class="header">
             <img src="icons/logo.png" class="seal1 left" alt="Barangay Seal">
             <div class="header-text">
@@ -183,18 +181,19 @@ h1 {
             OFFICE OF THE PUNONG BARANGAY
         </div>
 
-        <h1>Barangay Clearance</h1>
+        <h1>Barangay Business Permit.</h1>
 
         <div class="content">
             <p class="salutation">TO WHOM IT MAY CONCERN:</p>
             
-            <p>This is to certify that <strong><u><?= $resident['lname'];?>,     <?= $resident['fname'];?>    <?= $resident['mi'];?></u>, <u><?= $resident['age'];?></u> years old, <u><?= $resident['status'];?></u></strong> and a resident of <strong><?= $resident['houseno'];?> <?= $resident['street'];?> <?= $resident['brgy'];?> <?= $resident['municipal'];?></strong> is known to be of good moral character and law-abiding citizen in the community.</u>.
-            <p>To certify further, that he/she has no derogatory and/or criminal records filed in this barangay.</p>
-        
+            <p>PERMIT IS HEREBY GRANTED to <u><?= $resident['lname'];?>, <?= $resident['fname'];?> <?= $resident['mi'];?>,</u> to operate a <u><?= $resident['bsname'];?></u>.
+            <p>Since it has satisfactorily complied all the Barangay requirements and has fully.</p>
+            
+            <p>satisfied/paid whatever liabilities it may have incurred as a <u><?= $resident['bsname'];?></u></p>
             
             <p>Issued this <strong>
-        <?= $date_issued; ?></b> <b></b>
-    </strong> 
+        <?= $date_issued; ?></b>
+    </strong> <?= $resident['houseno'];?> <?= $resident['street'];?> <?= $resident['brgy'];?> <?= $resident['municipal'];?></p>
         </div>
 
         <div class="footer">
@@ -210,7 +209,8 @@ h1 {
             Not valid w/o official seal
         </div>
     </div>
-    <div class="d-flex justify-content-center my-4">
+
+    <div class="d-flex justify-content-center noprint" style="gap: 15px; margin-bottom: 30px;">
     <button 
         type="button" 
         class="btn btn-success noprint" 
@@ -219,8 +219,11 @@ h1 {
         onclick="PrintElem('#clearance')">
         Print Clearance
     </button>
-</div>
-    </body>
+    <a href="admn_bspermit.php" class="btn btn-secondary noprint" style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px;">
+        Back to Admin
+    </a>
+    </div>
+</body>
     <?php
     
     ?>
@@ -234,7 +237,7 @@ h1 {
 
     function Popup(data) 
     {
-        var mywindow = window.open('', 'my div', 'height=400,width=600');
+        var mywindow = window.open('', 'my div', 'height=400,width=1000');
         //mywindow.document.write('<html><head><title>my div</title>');
         /*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
         //mywindow.document.write('</head><body class="skin-black" >');

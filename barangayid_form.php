@@ -50,7 +50,7 @@ $date_expires = date('F j, Y', strtotime('+1 year'));
 
         @media print {
             body { background: white; padding: 0; }
-            .noprint { display: none; }
+            .noprint { display: none !important; }
             .print-container { padding: 0; width: 100%; border: none; }
             .id-card { page-break-inside: avoid; } /* Prevents splitting a card across pages */
         }
@@ -108,10 +108,18 @@ $date_expires = date('F j, Y', strtotime('+1 year'));
 </head>
 <body>
 
-    <div style="text-align:center; margin-bottom: 20px;">
-        <button type="button" class="noprint" onclick="window.print()" style="padding: 12px 40px; cursor:pointer; font-weight:bold; background:#28a745; color:white; border:none; border-radius:5px; font-size: 16px;">
-            PRINT BARANGAY ID
-        </button>
+    <div class="noprint" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 30px 0;">
+    <button 
+        type="button" 
+        class="noprint" 
+        id="printpagebutton" 
+        style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px; background-color: #198754; color: #fff; border: none; cursor: pointer;" 
+        onclick="window.print()">
+        Print Certificate
+    </button>
+    <a href="admn_brgyid.php" class="noprint" style="padding: 12px 40px; font-size: 18px; font-weight: bold; border-radius: 5px; background-color: #6c757d; color: #fff; border: none; text-decoration: none; display: inline-block; text-align: center;">
+        Back to Admin
+    </a>
     </div>
 
     <div class="print-container">

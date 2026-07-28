@@ -595,8 +595,7 @@ require('secure_header.php');
                         <i class="fas fa-map-marker-alt mr-2"></i> Certificate of Residency Form
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                       
                 </div>
 
                 <form method="post" class="was-validated">

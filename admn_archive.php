@@ -1,10 +1,10 @@
 <?php
-define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
-require('secure_header.php');
-error_reporting(E_ALL ^ E_WARNING);
-require_once('classes/conn.php');
-require('classes/resident.class.php');
-$userdetails = $bmis->get_userdata();
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    require_once('classes/conn.php');
+    require('classes/resident.class.php');
+    $userdetails = $bmis->get_userdata();
+    $bmis->validate_staff_or_admin();
 
     $type_meta = [
         'resident'        => ['label' => 'Resident',              'icon' => 'fa-users',          'color' => 'blue'],
@@ -1023,11 +1023,9 @@ function clearAllChecks() {
 }
 </script>
 
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 
 <?php include('dashboard_sidebar_end.php'); ?>

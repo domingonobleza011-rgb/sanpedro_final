@@ -1,8 +1,6 @@
 <?php
-define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
-require('secure_header.php');
-require('classes/main.class.php');
-$userdetails = $bmis->get_userdata();
+    require('classes/main.class.php');
+    $userdetails = $bmis->get_userdata();
 
     // ==========================================
     // BACKEND: Handle Bulk Deletion Action
@@ -53,6 +51,10 @@ $userdetails = $bmis->get_userdata();
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
     <style>
         :root {
             --blue-deep:   #1a2e4d;

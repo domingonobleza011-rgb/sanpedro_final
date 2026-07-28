@@ -37,7 +37,7 @@
             <tr>
                 <td>    
                     <form action="" method="post">
-                        <a class="btn btn-success" target="blank"  style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="businesspermit_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
+                        <a class="btn btn-success"  style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="businesspermit_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
                         <input type="hidden" name="id_bspermitid" value="<?= $view['id_bspermit'];?>">
                         <button class="btn btn-danger"  style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_certofres"> Delete</button>
                         <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
@@ -119,7 +119,7 @@
                 <tr>
                     <td>    
                         <form action="" method="post">
-                            <a class="btn btn-success" target="blank"  style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="businesspermit_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
+                            <a class="btn btn-success"  style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="businesspermit_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
                             <input type="hidden" name="id_bspermit" value="<?= $view['id_bspermit'];?>">
                             <button class="btn btn-danger"  style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_bspermit"> Delete </button>
                             <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">

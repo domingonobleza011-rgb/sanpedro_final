@@ -31,7 +31,7 @@
             <tr>
                 <td>    
                     <form action="" method="post">
-                        <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="indigency_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
+                        <a class="btn btn-success" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="indigency_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
                         <input type="hidden" name="id_indigency" value="<?= $view['id_indigency'];?>">
                         <button class="btn btn-danger" style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_certofindigency"> Archive </button>
                         <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>_<?= $view['id_indigency'];?>" data-bs-toggle="modal" data-bs-target="#messageModal<?= $view['id_resident'];?>_<?= $view['id_indigency'];?>">
@@ -107,7 +107,7 @@
                 <tr>
                     <td>    
                         <form action="" method="post">
-                            <a class="btn btn-success" target="blank" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="indigency_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
+                            <a class="btn btn-success" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="indigency_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
                             <input type="hidden" name="id_indigency" value="<?= $view['id_indigency'];?>">
                             <button class="btn btn-danger" style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_certofindigency"> Archive </button>
                             <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>_<?= $view['id_indigency'];?>" data-bs-toggle="modal" data-bs-target="#messageModal<?= $view['id_resident'];?>_<?= $view['id_indigency'];?>">

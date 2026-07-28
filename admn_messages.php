@@ -1,6 +1,9 @@
 <?php 
+     error_reporting(E_ALL ^ E_WARNING);
+   ini_set('display_errors',0);
     define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
 require('secure_header.php');
+require_once('classes/conn.php'); // needed so the shared notification sidebar gets a working $conn
 require_once 'classes/main.class.php'; 
 $systemObject = new BMISClass();
 $userdetails = $systemObject->get_userdata();
@@ -57,6 +60,20 @@ if (isset($_POST['bulk_delete_msg']) && !empty($_POST['msg_ids'])) {
     exit();
 }
 
+// ---- Handle: Reply to a resident message ----
+// NOTE: replyToMessage() is assumed — add it to your class if it doesn't exist yet.
+// It should insert the reply (linked to id_admin_msg) and, ideally, notify the resident.
+if (isset($_POST['reply_msg'])) {
+    $id_admin_msg = (int)$_POST['id_admin_msg'];
+    $reply_text   = trim($_POST['reply_text'] ?? '');
+    if ($reply_text !== '' && $systemObject->replyToMessage($id_admin_msg, $reply_text, $admin_name)) {
+        header("Location: admn_messages.php?toast=reply_sent");
+    } else {
+        header("Location: admn_messages.php?toast=error");
+    }
+    exit();
+}
+
 // ---- Fetch data ----
 $messages   = $systemObject->viewMessages();
 $id_uploads = [];
@@ -72,12 +89,11 @@ foreach ($id_uploads as $up) {
 <html>
 <head> 
     <title>Messages - Barangay Admin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1"> 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
         .status-pending  { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
         .status-approved { background: #d1e7dd; color: #0f5132; border: 1px solid #198754; }
         .status-rejected { background: #f8d7da; color: #842029; border: 1px solid #dc3545; }
@@ -216,127 +232,87 @@ foreach ($id_uploads as $up) {
             from { opacity: 0; transform: translateY(14px); }
             to   { opacity: 1; transform: translateY(0); }
         }
+
+        /* ── View Message modal: chat/conversation style ── */
+        .chat-thread-header {
+            background: linear-gradient(135deg, #0f2d5a, #1a4480);
+            padding: 16px 20px;
+        }
+        .chat-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255,255,255,0.18);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: #fff; flex-shrink: 0;
+        }
+        .chat-avatar-sm {
+            width: 32px; height: 32px; font-size: 13px;
+            background: #0d6efd; color: #fff;
+        }
+        .chat-thread-bg {
+            background: #eef2f7;
+            min-height: 160px;
+        }
+        .chat-row {
+            display: flex; align-items: flex-end; gap: 10px;
+        }
+        .chat-bubble {
+            max-width: 78%;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .chat-bubble-incoming {
+            background: #fff;
+            color: #212529;
+            border-radius: 4px 16px 16px 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+        .chat-row-outgoing {
+            justify-content: flex-end;
+        }
+        .chat-bubble-outgoing {
+            background: #0d6efd;
+            color: #fff;
+            border-radius: 16px 4px 16px 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+        }
+        .chat-timestamp-outgoing {
+            margin: 6px 0 0;
+            text-align: right;
+        }
+        .chat-timestamp {
+            margin: 10px 0 0 42px;
+            font-size: 11px;
+            color: #8a94a6;
+        }
+        .reply-box {
+            margin-left: 42px;
+        }
+        .reply-textarea {
+            resize: none;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        .reply-textarea:focus {
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+            border-color: #0d6efd;
+        }
     </style>
 </head>
 <body>
 
 <div class="container my-4">
-    <h2 class="fw-bold mb-4 text-center">Resident Messages &amp; Verification</h2>
+    <h2 class="fw-bold mb-4 text-center">Resident Messages<span class="badge bg-primary ms-1" id="badge-msg-count"><?= count($messages) > 0 ? count($messages) : '' ?></span></h2>
 
-    <!-- TABS -->
-    <ul class="nav nav-tabs mb-4" id="adminMsgTabs" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active" id="verify-tab" data-bs-toggle="tab" data-bs-target="#verify-panel" type="button">
-                <i class="bi bi-shield-check me-1"></i> ID Verifications
-                <?php if ($pending_count > 0): ?>
-                    <span class="badge bg-danger ms-1" id="badge-id-pending"><?= $pending_count ?></span>
-                <?php else: ?>
-                    <span class="badge bg-danger ms-1 d-none" id="badge-id-pending">0</span>
-                <?php endif; ?>
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages-panel" type="button">
-                <i class="bi bi-chat-dots-fill me-1"></i> Resident Messages
-                <span class="badge bg-primary ms-1" id="badge-msg-count"><?= count($messages) > 0 ? count($messages) : '' ?></span>
-            </button>
-        </li>
-    </ul>
+
 
     <div class="tab-content">
 
-        <!-- TAB 1: ID VERIFICATIONS -->
-        <div class="tab-pane fade show active" id="verify-panel">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-white py-3 rounded-top-4">
-                    <h5 class="fw-bold mb-0"><i class="bi bi-card-image me-2 text-warning"></i>Resident ID Submissions</h5>
-                    <small class="text-muted">Review and approve or reject resident valid ID uploads to grant account verification.</small>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0 text-center">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th class="py-3">Resident Name</th>
-                                    <th class="py-3">Contact</th>
-                                    <th class="py-3">File Submitted</th>
-                                    <th class="py-3">Note</th>
-                                    <th class="py-3">Date</th>
-                                    <th class="py-3">Status</th>
-                                    <th class="py-3">Action</th>
-                                    <th class="py-3">Delete</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            <?php if (!empty($id_uploads)): ?>
-                                <?php foreach ($id_uploads as $up):
-                                    $uid      = $up['id_upload'];
-                                    $fullname = htmlspecialchars($up['fname'] . ' ' . $up['lname']);
-                                ?>
-                                <tr>
-                                    <td class="align-middle fw-bold"><?= $fullname ?></td>
-                                    <td class="align-middle">
-                                        <small><?= htmlspecialchars($up['email'] ?: $up['phone_number'] ?: '—') ?></small>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="uploads/valid_ids/<?= htmlspecialchars($up['file_name']) ?>"
-                                           target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                                            <i class="bi bi-eye me-1"></i> View ID
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <small class="text-muted"><?= htmlspecialchars($up['message_note'] ?: '—') ?></small>
-                                    </td>
-                                    <td class="align-middle">
-                                        <small><?= date('M d, Y', strtotime($up['upload_date'])) ?></small>
-                                    </td>
-                                    <td class="align-middle">
-                                        <?php if ($up['status'] === 'approved'): ?>
-                                            <span class="badge rounded-pill status-approved px-3">&#x2705; Approved</span>
-                                        <?php elseif ($up['status'] === 'rejected'): ?>
-                                            <span class="badge rounded-pill status-rejected px-3">&#x274C; Rejected</span>
-                                        <?php else: ?>
-                                            <span class="badge rounded-pill status-pending px-3">&#x23F3; Pending</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="align-middle">
-                                        <?php if ($up['status'] === 'pending'): ?>
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <!-- Approve -->
-                                            <button type="button" class="btn btn-success btn-sm rounded-pill px-3 fw-bold"
-                                                onclick="openApproveModal(<?= $uid ?>, <?= (int)$up['id_resident'] ?>, '<?= $fullname ?>')">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Approve
-                                            </button>
-                                            <!-- Reject -->
-                                            <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold"
-                                                onclick="openRejectModal(<?= $uid ?>, <?= (int)$up['id_resident'] ?>, '<?= $fullname ?>')">
-                                                <i class="bi bi-x-circle-fill me-1"></i> Reject
-                                            </button>
-                                        </div>
-                                        <?php else: ?>
-                                            <span class="text-muted small">—</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="align-middle">
-                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3"
-                                            onclick="openDeleteUploadModal(<?= $uid ?>, '<?= $fullname ?>')">
-                                            <i class="bi bi-trash-fill me-1"></i> Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr><td colspan="8" class="py-5 text-muted fst-italic">No ID submissions found.</td></tr>
-                            <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- TAB 2: RESIDENT MESSAGES -->
-        <div class="tab-pane fade" id="messages-panel">
+        <div class="tab-pane fade show active" id="messages-panel">
             <div class="card shadow-sm border-0 rounded-4">
 
                 <!-- Bulk action toolbar (hidden until at least 1 checkbox is checked) -->
@@ -402,31 +378,70 @@ foreach ($id_uploads as $up) {
                                         </td>
                                     </tr>
 
-                                    <!-- View Message Modal (Bootstrap) -->
+                                    <!-- View Message Modal (Bootstrap) - chat/conversation style -->
                                     <div class="modal fade" id="viewMsg<?= $mid ?>" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content border-0 shadow-lg rounded-4">
-                                                <div class="modal-header bg-info text-white rounded-top-4">
-                                                    <h5 class="modal-title fw-bold">Message from <?= $mfname ?></h5>
+                                            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                                                <div class="modal-header chat-thread-header text-white">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="chat-avatar"><?= strtoupper(substr($mfname, 0, 1)) ?></div>
+                                                        <div>
+                                                            <h6 class="modal-title fw-bold mb-0"><?= $mfull ?></h6>
+                                                            <small class="opacity-75">Resident</small>
+                                                        </div>
+                                                    </div>
                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                 </div>
-                                                <div class="modal-body p-4 text-start">
-                                                    <label class="text-muted small fw-bold">FULL NAME</label>
-                                                    <p class="h6 mb-3"><?= $mfull ?></p>
-                                                    <label class="text-muted small fw-bold">DATE RECEIVED</label>
-                                                    <p class="h6 mb-3"><?= date('F j, Y, g:i a', strtotime($msg['date_sent'])) ?></p>
-                                                    <hr>
-                                                    <label class="text-muted small fw-bold">MESSAGE CONTENT</label>
-                                                    <div class="bg-light p-3 rounded-3 mt-1">
-                                                        <?= nl2br(htmlspecialchars($msg['message_text'])) ?>
+                                                <div class="modal-body p-4 chat-thread-bg">
+                                                    <div class="chat-row">
+                                                        <div class="chat-avatar chat-avatar-sm"><?= strtoupper(substr($mfname, 0, 1)) ?></div>
+                                                        <div class="chat-bubble chat-bubble-incoming">
+                                                            <?= nl2br(htmlspecialchars($msg['message_text'])) ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="chat-timestamp">
+                                                        <?= date('F j, Y, g:i a', strtotime($msg['date_sent'])) ?>
+                                                    </div>
+
+                                                    <?php if (!empty($msg['reply_text'])): ?>
+                                                    <div class="chat-row chat-row-outgoing mt-3">
+                                                        <div class="chat-bubble chat-bubble-outgoing">
+                                                            <?= nl2br(htmlspecialchars($msg['reply_text'])) ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="chat-timestamp chat-timestamp-outgoing">
+                                                        <?= htmlspecialchars($msg['replied_by']) ?> &middot;
+                                                        <?= date('F j, Y, g:i a', strtotime($msg['reply_date'])) ?>
+                                                    </div>
+                                                    <?php endif; ?>
+
+                                                    <!-- Reply composer: hidden until "Reply" is clicked -->
+                                                    <div class="reply-box d-none mt-3" id="replyBox<?= $mid ?>">
+                                                        <textarea class="form-control reply-textarea" id="replyText<?= $mid ?>"
+                                                                  rows="3" placeholder="Type your reply to <?= $mfname ?>..."></textarea>
+                                                        <div class="d-flex justify-content-end gap-2 mt-2">
+                                                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                                                                    onclick="toggleReplyBox(<?= $mid ?>, false)">Cancel</button>
+                                                            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3"
+                                                                    onclick="sendReply(<?= $mid ?>)">
+                                                                <i class="bi bi-send-fill me-1"></i> Send
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer border-0">
+                                                <div class="modal-footer border-0" id="viewFooter<?= $mid ?>">
+                                                    <button type="button" class="btn btn-primary rounded-pill px-4"
+                                                            id="replyBtn<?= $mid ?>"
+                                                            onclick="toggleReplyBox(<?= $mid ?>, true)">
+                                                        <i class="bi bi-reply-fill me-1"></i>
+                                                        <?= !empty($msg['reply_text']) ? 'Reply Again' : 'Reply' ?>
+                                                    </button>
                                                     <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
 
                                 <?php endforeach; ?>
                             <?php else: ?>
@@ -442,31 +457,6 @@ foreach ($id_uploads as $up) {
 </div><!-- end container -->
 
 
-<!-- ════════════════════════════════════════════════════════
-     HIDDEN FORMS  (submitted programmatically by JS)
-═══════════════════════════════════════════════════════════ -->
-
-<!-- Approve form -->
-<form id="approveForm" method="POST" action="admn_messages.php" style="display:none;">
-    <input type="hidden" name="id_resident" id="approveResidentId">
-    <input type="hidden" name="id_upload"   id="approveUploadId">
-    <input type="hidden" name="approve_resident" value="1">
-</form>
-
-<!-- Reject form -->
-<form id="rejectForm" method="POST" action="admn_messages.php" style="display:none;">
-    <input type="hidden" name="id_resident"  id="rejectResidentId">
-    <input type="hidden" name="id_upload"    id="rejectUploadId">
-    <input type="hidden" name="reject_reason" id="rejectReason">
-    <input type="hidden" name="reject_resident" value="1">
-</form>
-
-<!-- Delete upload form -->
-<form id="deleteUploadForm" method="POST" action="admn_messages.php" style="display:none;">
-    <input type="hidden" name="id_upload"     id="deleteUploadId">
-    <input type="hidden" name="delete_upload" value="1">
-</form>
-
 <!-- Delete message form -->
 <form id="deleteMsgForm" method="POST" action="admn_messages.php" style="display:none;">
     <input type="hidden" name="id_admin_msg" id="deleteMsgId">
@@ -479,111 +469,18 @@ foreach ($id_uploads as $up) {
     <div id="bulkDeleteIds"></div>
 </form>
 
+<!-- Reply to message form -->
+<form id="replyForm" method="POST" action="admn_messages.php" style="display:none;">
+    <input type="hidden" name="id_admin_msg" id="replyMsgId">
+    <input type="hidden" name="reply_text"   id="replyMsgText">
+    <input type="hidden" name="reply_msg"    value="1">
+</form>
+
 
 <!-- ════════════════════════════════════════════════════════
      APPROVE MODAL
 ═══════════════════════════════════════════════════════════ -->
-<div id="approveModal" class="bmis-modal-backdrop">
-  <div class="bmis-modal-card">
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-      <div class="bmis-modal-icon" style="background:#d1fae5;">
-        <i class="bi bi-check-circle-fill" style="color:#059669; font-size:18px;"></i>
-      </div>
-      <div>
-        <p class="bmis-modal-title">Approve verification</p>
-        <p class="bmis-modal-sub">This will grant the resident a verified account.</p>
-      </div>
-    </div>
-    <hr style="margin:16px 0; border-color:#e5e7eb;">
-    <div class="bmis-modal-info" style="background:#f0fdf4; border:1.5px solid #bbf7d0;">
-      <i class="bi bi-person-check-fill" style="color:#059669; font-size:20px; flex-shrink:0;"></i>
-      <div>
-        <p id="approveModalName" style="font-size:14px; font-weight:700; color:#065f46;"></p>
-        <p style="font-size:12px; color:#047857;">Resident ID submission will be marked as approved.</p>
-      </div>
-    </div>
-    <div style="display:flex; gap:8px; justify-content:flex-end;">
-      <button class="bmis-btn-cancel" onclick="closeAllModals()">Cancel</button>
-      <button class="bmis-btn-confirm" style="background:linear-gradient(135deg,#059669,#34d399);"
-              onclick="document.getElementById('approveForm').submit();">
-        <i class="bi bi-check-circle-fill me-1"></i> Yes, approve
-      </button>
-    </div>
-  </div>
-</div>
 
-
-<!-- ════════════════════════════════════════════════════════
-     REJECT MODAL
-═══════════════════════════════════════════════════════════ -->
-<div id="rejectModal" class="bmis-modal-backdrop">
-  <div class="bmis-modal-card">
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-      <div class="bmis-modal-icon" style="background:#fee2e2;">
-        <i class="bi bi-x-circle-fill" style="color:#dc2626; font-size:18px;"></i>
-      </div>
-      <div>
-        <p class="bmis-modal-title">Reject ID submission</p>
-        <p class="bmis-modal-sub">The resident will be notified of the rejection.</p>
-      </div>
-    </div>
-    <hr style="margin:16px 0; border-color:#e5e7eb;">
-    <div class="bmis-modal-info" style="background:#fef2f2; border:1.5px solid #fecaca;">
-      <i class="bi bi-person-x-fill" style="color:#dc2626; font-size:20px; flex-shrink:0;"></i>
-      <div>
-        <p id="rejectModalName" style="font-size:14px; font-weight:700; color:#991b1b;"></p>
-        <p style="font-size:12px; color:#b91c1c;">Their ID submission will be marked as rejected.</p>
-      </div>
-    </div>
-    <div class="mb-3">
-      <label style="font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:6px;">
-        Reason <span style="font-weight:400; color:#9ca3af;">(optional)</span>
-      </label>
-      <textarea id="rejectReasonInput" rows="3" style="width:100%; border:1.5px solid #d1d5db; border-radius:8px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"
-                placeholder="e.g., ID is blurry, expired, or not a government-issued ID…"></textarea>
-    </div>
-    <div style="display:flex; gap:8px; justify-content:flex-end;">
-      <button class="bmis-btn-cancel" onclick="closeAllModals()">Cancel</button>
-      <button class="bmis-btn-confirm" style="background:linear-gradient(135deg,#dc2626,#ef4444);"
-              onclick="submitReject()">
-        <i class="bi bi-x-circle-fill me-1"></i> Confirm rejection
-      </button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ════════════════════════════════════════════════════════
-     DELETE UPLOAD MODAL
-═══════════════════════════════════════════════════════════ -->
-<div id="deleteUploadModal" class="bmis-modal-backdrop">
-  <div class="bmis-modal-card">
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-      <div class="bmis-modal-icon" style="background:#fee2e2;">
-        <i class="bi bi-trash-fill" style="color:#dc2626; font-size:18px;"></i>
-      </div>
-      <div>
-        <p class="bmis-modal-title">Delete ID submission</p>
-        <p class="bmis-modal-sub">This action cannot be undone.</p>
-      </div>
-    </div>
-    <hr style="margin:16px 0; border-color:#e5e7eb;">
-    <div class="bmis-modal-info" style="background:#fef2f2; border:1.5px solid #fecaca;">
-      <i class="bi bi-exclamation-triangle-fill" style="color:#dc2626; font-size:20px; flex-shrink:0;"></i>
-      <div>
-        <p id="deleteUploadModalName" style="font-size:14px; font-weight:700; color:#991b1b;"></p>
-        <p style="font-size:12px; color:#b91c1c;">The ID submission record will be permanently removed.</p>
-      </div>
-    </div>
-    <div style="display:flex; gap:8px; justify-content:flex-end;">
-      <button class="bmis-btn-cancel" onclick="closeAllModals()">Cancel</button>
-      <button class="bmis-btn-confirm" style="background:linear-gradient(135deg,#dc2626,#ef4444);"
-              onclick="document.getElementById('deleteUploadForm').submit();">
-        <i class="bi bi-trash-fill me-1"></i> Yes, delete
-      </button>
-    </div>
-  </div>
-</div>
 
 
 <!-- ════════════════════════════════════════════════════════
@@ -781,12 +678,43 @@ function submitBulkDelete() {
 }
 
 
+// ── Reply to message ──────────────────────────────────────────
+function toggleReplyBox(mid, show) {
+    var box = document.getElementById('replyBox' + mid);
+    var btn = document.getElementById('replyBtn' + mid);
+    if (!box) return;
+
+    if (show) {
+        box.classList.remove('d-none');
+        btn.classList.add('d-none');
+        document.getElementById('replyText' + mid).focus();
+    } else {
+        box.classList.add('d-none');
+        btn.classList.remove('d-none');
+        document.getElementById('replyText' + mid).value = '';
+    }
+}
+
+function sendReply(mid) {
+    var textarea = document.getElementById('replyText' + mid);
+    var text     = textarea.value.trim();
+    if (text === '') {
+        textarea.focus();
+        return;
+    }
+    document.getElementById('replyMsgId').value   = mid;
+    document.getElementById('replyMsgText').value = text;
+    document.getElementById('replyForm').submit();
+}
+
+
 // ── Toast ────────────────────────────────────────────────────
 var toastConfigs = {
     approved:      { type: 'success', title: 'Approved',  msg: 'Resident account has been verified successfully.' },
     rejected:      { type: 'warning', title: 'Rejected',  msg: 'ID submission rejected. Resident has been notified.' },
     upload_deleted:{ type: 'delete',  title: 'Deleted',   msg: 'ID submission record permanently deleted.' },
     msg_deleted:   { type: 'delete',  title: 'Deleted',   msg: 'Message(s) permanently deleted.' },
+    reply_sent:    { type: 'success', title: 'Reply Sent', msg: 'Your reply has been sent to the resident.' },
     error:         { type: 'error',   title: 'Error',     msg: 'Something went wrong. Please try again.' },
 };
 
@@ -857,6 +785,12 @@ function closeToast() {
                 var tbody = document.getElementById('messages-tbody');
                 if (tbody) tbody.innerHTML = data.messages_html;
 
+                // The rows just swapped in are freshly rendered and unchecked, but the
+                // bulk-delete toolbar has its own d-none/d-flex state that this replacement
+                // doesn't touch — without this, the toolbar could stay stuck open from a
+                // selection that existed before this refresh.
+                clearSelection();
+
                 // Update badges
                 var badgeMsg = document.getElementById('badge-msg-count');
                 if (badgeMsg) {
@@ -872,8 +806,17 @@ function closeToast() {
     }
 
     poll();
-    setInterval(poll, 8000);
+    setInterval(poll, 60000);
 })();
+
+// Some browsers restore the page from cache on back/forward or refresh (bfcache),
+// which can bring back a stale "Delete Selected" toolbar state even though nothing
+// on the fresh page is actually checked. Force it closed every time the page is shown.
+window.addEventListener('pageshow', function () {
+    clearSelection();
+});
 </script>
+    
 </body>
+    <?php include('dashboard_sidebar_end.php'); ?>
 </html>

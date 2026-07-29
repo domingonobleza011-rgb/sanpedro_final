@@ -16,6 +16,7 @@
         'youth'           => ['label' => 'Youth Profile',         'icon' => 'fa-users',           'color' => 'teal'],
         'brgyid'          => ['label' => 'Barangay ID',           'icon' => 'fa-id-card',         'color' => 'blue'],
         'staff'           => ['label' => 'Staff',                 'icon' => 'fa-user-tie',        'color' => 'blue'],
+        'message'         => ['label' => 'Resident Message',      'icon' => 'fa-comments',         'color' => 'blue'],
     ];
 
     // ── Handle permanent delete (single) ────────────────────
@@ -214,6 +215,40 @@
                     $data['inc_fname']    ?? '',   $data['inc_contact']   ?? '',
                 ]);
                 return true;
+
+            case 'message':
+                $ok = true;
+                if (!empty($data['admin_messages'])) {
+                    $s1 = $conn->prepare("INSERT IGNORE INTO admin_messages
+                        (id_admin_msg, id_resident, message_text, date_sent, status, reply_text, reply_date, replied_by)
+                        VALUES (?,?,?,?,?,?,?,?)");
+                    foreach ($data['admin_messages'] as $m) {
+                        $s1->execute([
+                            $m['id_admin_msg']  ?? null,
+                            $m['id_resident']   ?? null,
+                            $m['message_text']  ?? '',
+                            $m['date_sent']     ?? null,
+                            $m['status']        ?? 'unread',
+                            $m['reply_text']    ?? null,
+                            $m['reply_date']    ?? null,
+                            $m['replied_by']    ?? null,
+                        ]);
+                    }
+                }
+                if (!empty($data['resident_messages'])) {
+                    $s2 = $conn->prepare("INSERT IGNORE INTO resident_messages
+                        (id_message, id_resident, message_text, date_sent)
+                        VALUES (?,?,?,?)");
+                    foreach ($data['resident_messages'] as $m) {
+                        $s2->execute([
+                            $m['id_message']   ?? null,
+                            $m['id_resident']  ?? null,
+                            $m['message_text'] ?? '',
+                            $m['date_sent']    ?? null,
+                        ]);
+                    }
+                }
+                return $ok;
         }
         return false;
     }

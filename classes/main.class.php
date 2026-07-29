@@ -10,9 +10,9 @@ class BMISClass {
 //------------------------------------------ DATABASE CONNECTION ----------------------------------------------------
     
 
-     protected $server = "mysql:host=localhost;dbname=bmis";
-    protected $user = "root";
-    protected $pass = "";
+     protected $server = "mysql:host=sql106.infinityfree.com;dbname=if0_41514709_bmis";
+    protected $user = "if0_41514709";
+    protected $pass = "sanpedro011";
     protected $options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC);
     protected $con;
 
@@ -726,7 +726,162 @@ public function admin_delete_announcement(){
             die();
         }
     }
- 
+
+    // ---- Conversation-level views (one row per resident, not per message) ----
+
+    /**
+     * One row per resident who has ever messaged the admin (or been sent a
+     * system/admin notice), with the most recent message text/date across
+     * BOTH admin_messages (resident -> admin) and resident_messages (admin -> resident),
+     * plus how many of their messages are still unread.
+     */
+    public function getConversations() {
+        try {
+            $connection = $this->openConn();
+            $sql = "
+                SELECT
+                    r.id_resident,
+                    r.fname,
+                    r.lname,
+                    (SELECT COUNT(*) FROM admin_messages a
+                        WHERE a.id_resident = r.id_resident) AS total_count,
+                    (SELECT COUNT(*) FROM admin_messages a
+                        WHERE a.id_resident = r.id_resident AND a.status = 'unread') AS unread_count,
+                    latest.message_text AS last_message,
+                    latest.date_sent    AS last_date
+                FROM tbl_resident r
+                INNER JOIN (
+                    SELECT id_resident, message_text, date_sent FROM (
+                        SELECT id_resident, message_text, date_sent,
+                               ROW_NUMBER() OVER (PARTITION BY id_resident ORDER BY date_sent DESC) AS rn
+                        FROM (
+                            SELECT id_resident, message_text, date_sent FROM admin_messages
+                            UNION ALL
+                            SELECT id_resident, message_text, date_sent FROM resident_messages
+                        ) combined
+                    ) ranked WHERE rn = 1
+                ) latest ON latest.id_resident = r.id_resident
+                ORDER BY latest.date_sent DESC
+            ";
+            $stmt = $connection->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            notif("Database Error: " . $e->getMessage(), 'error');
+            die();
+        }
+    }
+
+    /**
+     * Full back-and-forth thread for one resident, oldest first, merged from:
+     *  - admin_messages       (side = resident, what they sent in)
+     *  - admin_messages.reply_text (side = admin, OLD single-reply-slot replies,
+     *                                kept so existing conversation history isn't lost)
+     *  - resident_messages    (side = admin, replies/notices sent going forward)
+     */
+    public function getConversationThread($id_resident) {
+        try {
+            $connection = $this->openConn();
+            $sql = "
+                SELECT message_text, date_sent, 'resident' AS side
+                FROM admin_messages WHERE id_resident = ?
+
+                UNION ALL
+
+                SELECT reply_text AS message_text, reply_date AS date_sent, 'admin' AS side
+                FROM admin_messages
+                WHERE id_resident = ? AND reply_text IS NOT NULL AND reply_text <> ''
+
+                UNION ALL
+
+                SELECT message_text, date_sent, 'admin' AS side
+                FROM resident_messages WHERE id_resident = ?
+
+                ORDER BY date_sent ASC
+            ";
+            $stmt = $connection->prepare($sql);
+            $stmt->execute([$id_resident, $id_resident, $id_resident]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            notif("Database Error: " . $e->getMessage(), 'error');
+            die();
+        }
+    }
+
+    /** Deletes an entire conversation (all messages + notices) for one resident. */
+    public function deleteConversation($id_resident) {
+        try {
+            $connection = $this->openConn();
+            $connection->beginTransaction();
+            $stmt1 = $connection->prepare("DELETE FROM admin_messages WHERE id_resident = ?");
+            $stmt1->execute([$id_resident]);
+            $stmt2 = $connection->prepare("DELETE FROM resident_messages WHERE id_resident = ?");
+            $stmt2->execute([$id_resident]);
+            $connection->commit();
+            return true;
+        } catch (PDOException $e) {
+            if ($connection->inTransaction()) $connection->rollBack();
+            notif("Database Error: " . $e->getMessage(), 'error');
+            die();
+        }
+    }
+
+    /**
+     * Soft-delete: snapshots a resident's whole conversation (both tables) into
+     * tbl_archive — the same archive table/columns used elsewhere in the app —
+     * then removes it from the live inbox. Restoring or permanently deleting it
+     * afterward is handled by admn_archive.php, exactly like every other record type.
+     */
+    public function archiveConversation($id_resident, $deleted_by) {
+        try {
+            $connection = $this->openConn();
+
+            $r = $connection->prepare("SELECT fname, lname FROM tbl_resident WHERE id_resident = ?");
+            $r->execute([$id_resident]);
+            $resident = $r->fetch(PDO::FETCH_ASSOC);
+            if (!$resident) return false;
+            $full_name = trim($resident['fname'] . ' ' . $resident['lname']);
+
+            $a = $connection->prepare("SELECT * FROM admin_messages WHERE id_resident = ?");
+            $a->execute([$id_resident]);
+            $admin_msgs = $a->fetchAll(PDO::FETCH_ASSOC);
+
+            $rm = $connection->prepare("SELECT * FROM resident_messages WHERE id_resident = ?");
+            $rm->execute([$id_resident]);
+            $resident_msgs = $rm->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($admin_msgs) && empty($resident_msgs)) {
+                return false; // nothing to archive
+            }
+
+            // Preview text for the archive list = most recent message overall
+            $latest = null;
+            foreach (array_merge($admin_msgs, $resident_msgs) as $m) {
+                if ($latest === null || strtotime($m['date_sent']) > strtotime($latest['date_sent'])) {
+                    $latest = $m;
+                }
+            }
+            $summary = $latest ? mb_substr($latest['message_text'], 0, 80) : '';
+
+            $record_data = json_encode([
+                'admin_messages'    => $admin_msgs,
+                'resident_messages' => $resident_msgs,
+            ], JSON_UNESCAPED_UNICODE);
+
+            $ins = $connection->prepare(
+                "INSERT INTO tbl_archive (record_type, record_id, full_name, summary, record_data, deleted_by)
+                 VALUES ('message', ?, ?, ?, ?, ?)"
+            );
+            $ins->execute([$id_resident, $full_name, $summary, $record_data, $deleted_by]);
+
+            // Now that it's safely archived, remove it from the live inbox
+            return $this->deleteConversation($id_resident);
+        } catch (PDOException $e) {
+            notif("Database Error: " . $e->getMessage(), 'error');
+            die();
+        }
+    }
+
     public function deleteMessage($id_admin_msg) {
         try {
             $connection = $this->openConn();
@@ -739,30 +894,23 @@ public function admin_delete_announcement(){
         }
     }
 
-    public function replyToMessage($id_admin_msg, $reply_text, $admin_name) {
+    /**
+     * Reply to a resident's whole conversation (not a single message row):
+     * marks their pending messages as handled, then records one new reply
+     * that shows up in the merged thread for everyone.
+     */
+    public function replyToMessage($id_resident, $reply_text, $admin_name) {
         try {
             $connection = $this->openConn();
 
-            // Find which resident this message belongs to
-            $stmt = $connection->prepare("SELECT id_resident FROM admin_messages WHERE id_admin_msg = ?");
-            $stmt->execute([$id_admin_msg]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$row) {
-                return false;
-            }
-            $id_resident = $row['id_resident'];
+            $stmt1 = $connection->prepare(
+                "UPDATE admin_messages SET status = 'replied' WHERE id_resident = ? AND status = 'unread'"
+            );
+            $stmt1->execute([$id_resident]);
 
-            // Record the reply against the original message, for the admin's own view
-            $sql1  = "UPDATE admin_messages
-                      SET reply_text = ?, reply_date = NOW(), replied_by = ?, status = 'replied'
-                      WHERE id_admin_msg = ?";
-            $stmt1 = $connection->prepare($sql1);
-            $stmt1->execute([$reply_text, $admin_name, $id_admin_msg]);
-
-            // Push the reply into resident_messages — this is what resident_messages.php
-            // actually reads (via getResidentMessages) to show admin-side bubbles.
-            $sql2  = "INSERT INTO resident_messages (id_resident, message_text, date_sent) VALUES (?, ?, NOW())";
-            $stmt2 = $connection->prepare($sql2);
+            $stmt2 = $connection->prepare(
+                "INSERT INTO resident_messages (id_resident, message_text, date_sent) VALUES (?, ?, NOW())"
+            );
             return $stmt2->execute([$id_resident, $reply_text]);
         } catch (PDOException $e) {
             notif("Database Error: " . $e->getMessage(), 'error');

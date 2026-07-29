@@ -15,67 +15,114 @@ $systemObject = new BMISClass();
 $userdetails  = $systemObject->get_userdata();
 $admin_name   = isset($userdetails['fname']) ? $userdetails['fname'] . ' ' . $userdetails['lname'] : 'Admin';
 
-$messages   = $systemObject->viewMessages();
-$id_uploads = $systemObject->getPendingIDUploads();
+$conversations = $systemObject->getConversations();
+$id_uploads    = $systemObject->getPendingIDUploads();
 
 $pending_count = 0;
 foreach ($id_uploads as $up) {
     if ($up['status'] === 'pending') $pending_count++;
 }
 
-// ── Build messages table rows HTML ───────────────────────────
+// ── Build messages table rows HTML (one row per resident conversation) ────
+// Kept in sync with admn_messages.php's table + modal markup — if you change
+// one, change the other, or the 8s/60s poll will revert this view.
 ob_start();
-if (!empty($messages)):
-    foreach ($messages as $msg):
-        $mid   = $msg['id_admin_msg'];
-        $mfname = htmlspecialchars($msg['fname']);
-        $mfull  = htmlspecialchars($msg['fname'] . ' ' . $msg['lname']);
+if (!empty($conversations)):
+    foreach ($conversations as $conv):
+        $rid     = $conv['id_resident'];
+        $mfname  = htmlspecialchars($conv['fname']);
+        $mfull   = htmlspecialchars($conv['fname'] . ' ' . $conv['lname']);
+        $thread  = $systemObject->getConversationThread($rid);
+        $lastMsg = end($thread);
 ?>
-<tr id="msgRow<?= $mid ?>">
+<tr id="msgRow<?= $rid ?>">
     <td class="align-middle">
-        <input type="checkbox" class="form-check-input msg-checkbox" value="<?= $mid ?>" onchange="updateBulkToolbar()">
+        <input type="checkbox" class="form-check-input msg-checkbox" value="<?= $rid ?>" onchange="updateBulkToolbar()">
     </td>
-    <td class="align-middle fw-bold"><?= $mfull ?></td>
+    <td class="align-middle fw-bold">
+        <?= $mfull ?>
+        <?php if ($conv['unread_count'] > 0): ?>
+            <span class="badge bg-danger rounded-pill ms-1"><?= (int)$conv['unread_count'] ?></span>
+        <?php endif; ?>
+    </td>
     <td class="align-middle text-muted">
-        <?= htmlspecialchars(substr($msg['message_text'], 0, 50)) ?>...
+        <?= htmlspecialchars(substr($conv['last_message'], 0, 50)) ?>...
     </td>
     <td class="align-middle">
-        <?= date('M d, Y | h:i A', strtotime($msg['date_sent'])) ?>
+        <?= date('M d, Y | h:i A', strtotime($conv['last_date'])) ?>
     </td>
     <td class="align-middle">
         <button class="btn btn-info btn-sm rounded-pill px-3 fw-bold"
-                data-bs-toggle="modal" data-bs-target="#viewMsg<?= $mid ?>">
+                data-bs-toggle="modal" data-bs-target="#viewMsg<?= $rid ?>">
             <i class="bi bi-eye-fill me-1"></i> View
         </button>
     </td>
     <td class="align-middle">
         <button type="button" class="btn btn-danger btn-sm rounded-pill px-3"
-            onclick="openDeleteMsgModal(<?= $mid ?>, '<?= $mfname ?>')">
+            onclick="openDeleteMsgModal(<?= $rid ?>, '<?= $mfname ?>')">
             <i class="bi bi-trash-fill me-1"></i> Delete
         </button>
     </td>
 </tr>
-<!-- View Modal -->
-<div class="modal fade" id="viewMsg<?= $mid ?>" tabindex="-1" aria-hidden="true">
+<!-- View Conversation Modal - full chat thread for this resident -->
+<div class="modal fade" id="viewMsg<?= $rid ?>" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-info text-white rounded-top-4">
-                <h5 class="modal-title fw-bold">Message from <?= $mfname ?></h5>
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header chat-thread-header text-white">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="chat-avatar"><?= strtoupper(substr($mfname, 0, 1)) ?></div>
+                    <div>
+                        <h6 class="modal-title fw-bold mb-0"><?= $mfull ?></h6>
+                        <small class="opacity-75">Resident</small>
+                    </div>
+                </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4 text-start">
-                <label class="text-muted small fw-bold">FULL NAME</label>
-                <p class="h6 mb-3"><?= $mfull ?></p>
-                <label class="text-muted small fw-bold">DATE RECEIVED</label>
-                <p class="h6 mb-3"><?= date('F j, Y, g:i a', strtotime($msg['date_sent'])) ?></p>
-                <hr>
-                <label class="text-muted small fw-bold">MESSAGE CONTENT</label>
-                <div class="bg-light p-3 rounded-3 mt-1">
-                    <?= nl2br(htmlspecialchars($msg['message_text'])) ?>
+            <div class="modal-body p-4 chat-thread-bg">
+                <?php foreach ($thread as $bubble): ?>
+                    <?php if ($bubble['side'] === 'resident'): ?>
+                        <div class="chat-row mt-3">
+                            <div class="chat-avatar chat-avatar-sm"><?= strtoupper(substr($mfname, 0, 1)) ?></div>
+                            <div class="chat-bubble chat-bubble-incoming">
+                                <?= nl2br(htmlspecialchars($bubble['message_text'])) ?>
+                            </div>
+                        </div>
+                        <div class="chat-timestamp">
+                            <?= date('F j, Y, g:i a', strtotime($bubble['date_sent'])) ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="chat-row chat-row-outgoing mt-3">
+                            <div class="chat-bubble chat-bubble-outgoing">
+                                <?= nl2br(htmlspecialchars($bubble['message_text'])) ?>
+                            </div>
+                        </div>
+                        <div class="chat-timestamp chat-timestamp-outgoing">
+                            <?= date('F j, Y, g:i a', strtotime($bubble['date_sent'])) ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+
+                <div class="reply-box d-none mt-3" id="replyBox<?= $rid ?>">
+                    <textarea class="form-control reply-textarea" id="replyText<?= $rid ?>"
+                              rows="3" placeholder="Type your reply to <?= $mfname ?>..."></textarea>
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                                onclick="toggleReplyBox(<?= $rid ?>, false)">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3"
+                                onclick="sendReply(<?= $rid ?>)">
+                            <i class="bi bi-send-fill me-1"></i> Send
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer border-0" id="viewFooter<?= $rid ?>">
+                <button type="button" class="btn btn-primary rounded-pill px-4"
+                        id="replyBtn<?= $rid ?>"
+                        onclick="toggleReplyBox(<?= $rid ?>, true)">
+                    <i class="bi bi-reply-fill me-1"></i>
+                    <?= ($lastMsg && $lastMsg['side'] === 'admin') ? 'Reply Again' : 'Reply' ?>
+                </button>
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -165,6 +212,6 @@ $uploads_html = ob_get_clean();
 echo json_encode([
     'messages_html'  => $messages_html,
     'uploads_html'   => $uploads_html,
-    'msg_count'      => count($messages),
+    'msg_count'      => count($conversations),
     'pending_count'  => $pending_count,
 ]);

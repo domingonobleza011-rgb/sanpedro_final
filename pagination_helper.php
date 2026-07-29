@@ -12,6 +12,12 @@
  * The helper preserves all existing GET params (e.g. keyword, search flag)
  * and only replaces/adds the `page` param.
  */
+if (!function_exists('page_url')) {
+    function page_url(string $base, string $sep, int $p): string {
+        return htmlspecialchars($base . $sep . 'page=' . $p);
+    }
+}
+
 function render_pagination(array $paged): void {
     $page      = $paged['page'];
     $lastPage  = $paged['last_page'];
@@ -27,10 +33,6 @@ function render_pagination(array $paged): void {
     unset($params['page']);
     $base = '?' . http_build_query($params);
     $sep  = empty($params) ? '' : '&';
-
-    function page_url(string $base, string $sep, int $p): string {
-        return htmlspecialchars($base . $sep . 'page=' . $p);
-    }
 
     $window = 2; // pages shown on each side of current
     ?>

@@ -1,4 +1,21 @@
 <?php 
+     // Force HTTPS: the "Take Photo" camera feature uses getUserMedia(), which
+     // browsers block on insecure (http://) origins. InfinityFree serves both
+     // http:// and https:// on the same domain, so without this redirect a
+     // resident who lands on the http:// version sees the camera silently fail.
+     if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
+         $redirectUrl = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+         header('Location: ' . $redirectUrl, true, 301);
+         exit;
+     }
+
+     // InfinityFree sends a restrictive default Permissions-Policy header that
+     // blocks camera access on every page ("camera is not allowed in this
+     // document"), regardless of what the browser's own permission prompt says.
+     // Sending our own header here overrides it so the Take Photo feature can
+     // actually request camera access on this page.
+     header('Permissions-Policy: camera=(self)');
+
      require('classes/resident.class.php');
     $residentbmis->create_resident();
      //$data = $bms->get_userdata();
@@ -501,18 +518,40 @@
         previewWrap.classList.add('d-none');
         liveWrap.classList.remove('d-none');
 
+        // getUserMedia only exists in a "secure context" (HTTPS, or localhost).
+        // On InfinityFree, if the page loads over plain http://, the browser hides
+        // navigator.mediaDevices entirely, which looks like "camera not supported"
+        // even though the real problem is the missing HTTPS connection.
+        if (!window.isSecureContext) {
+            showError('Camera access requires a secure (https://) connection. This page was loaded over http://. Please reload the page using https:// or use the Upload File option instead.');
+            return;
+        }
+
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             showError('Camera access is not supported on this browser. Please use the Upload File option instead.');
             return;
         }
 
         try {
+            // 'ideal' (not a hard requirement): prefer the rear camera on phones,
+            // but still fall back to whatever camera is available (e.g. laptops,
+            // which have no rear camera and would otherwise throw OverconstrainedError).
             stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
+                video: { facingMode: { ideal: 'environment' } }
             });
             video.srcObject = stream;
         } catch (err) {
-            showError('Could not access the camera. Please allow camera permission, or use the Upload File option instead.');
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                showError('Camera permission was denied. Please allow camera access in your browser\'s site settings, or use the Upload File option instead.');
+            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                showError('No camera was found on this device. Please use the Upload File option instead.');
+            } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+                showError('The camera is already in use by another app. Close it and try again, or use the Upload File option instead.');
+            } else if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
+                showError('No camera on this device matched the requested settings. Please use the Upload File option instead.');
+            } else {
+                showError('Could not access the camera (' + (err.name || 'unknown error') + '). Please use the Upload File option instead.');
+            }
         }
     }
 

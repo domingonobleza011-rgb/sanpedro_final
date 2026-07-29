@@ -42,31 +42,29 @@ if (isset($_POST['reject_resident'])) {
     exit();
 }
 
-// ---- Handle: Delete message ----
+// ---- Handle: Soft-delete a conversation (moves it to Archive) ----
 if (isset($_POST['delete_msg'])) {
-    $id = $_POST['id_admin_msg'];
-    $systemObject->deleteMessage($id);
+    $id_resident = (int)($_POST['id_resident'] ?? 0);
+    $systemObject->archiveConversation($id_resident, $admin_name);
     header("Location: admn_messages.php?toast=msg_deleted");
     exit();
 }
 
-// ---- Handle: Bulk delete messages ----
+// ---- Handle: Bulk soft-delete conversations ----
 if (isset($_POST['bulk_delete_msg']) && !empty($_POST['msg_ids'])) {
     $ids = array_map('intval', $_POST['msg_ids']);
-    foreach ($ids as $id) {
-        $systemObject->deleteMessage($id);
+    foreach ($ids as $id_resident) {
+        $systemObject->archiveConversation($id_resident, $admin_name);
     }
     header("Location: admn_messages.php?toast=msg_deleted");
     exit();
 }
 
-// ---- Handle: Reply to a resident message ----
-// NOTE: replyToMessage() is assumed — add it to your class if it doesn't exist yet.
-// It should insert the reply (linked to id_admin_msg) and, ideally, notify the resident.
+// ---- Handle: Reply to a resident's conversation ----
 if (isset($_POST['reply_msg'])) {
-    $id_admin_msg = (int)$_POST['id_admin_msg'];
-    $reply_text   = trim($_POST['reply_text'] ?? '');
-    if ($reply_text !== '' && $systemObject->replyToMessage($id_admin_msg, $reply_text, $admin_name)) {
+    $id_resident = (int)($_POST['id_resident'] ?? 0);
+    $reply_text  = trim($_POST['reply_text'] ?? '');
+    if ($id_resident && $reply_text !== '' && $systemObject->replyToMessage($id_resident, $reply_text, $admin_name)) {
         header("Location: admn_messages.php?toast=reply_sent");
     } else {
         header("Location: admn_messages.php?toast=error");
@@ -75,7 +73,7 @@ if (isset($_POST['reply_msg'])) {
 }
 
 // ---- Fetch data ----
-$messages   = $systemObject->viewMessages();
+$conversations = $systemObject->getConversations();
 $id_uploads = [];
 $id_uploads = $systemObject->getPendingIDUploads();
 
@@ -303,7 +301,7 @@ foreach ($id_uploads as $up) {
 <body>
 
 <div class="container my-4">
-    <h2 class="fw-bold mb-4 text-center">Resident Messages<span class="badge bg-primary ms-1" id="badge-msg-count"><?= count($messages) > 0 ? count($messages) : '' ?></span></h2>
+    <h2 class="fw-bold mb-4 text-center">Resident Messages<span class="badge bg-primary ms-1" id="badge-msg-count"><?= count($conversations) > 0 ? count($conversations) : '' ?></span></h2>
 
 
 
@@ -345,41 +343,48 @@ foreach ($id_uploads as $up) {
                             </tr>
                         </thead>
                         <tbody id="messages-tbody">
-                            <?php if (!empty($messages)): ?>
-                                <?php foreach ($messages as $msg):
-                                    $mid      = $msg['id_admin_msg'];
-                                    $mfname   = htmlspecialchars($msg['fname']);
-                                    $mfull    = htmlspecialchars($msg['fname'] . ' ' . $msg['lname']);
+                            <?php if (!empty($conversations)): ?>
+                                <?php foreach ($conversations as $conv):
+                                    $rid      = $conv['id_resident'];
+                                    $mfname   = htmlspecialchars($conv['fname']);
+                                    $mfull    = htmlspecialchars($conv['fname'] . ' ' . $conv['lname']);
+                                    $thread   = $systemObject->getConversationThread($rid);
+                                    $lastMsg  = end($thread); // most recent bubble, used to decide "Reply" vs "Reply Again"
                                 ?>
-                                    <tr id="msgRow<?= $mid ?>">
+                                    <tr id="msgRow<?= $rid ?>">
                                         <td class="align-middle">
                                             <input type="checkbox" class="form-check-input msg-checkbox"
-                                                   value="<?= $mid ?>" onchange="updateBulkToolbar()">
+                                                   value="<?= $rid ?>" onchange="updateBulkToolbar()">
                                         </td>
-                                        <td class="align-middle fw-bold"><?= $mfull ?></td>
+                                        <td class="align-middle fw-bold">
+                                            <?= $mfull ?>
+                                            <?php if ($conv['unread_count'] > 0): ?>
+                                                <span class="badge bg-danger rounded-pill ms-1"><?= (int)$conv['unread_count'] ?></span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="align-middle text-muted">
-                                            <?= htmlspecialchars(substr($msg['message_text'], 0, 50)) ?>...
+                                            <?= htmlspecialchars(substr($conv['last_message'], 0, 50)) ?>...
                                         </td>
                                         <td class="align-middle">
-                                            <?= date('M d, Y | h:i A', strtotime($msg['date_sent'])) ?>
+                                            <?= date('M d, Y | h:i A', strtotime($conv['last_date'])) ?>
                                         </td>
                                         <td class="align-middle">
                                             <button class="btn btn-info btn-sm rounded-pill px-3 fw-bold"
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#viewMsg<?= $mid ?>">
+                                                    data-bs-target="#viewMsg<?= $rid ?>">
                                                 <i class="bi bi-eye-fill me-1"></i> View
                                             </button>
                                         </td>
                                         <td class="align-middle">
                                             <button type="button" class="btn btn-danger btn-sm rounded-pill px-3"
-                                                onclick="openDeleteMsgModal(<?= $mid ?>, '<?= $mfname ?>')">
+                                                onclick="openDeleteMsgModal(<?= $rid ?>, '<?= $mfname ?>')">
                                                 <i class="bi bi-trash-fill me-1"></i> Delete
                                             </button>
                                         </td>
                                     </tr>
 
-                                    <!-- View Message Modal (Bootstrap) - chat/conversation style -->
-                                    <div class="modal fade" id="viewMsg<?= $mid ?>" tabindex="-1" aria-hidden="true">
+                                    <!-- View Conversation Modal (Bootstrap) - full chat thread for this resident -->
+                                    <div class="modal fade" id="viewMsg<?= $rid ?>" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                                                 <div class="modal-header chat-thread-header text-white">
@@ -393,48 +398,49 @@ foreach ($id_uploads as $up) {
                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body p-4 chat-thread-bg">
-                                                    <div class="chat-row">
-                                                        <div class="chat-avatar chat-avatar-sm"><?= strtoupper(substr($mfname, 0, 1)) ?></div>
-                                                        <div class="chat-bubble chat-bubble-incoming">
-                                                            <?= nl2br(htmlspecialchars($msg['message_text'])) ?>
-                                                        </div>
-                                                    </div>
-                                                    <div class="chat-timestamp">
-                                                        <?= date('F j, Y, g:i a', strtotime($msg['date_sent'])) ?>
-                                                    </div>
-
-                                                    <?php if (!empty($msg['reply_text'])): ?>
-                                                    <div class="chat-row chat-row-outgoing mt-3">
-                                                        <div class="chat-bubble chat-bubble-outgoing">
-                                                            <?= nl2br(htmlspecialchars($msg['reply_text'])) ?>
-                                                        </div>
-                                                    </div>
-                                                    <div class="chat-timestamp chat-timestamp-outgoing">
-                                                        <?= htmlspecialchars($msg['replied_by']) ?> &middot;
-                                                        <?= date('F j, Y, g:i a', strtotime($msg['reply_date'])) ?>
-                                                    </div>
-                                                    <?php endif; ?>
+                                                    <?php foreach ($thread as $bubble): ?>
+                                                        <?php if ($bubble['side'] === 'resident'): ?>
+                                                            <div class="chat-row mt-3">
+                                                                <div class="chat-avatar chat-avatar-sm"><?= strtoupper(substr($mfname, 0, 1)) ?></div>
+                                                                <div class="chat-bubble chat-bubble-incoming">
+                                                                    <?= nl2br(htmlspecialchars($bubble['message_text'])) ?>
+                                                                </div>
+                                                            </div>
+                                                            <div class="chat-timestamp">
+                                                                <?= date('F j, Y, g:i a', strtotime($bubble['date_sent'])) ?>
+                                                            </div>
+                                                        <?php else: ?>
+                                                            <div class="chat-row chat-row-outgoing mt-3">
+                                                                <div class="chat-bubble chat-bubble-outgoing">
+                                                                    <?= nl2br(htmlspecialchars($bubble['message_text'])) ?>
+                                                                </div>
+                                                            </div>
+                                                            <div class="chat-timestamp chat-timestamp-outgoing">
+                                                                <?= date('F j, Y, g:i a', strtotime($bubble['date_sent'])) ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>
 
                                                     <!-- Reply composer: hidden until "Reply" is clicked -->
-                                                    <div class="reply-box d-none mt-3" id="replyBox<?= $mid ?>">
-                                                        <textarea class="form-control reply-textarea" id="replyText<?= $mid ?>"
+                                                    <div class="reply-box d-none mt-3" id="replyBox<?= $rid ?>">
+                                                        <textarea class="form-control reply-textarea" id="replyText<?= $rid ?>"
                                                                   rows="3" placeholder="Type your reply to <?= $mfname ?>..."></textarea>
                                                         <div class="d-flex justify-content-end gap-2 mt-2">
                                                             <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3"
-                                                                    onclick="toggleReplyBox(<?= $mid ?>, false)">Cancel</button>
+                                                                    onclick="toggleReplyBox(<?= $rid ?>, false)">Cancel</button>
                                                             <button type="button" class="btn btn-primary btn-sm rounded-pill px-3"
-                                                                    onclick="sendReply(<?= $mid ?>)">
+                                                                    onclick="sendReply(<?= $rid ?>)">
                                                                 <i class="bi bi-send-fill me-1"></i> Send
                                                             </button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer border-0" id="viewFooter<?= $mid ?>">
+                                                <div class="modal-footer border-0" id="viewFooter<?= $rid ?>">
                                                     <button type="button" class="btn btn-primary rounded-pill px-4"
-                                                            id="replyBtn<?= $mid ?>"
-                                                            onclick="toggleReplyBox(<?= $mid ?>, true)">
+                                                            id="replyBtn<?= $rid ?>"
+                                                            onclick="toggleReplyBox(<?= $rid ?>, true)">
                                                         <i class="bi bi-reply-fill me-1"></i>
-                                                        <?= !empty($msg['reply_text']) ? 'Reply Again' : 'Reply' ?>
+                                                        <?= ($lastMsg && $lastMsg['side'] === 'admin') ? 'Reply Again' : 'Reply' ?>
                                                     </button>
                                                     <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
                                                 </div>
@@ -459,7 +465,7 @@ foreach ($id_uploads as $up) {
 
 <!-- Delete message form -->
 <form id="deleteMsgForm" method="POST" action="admn_messages.php" style="display:none;">
-    <input type="hidden" name="id_admin_msg" id="deleteMsgId">
+    <input type="hidden" name="id_resident" id="deleteMsgId">
     <input type="hidden" name="delete_msg"   value="1">
 </form>
 
@@ -471,7 +477,7 @@ foreach ($id_uploads as $up) {
 
 <!-- Reply to message form -->
 <form id="replyForm" method="POST" action="admn_messages.php" style="display:none;">
-    <input type="hidden" name="id_admin_msg" id="replyMsgId">
+    <input type="hidden" name="id_resident" id="replyMsgId">
     <input type="hidden" name="reply_text"   id="replyMsgText">
     <input type="hidden" name="reply_msg"    value="1">
 </form>
@@ -493,8 +499,8 @@ foreach ($id_uploads as $up) {
         <i class="bi bi-trash-fill" style="color:#dc2626; font-size:18px;"></i>
       </div>
       <div>
-        <p class="bmis-modal-title">Delete message</p>
-        <p class="bmis-modal-sub">This action cannot be undone.</p>
+        <p class="bmis-modal-title">Move to Archive</p>
+        <p class="bmis-modal-sub">You can restore it later from Archive.</p>
       </div>
     </div>
     <hr style="margin:16px 0; border-color:#e5e7eb;">
@@ -502,7 +508,7 @@ foreach ($id_uploads as $up) {
       <i class="bi bi-chat-left-dots-fill" style="color:#dc2626; font-size:20px; flex-shrink:0;"></i>
       <div>
         <p id="deleteMsgModalName" style="font-size:14px; font-weight:700; color:#991b1b;"></p>
-        <p style="font-size:12px; color:#b91c1c;">The message will be permanently deleted.</p>
+        <p style="font-size:12px; color:#b91c1c;">This conversation will be moved to Archive. You can restore or permanently delete it from there.</p>
       </div>
     </div>
     <div style="display:flex; gap:8px; justify-content:flex-end;">
@@ -526,8 +532,7 @@ foreach ($id_uploads as $up) {
         <i class="bi bi-trash-fill" style="color:#dc2626; font-size:18px;"></i>
       </div>
       <div>
-        <p class="bmis-modal-title">Delete selected messages</p>
-        <p class="bmis-modal-sub">This action cannot be undone.</p>
+        <p class="bmis-modal-sub">You can restore them later from Archive.</p>
       </div>
     </div>
     <hr style="margin:16px 0; border-color:#e5e7eb;">
@@ -535,7 +540,7 @@ foreach ($id_uploads as $up) {
       <i class="bi bi-exclamation-triangle-fill" style="color:#dc2626; font-size:20px; flex-shrink:0;"></i>
       <div>
         <p id="bulkDeleteCount" style="font-size:14px; font-weight:700; color:#991b1b;"></p>
-        <p style="font-size:12px; color:#b91c1c;">All selected messages will be permanently deleted.</p>
+        <p style="font-size:12px; color:#b91c1c;">All selected conversations will be moved to Archive. You can restore or permanently delete them from there.</p>
       </div>
     </div>
     <div style="display:flex; gap:8px; justify-content:flex-end;">
@@ -593,7 +598,7 @@ function openDeleteUploadModal(uploadId, name) {
 
 function openDeleteMsgModal(msgId, name) {
     document.getElementById('deleteMsgId').value = msgId;
-    document.getElementById('deleteMsgModalName').textContent = 'Message from ' + name;
+    document.getElementById('deleteMsgModalName').textContent = 'Conversation with ' + name;
     document.getElementById('deleteMsgModal').classList.add('open');
 }
 
@@ -713,7 +718,7 @@ var toastConfigs = {
     approved:      { type: 'success', title: 'Approved',  msg: 'Resident account has been verified successfully.' },
     rejected:      { type: 'warning', title: 'Rejected',  msg: 'ID submission rejected. Resident has been notified.' },
     upload_deleted:{ type: 'delete',  title: 'Deleted',   msg: 'ID submission record permanently deleted.' },
-    msg_deleted:   { type: 'delete',  title: 'Deleted',   msg: 'Message(s) permanently deleted.' },
+    msg_deleted:   { type: 'delete',  title: 'Archived',   msg: 'Conversation(s) moved to Archive.' },
     reply_sent:    { type: 'success', title: 'Reply Sent', msg: 'Your reply has been sent to the resident.' },
     error:         { type: 'error',   title: 'Error',     msg: 'Something went wrong. Please try again.' },
 };

@@ -99,6 +99,7 @@ if (!empty($_SERVER['QUERY_STRING'])) {
     <meta name="author" content="">
 
     <title>Barangay San Pedro</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -808,7 +809,7 @@ hr {
                 <i class="fas fa-user-clock mr-2"></i>Pending Registrations
             </a>
             <a class="collapse-item" href="admn_messages.php">
-                <i class="bi bi-chat-left-text mr-2"></i>Verification &Messages
+                <i class="bi bi-chat-left-text mr-2"></i>Messages
             </a>
             <a class="collapse-item" href="admn_password_reset_requests.php">
                 <i class="fas fa-key mr-2"></i>Password Reset Requests
@@ -850,9 +851,6 @@ hr {
             </a>
             <a class="collapse-item" href="admn_certofindigency.php">
                 <i class="fas fa-fw fa-table mr-2"></i>Certificate of Indigency
-            </a>
-            <a class="collapse-item" href="admn_blotterreport.php">
-                <i class="fas fa-user-shield mr-2"></i>Blotter Report
             </a>
             <a class="collapse-item" href="admn_complaints.php">
                 <i class="bi bi-people-fill mr-2"></i>Complaints

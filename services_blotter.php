@@ -463,46 +463,16 @@ require('secure_header.php');
                 height: 120px;
                 width: 120px;
             }
-                .mobile-bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 65px;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    z-index: 1050;
-    border-top: 1px solid #dee2e6;
-}
+                
 
-.mobile-bottom-nav .nav-item {
-    text-decoration: none;
-    color: #6c757d;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 0.7rem; /* Small text for mobile */
-    font-weight: 500;
-}
 
-.mobile-bottom-nav .nav-item i {
-    font-size: 1.4rem; /* Larger icons for easy tapping */
-    margin-bottom: 2px;
-}
 
-.mobile-bottom-nav .nav-item:active {
-    color: #0d6efd;
-}
 
-/* Add padding to the bottom of the body so content isn't hidden by the nav */
-@media (max-width: 767px) {
-    body {
-        padding-bottom: 80px;
-    }
-}
+
+
+
+
+
 
         </style>
     </head>
@@ -513,44 +483,7 @@ require('secure_header.php');
         <span class="screen-reader-text">Back to top</span>
     </a>
 
- <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="resident_homepage.php">
-            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
-        </a>
-        <div class="d-flex ms-auto">
-            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
-            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
-            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
-            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
-            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
-        </div>
-    </div>
-</nav>
-
-<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
-<div class="mobile-bottom-nav d-md-none">
-    <a href="resident_homepage.php" class="nav-item">
-        <i class="bi bi-house-door-fill"></i>
-        <span>Home</span>
-    </a>
-    <a href="resident_announcement.php" class="nav-item">
-        <i class="bi bi-megaphone-fill"></i>
-        <span>News</span>
-    </a>
-    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
-        <i class="bi bi-person-badge"></i>
-        <span>Profile</span>
-    </a>
-    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
-        <i class="bi bi-shield-lock"></i>
-        <span>Pass</span>
-    </a>
-    <a href="logout.php" class="nav-item text-danger">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>Exit</span>
-    </a>
-</div>
+ <?php include __DIR__ . '/resident_navbar.php'; ?>
 
 
     <section class="container my-5 py-4">

@@ -8,6 +8,8 @@ require('secure_header.php');
     // Check if resident is verified
     $is_verified = $bmis->isResidentVerified($userdetails['id_resident']);
 
+$unread_msg_count = $bmis->getUnreadResidentMessageCount($userdetails['id_resident']);
+
     $dt = new DateTime("now", new DateTimeZone('Asia/Manila'));
     $tm = new DateTime("now", new DateTimeZone('Asia/Manila'));
     $cdate = $dt->format('Y/m/d');
@@ -46,6 +48,7 @@ require('secure_header.php');
 
     <head> 
     <title> Barangay San Pedro Iriga </title>
+         <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
         <!-- responsive tags for screen compatibility -->
@@ -58,47 +61,17 @@ require('secure_header.php');
         
 
     <style>
-/* Mobile Bottom Nav Styling */
-.mobile-bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 65px;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    z-index: 1050;
-    border-top: 1px solid #dee2e6;
-}
 
-.mobile-bottom-nav .nav-item {
-    text-decoration: none;
-    color: #6c757d;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 0.7rem; /* Small text for mobile */
-    font-weight: 500;
-}
 
-.mobile-bottom-nav .nav-item i {
-    font-size: 1.4rem; /* Larger icons for easy tapping */
-    margin-bottom: 2px;
-}
 
-.mobile-bottom-nav .nav-item:active {
-    color: #0d6efd;
-}
 
-/* Add padding to the bottom of the body so content isn't hidden by the nav */
-@media (max-width: 767px) {
-    body {
-        padding-bottom: 80px;
-    }
-}
+
+
+
+
+
+
+
     /* Navbar Buttons */
 
   .service-card {
@@ -320,48 +293,10 @@ require('secure_header.php');
             <span class="screen-reader-text">Back to top</span>
         </a>
 
-        <!-- Eto yung navbar -->
+        
 
-        <!-- DESKTOP NAVBAR (Hidden on Mobile) -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="resident_homepage.php">
-            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
-        </a>
-        <div class="d-flex ms-auto">
-            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
-            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
-            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
-            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
-            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
-        </div>
-    </div>
-</nav>
-
-<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
-<div class="mobile-bottom-nav d-md-none">
-    <a href="resident_homepage.php" class="nav-item">
-        <i class="bi bi-house-door-fill"></i>
-        <span>Home</span>
-    </a>
-    <a href="resident_announcement.php" class="nav-item">
-        <i class="bi bi-megaphone-fill"></i>
-        <span>News</span>
-    </a>
-    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
-        <i class="bi bi-person-badge"></i>
-        <span>Profile</span>
-    </a>
-    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
-        <i class="bi bi-shield-lock"></i>
-        <span>Pass</span>
-    </a>
-
-    <a href="logout.php" class="nav-item text-danger">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>Exit</span>
-    </a>
-</div>
+        
+<?php include __DIR__ . '/resident_navbar.php'; ?>
 
 <style>
 /* ===== FACEBOOK-STYLE ANNOUNCEMENT FEED ===== */
@@ -555,11 +490,19 @@ require('secure_header.php');
     display: block;
     margin-bottom: 10px;
 }
+@media (max-width: 991.98px) {
+    h4 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    h4 {
+        font-size: 1.05rem;
+        line-height: 1.4;
+    }
+}
 </style>
-<button onclick="initPushNotifications()" id="enable-notif-btn" 
-    style="display:none; margin:10px auto;">
-    🔔 Enable Notifications
-</button>
 
         <div id="down1"></div>
 
@@ -573,8 +516,8 @@ require('secure_header.php');
                        
 <br><br>
                         <div class="header"> 
-                            <h4> Welcome to Barangay San Pedro Iriga City </h2><bR>
-                            <h4> You may select the following services offered below </h3>
+                            <h4> Welcome to Barangay San Pedro Iriga City </h4><bR>
+                            <h4> You may select the following services offered below </h4>
                         </div>
                     </div>
                 </div>
@@ -759,20 +702,8 @@ require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-s
             </a>
         </div>
 
-        <div class="col">
-            <a href="services_blotter.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
-                            <i class="bi bi-exclamation-octagon-fill fs-1"></i>
-                            <h4 class="mt-2 text-dark">Blotter</h4>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
 
-        <div class="col">
+               <div class="col">
             <a href="resident_messages.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
                 <div class="zoom1 h-100">
                     <div class="card h-100 shadow-sm">
@@ -780,7 +711,15 @@ require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-s
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
 require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-warning text-dark float-end">Action Needed</span><?php endif; ?>
-                            <i class="bi bi-chat-dots-fill fs-1"></i>
+                            <span class="position-relative d-inline-block">
+                                <i class="bi bi-chat-dots-fill fs-1"></i>
+                                <?php if ($unread_msg_count > 0): ?>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    <?= $unread_msg_count > 9 ? '9+' : $unread_msg_count ?>
+                                    <span class="visually-hidden">unread messages</span>
+                                </span>
+                                <?php endif; ?>
+                            </span>
                             <h4 class="mt-2 text-dark">Messages</h4>
                             <?php
 define('BMIS_ROLE_REQUIRED', 'resident');

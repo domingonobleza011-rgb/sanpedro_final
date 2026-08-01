@@ -12,6 +12,7 @@ if (!isset($_SESSION['userdata']['id_resident'])) {
 $userdetails = $_SESSION['userdata'];
 $resident_id = $userdetails['id_resident']; 
 $is_verified = $bmis->isResidentVerified($userdetails['id_resident']);
+$main->markResidentMessagesRead($resident_id);
 
 // ---- Handle: Send message to admin ----
 if (isset($_POST['send_to_admin'])) {
@@ -358,48 +359,16 @@ usort($all_messages, fn($a, $b) => strtotime($a['date_sent']) <=> strtotime($b['
         .upload-zone { border: 2px dashed #0d6efd; border-radius: 12px; background: #f8f9ff; }
 
         /* ─── Mobile bottom nav ─── */
-        .mobile-bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 65px; background: #fff;
-            display: flex; justify-content: space-around; align-items: center;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1050; border-top: 1px solid #dee2e6;
-        }
-        .mobile-bottom-nav .nav-item {
-            text-decoration: none; color: #6c757d;
-            display: flex; flex-direction: column; align-items: center;
-            font-size: 0.7rem; font-weight: 500;
-        }
-        .mobile-bottom-nav .nav-item i { font-size: 1.4rem; margin-bottom: 2px; }
-        .mobile-bottom-nav .nav-item:active { color: #0d6efd; }
+        
+        
+        
+        
     </style>
 </head>
 <body>
 
 <!-- DESKTOP NAV -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="resident_homepage.php">
-            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
-        </a>
-        <div class="d-flex ms-auto">
-            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
-            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
-            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
-            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
-            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
-        </div>
-    </div>
-</nav>
-
-<!-- MOBILE BOTTOM NAV -->
-<div class="mobile-bottom-nav d-md-none">
-    <a href="resident_homepage.php" class="nav-item"><i class="bi bi-house-door-fill"></i><span>Home</span></a>
-    <a href="resident_announcement.php" class="nav-item"><i class="bi bi-megaphone-fill"></i><span>News</span></a>
-    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item"><i class="bi bi-person-badge"></i><span>Profile</span></a>
-    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item"><i class="bi bi-shield-lock"></i><span>Pass</span></a>
-    <a href="logout.php" class="nav-item text-danger"><i class="bi bi-box-arrow-right"></i><span>Exit</span></a>
-</div>
+<?php include __DIR__ . '/resident_navbar.php'; ?>
 
 <div class="page-wrapper">
 
@@ -619,6 +588,47 @@ window.addEventListener('DOMContentLoaded', function() {
     new bootstrap.Modal(document.getElementById('uploadIDModal')).show();
 });
 <?php endif; ?>
+
+// ── Auto-refresh the chat thread every 5 seconds ────────────────────────────
+(function () {
+    let lastCount = <?= (int)count($all_messages) ?>;
+
+    function isNearBottom() {
+        // "Near bottom" = within ~80px of the latest message, so we only
+        // auto-scroll if the resident was already following the conversation —
+        // not if they scrolled up to re-read something older.
+        return chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight < 80;
+    }
+
+    function poll() {
+        // Don't refresh mid-interaction: an open modal (e.g. the delete confirm
+        // isn't a modal here, but the Upload ID modal is) or an in-progress draft
+        // shouldn't be interrupted by a DOM swap underneath them.
+        if (document.querySelector('.modal.show')) return;
+
+        fetch('ajax_resident_chat.php')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data || data.error || !chatBody) return;
+
+                const wasNearBottom = isNearBottom();
+                const hasNewMessage = data.count > lastCount;
+                lastCount = data.count;
+
+                chatBody.innerHTML = data.chat_html;
+
+                // Only auto-scroll down if there's something new AND the
+                // resident hadn't scrolled away to read earlier messages.
+                if (hasNewMessage && wasNearBottom) {
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }
+            })
+            .catch(function () {});
+    }
+
+    setInterval(poll, 60000);
+})();
 </script>
 </body>
+
 </html>

@@ -58,48 +58,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_security_q'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Security Question — Barangay San Pedro</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 </head>
-<!-- DESKTOP NAVBAR (Hidden on Mobile) -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="resident_homepage.php">
-            <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
-        </a>
-        <div class="d-flex ms-auto">
-            <a href="resident_homepage.php" class="btn btn-primary me-1"><i class="bi bi-house-door-fill me-1"></i> Home</a>
-            <a href="resident_announcement.php" class="btn btn-primary me-1"><i class="bi bi-megaphone-fill me-1"></i> Announcements</a>
-            <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-person-badge me-1"></i> Profile</a>
-            <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="btn btn-primary me-1"><i class="bi bi-shield-lock me-1"></i> Password</a>
-            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
-        </div>
-    </div>
-</nav>
 
-<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
-<div class="mobile-bottom-nav d-md-none">
-    <a href="resident_homepage.php" class="nav-item">
-        <i class="bi bi-house-door-fill"></i>
-        <span>Home</span>
-    </a>
-    <a href="resident_announcement.php" class="nav-item">
-        <i class="bi bi-megaphone-fill"></i>
-        <span>News</span>
-    </a>
-    <a href="resident_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
-        <i class="bi bi-person-badge"></i>
-        <span>Profile</span>
-    </a>
-    <a href="resident_changepass.php?id_resident=<?= $userdetails['id_resident'];?>" class="nav-item">
-        <i class="bi bi-shield-lock"></i>
-        <span>Pass</span>
-    </a>
-    <a href="logout.php" class="nav-item text-danger">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>Exit</span>
-    </a>
-</div>
+<?php include __DIR__ . '/resident_navbar.php'; ?>
 <body class="bg-light">
 <div class="content-wrapper p-4">
     <div class="row justify-content-center">

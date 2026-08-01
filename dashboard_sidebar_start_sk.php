@@ -116,9 +116,7 @@ hr { border-color: var(--border) !important; opacity: 1 !important; margin: 0.5r
     <ul class="navbar-nav bg-success sidebar sidebar-dark accordion" id="accordionSidebar">
 
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="sk_dashboard.php">
-            <div class="sidebar-brand-icon">
-                <i class="fas fa-leaf" style="font-size:1.4rem;color:rgba(255,255,255,0.8);"></i>
-            </div>
+
             <div class="sidebar-brand-text ms-2">
                 SK Portal<br>
                 <span style="font-size:0.68rem;font-weight:400;opacity:0.7;">Youth Engagement Module</span>

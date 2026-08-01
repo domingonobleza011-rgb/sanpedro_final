@@ -1,5 +1,8 @@
 <?php
+    define('BMIS_ROLE_REQUIRED', 'admin_dashboard');
+require('secure_header.php');
     require('classes/main.class.php');
+$bmis->validate_staff_or_admin();
     $bmis->admin_changepass();
     $userdetails = $bmis->get_userdata();
     include('dashboard_sidebar_start.php');

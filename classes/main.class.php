@@ -689,6 +689,32 @@ public function admin_delete_announcement(){
             $this->closeConn();
         }
     }
+    
+    public function getUnreadResidentMessageCount($id_resident) {
+        try {
+            $sql  = "SELECT COUNT(*) FROM resident_messages WHERE id_resident = ? AND is_read = 0";
+            $stmt = $this->openConn()->prepare($sql);
+            $stmt->execute([$id_resident]);
+            return (int)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return 0;
+        } finally {
+            $this->closeConn();
+        }
+    }
+ 
+    // Clears the unread badge — call this when the resident actually opens resident_messages.php.
+    public function markResidentMessagesRead($id_resident) {
+        try {
+            $sql  = "UPDATE resident_messages SET is_read = 1 WHERE id_resident = ? AND is_read = 0";
+            $stmt = $this->openConn()->prepare($sql);
+            return $stmt->execute([$id_resident]);
+        } catch (PDOException $e) {
+            return false;
+        } finally {
+            $this->closeConn();
+        }
+    }
  
     public function deleteResidentMessage($id_msg) {
         try {

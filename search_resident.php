@@ -5,6 +5,23 @@
     $page    = max(1, (int)($_GET['page'] ?? 1));
     $perPage = 10;
 
+function format_resident_address(array $row): string {
+        $parts = [
+            $row['houseno']   ?? '',
+            $row['street']    ?? '',
+            $row['brgy']      ?? '',
+            $row['municipal'] ?? '',
+            $row['province']  ?? '',
+        ];
+        $parts = array_filter(array_map('trim', $parts), fn($p) => $p !== '');
+ 
+        if (!empty($parts)) {
+            return implode(', ', $parts);
+        }
+ 
+        // Structured fields are empty -> this is a pre-PSGC-fix account, use the legacy column
+        return trim($row['address'] ?? '');
+    }
     if (isset($_POST['search_resident'])) {
         $keyword = $_POST['keyword'];
         $kw = "%$keyword%";
@@ -64,7 +81,7 @@
                 </td>
                 <td><?= $row['id_resident'] ?></td>
                 <td><?= htmlspecialchars($row['lname']) ?>, <?= htmlspecialchars($row['fname']) ?> <?= htmlspecialchars($row['mi']) ?></td>
-                <td><?= htmlspecialchars($row['houseno']) ?>, <?= htmlspecialchars($row['street']) ?>, <?= htmlspecialchars($row['brgy']) ?></td>
+                <td><?= htmlspecialchars(format_resident_address($row)) ?></td>
 
                 <!-- View Modal -->
                 <div class="modal fade" id="viewModal<?= $row['id_resident'] ?>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -93,8 +110,7 @@
                                 </div>
                                 <hr>
                                 <h5><strong>Contact & Address</strong></h5>
-                                <p><strong>Contact Number:</strong> <?= htmlspecialchars($row['contact']) ?></p>
-                                <p><strong>Address:</strong> <?= htmlspecialchars($row['houseno']) ?>, <?= htmlspecialchars($row['street']) ?>, <?= htmlspecialchars($row['brgy']) ?>, <?= htmlspecialchars($row['municipal']) ?></p>
+                                <p><strong>Address:</strong> <?= htmlspecialchars(format_resident_address($row)) ?></p>
                                 <hr>
                                 <a href="update_resident_form.php?id_resident=<?= $row['id_resident'] ?>" class="btn btn-primary" style="width:100px;border-radius:30px;">Update</a>
                             </div>

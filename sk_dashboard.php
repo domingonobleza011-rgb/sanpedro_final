@@ -119,7 +119,6 @@ try {
 
     <!-- Page Header -->
     <div class="sk-page-header">
-        <div class="hdr-icon"><i class="fas fa-leaf"></i></div>
         <div>
             <h2>Sangguniang Kabataan Portal</h2>
             <p>Youth Engagement Module — Barangay San Pedro</p>

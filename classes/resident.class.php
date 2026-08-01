@@ -22,9 +22,11 @@
         $status = $_POST['status'];
         $houseno = $_POST['houseno'];
         $street = $_POST['street'];
+        $region = $_POST['region'] ?? '';     // free-text region name from PSGC cascading dropdown
+        $province = $_POST['province'] ?? ''; // free-text province name (blank for regions with no provinces, e.g. NCR)
         $brgy = $_POST['brgy'];
         $municipal = $_POST['municipal'];
-        $contact = $_POST['contact']; // Profile contact info
+        $contact = $_POST['contact'] ?? ''; // Profile contact info (no longer collected at registration)
         $bdate = $_POST['bdate'];
         $bplace = $_POST['bplace'];
         $nationality = $_POST['nationality'];
@@ -91,17 +93,17 @@
             // 3. Insert into the PENDING table (NOT tbl_resident) until an admin approves the ID
             $stmt = $connection->prepare("INSERT INTO tbl_resident_pending (
                 `email`, `phone_number`, `password`, `lname`, `fname`, `mi`, `pwd`, `sex`,
-                `status`, `houseno`, `street`, `brgy`, `municipal`, `contact`, `bdate`,
+                `status`, `houseno`, `street`, `region`, `province`, `brgy`, `municipal`, `contact`, `bdate`,
                 `bplace`, `nationality`, `voter`, `family_role`, `role`, `addedby`,
                 `valid_id_file`, `valid_id_original_name`, `valid_id_file_type`, `application_status`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
 
             $stmt->execute([
                 $email_to_save,
                 $phone_to_save,
                 $hashed_password,
                 $lname, $fname, $mi, $pwd, $sex, $status,
-                $houseno, $street, $brgy, $municipal, $contact,
+                $houseno, $street, $region, $province, $brgy, $municipal, $contact,
                 $bdate, $bplace, $nationality, $voter, $familyrole, $role, $addedby,
                 $new_filename, $original_name, $file_type
             ]);
@@ -348,15 +350,15 @@ header("refresh: 0");
 
             $insert = $connection->prepare("INSERT INTO tbl_resident (
                 `email`, `phone_number`, `password`, `lname`, `fname`, `mi`, `pwd`, `sex`,
-                `status`, `houseno`, `street`, `brgy`, `municipal`, `contact`, `bdate`,
+                `status`, `houseno`, `street`, `region`, `province`, `brgy`, `municipal`, `contact`, `bdate`,
                 `bplace`, `nationality`, `voter`, `family_role`, `role`, `addedby`,
                 `is_verified`, `verified_at`, `verified_by`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), ?)");
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), ?)");
 
             $insert->execute([
                 $p['email'], $p['phone_number'], $p['password'], $p['lname'], $p['fname'], $p['mi'],
-                $p['pwd'], $p['sex'], $p['status'], $p['houseno'], $p['street'], $p['brgy'],
-                $p['municipal'], $p['contact'], $p['bdate'], $p['bplace'], $p['nationality'],
+                $p['pwd'], $p['sex'], $p['status'], $p['houseno'], $p['street'], $p['region'], $p['province'],
+                $p['brgy'], $p['municipal'], $p['contact'], $p['bdate'], $p['bplace'], $p['nationality'],
                 $p['voter'], $p['family_role'], $p['role'], $p['addedby'], $admin_name
             ]);
 

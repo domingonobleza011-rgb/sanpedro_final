@@ -1,9 +1,5 @@
 <?php 
-     // Force HTTPS: the "Take Photo" camera feature uses getUserMedia(), which
-     // browsers block on insecure (http://) origins. InfinityFree serves both
-     // http:// and https:// on the same domain, so without this redirect a
-     // resident who lands on the http:// version sees the camera silently fail.
-     if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
+  if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
          $redirectUrl = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
          header('Location: ' . $redirectUrl, true, 301);
          exit;
@@ -18,9 +14,7 @@
 
      require('classes/resident.class.php');
     $residentbmis->create_resident();
-     //$data = $bms->get_userdata();
-
-     
+     //$data = $bms->get_userdata(); 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -81,16 +75,11 @@
                             </div>
 
                             <div class="row g-3 mtop">
-    <div class="col-md-4">
-        <label class="form-label">Contact Number:</label>
-        <input type="tel" class="form-control" name="contact" maxlength="11" pattern="[0-9]{11}" placeholder="09123456789" required>
-    </div>
-
-   <div class="col-md-4">
+   <div class="col-md-6">
                                     <label class="form-label"> Username or Phone Number:</label>
                                     <input type="text" class="form-control" name="login_identity" placeholder="Enter Email or Phone Number" required>
                                 </div>
-<div class="col-md-4">
+<div class="col-md-6">
     <label class="form-label">Password:</label>
     <div class="password-wrapper" style="position: relative;">
         <input type="password" 
@@ -123,13 +112,13 @@
                                 <div class="row g-3 mtop">
                                 <div class="col-md-3">
                                     <label class="form-label">Region:</label>
-                                    <select class="form-select" id="regionSelect" required>
+                                    <select class="form-select" id="regionSelect" name="region" required>
                                         <option value="">Loading regions...</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Province:</label>
-                                    <select class="form-select" id="provinceSelect" required disabled>
+                                    <select class="form-select" id="provinceSelect" name="province" required disabled>
                                         <option value="">Select Region first</option>
                                     </select>
                                 </div>
@@ -222,7 +211,7 @@
                                         <button type="button" id="idModeUploadBtn" class="btn btn-outline-secondary btn-sm active">
                                             <i class="fa-solid fa-file-arrow-up me-1"></i> Upload File
                                         </button>
-                                        <button type="button" id="idModeCameraBtn" class="btn btn-outline-secondary btn-sm">
+<button type="button" id="idModeCameraBtn" class="btn btn-outline-secondary btn-sm">
                                             <i class="fa-solid fa-camera me-1"></i> Take Photo
                                         </button>
                                     </div>
@@ -232,7 +221,7 @@
                                         <input type="file" class="form-control" id="valid_id_file_input" name="valid_id_file" accept=".jpg,.jpeg,.png,.pdf" required>
                                     </div>
 
-                                    <!-- Camera panel -->
+                                   <!-- Camera panel -->
                                     <div id="idCameraPanel" class="d-none">
                                         <div id="idCameraLive">
                                             <video id="idVideo" class="w-100 rounded border bg-dark" style="max-height:360px; object-fit:cover;" autoplay playsinline muted></video>
@@ -482,7 +471,6 @@
     });
 })();
 
-// ---- Valid ID: Upload vs. Take Photo ----
 (function () {
     const uploadBtn   = document.getElementById('idModeUploadBtn');
     const cameraBtn    = document.getElementById('idModeCameraBtn');
@@ -607,6 +595,172 @@
 
     // If the user re-selects Upload File normally, camera-captured file is replaced naturally.
     window.addEventListener('beforeunload', stopStream);
+})();
+// ===== Draft Autosave (localStorage) =====
+// Keeps whatever the resident has typed saved locally, so a dropped
+// connection, an accidental refresh, or the back button doesn't lose
+// their progress. The password field and the ID upload are intentionally
+// left out — passwords shouldn't sit in localStorage, and files can't be
+// serialized into it anyway.
+(function () {
+    const DRAFT_KEY = 'bmis_resident_registration_draft';
+    const form = document.querySelector('form[method="post"]');
+    if (!form) return;
+
+    const TEXT_FIELDS = [
+        'lname', 'fname', 'mi', 'login_identity',
+        'houseno', 'street', 'bdate', 'bplace', 'nationality'
+    ];
+    const SELECT_FIELDS = ['status', 'pwd', 'sex', 'voter', 'family_role'];
+    const ADDRESS_SELECTS = [
+        { select: 'regionSelect',   code: 'regionCode' },
+        { select: 'provinceSelect', code: 'provinceCode' },
+        { select: 'citymunSelect',  code: 'citymunCode' },
+        { select: 'barangaySelect', code: 'barangayCode' },
+    ];
+
+    function readDraft() {
+        try {
+            return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function saveDraft() {
+        const draft = { fields: {}, selects: {}, address: {}, terms: false };
+
+        TEXT_FIELDS.forEach(name => {
+            const el = form.querySelector(`[name="${name}"]`);
+            if (el) draft.fields[name] = el.value;
+        });
+        SELECT_FIELDS.forEach(name => {
+            const el = form.querySelector(`[name="${name}"]`);
+            if (el) draft.selects[name] = el.value;
+        });
+        ADDRESS_SELECTS.forEach(({ select, code }) => {
+            const selEl  = document.getElementById(select);
+            const codeEl = document.getElementById(code);
+            if (selEl) draft.address[select] = { value: selEl.value, code: codeEl ? codeEl.value : '' };
+        });
+        const terms = document.getElementById('termsCheck');
+        draft.terms = terms ? terms.checked : false;
+
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch (e) {
+            // storage full/unavailable (e.g. private browsing) — nothing to autosave to, fail silently
+        }
+    }
+
+    function clearDraft() {
+        try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+    }
+
+    function showRestoredNotice() {
+        const notice = document.createElement('div');
+        notice.style.cssText = 'position:fixed; top:24px; right:24px; z-index:9999; background:#fff;' +
+            'border-left:4px solid #0d6efd; border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);' +
+            'padding:14px 18px; max-width:340px; font-family:sans-serif; font-size:13px; color:#0f2d5a;';
+        notice.innerHTML = '<strong>Draft restored.</strong> We picked up where you left off. ' +
+            '<button type="button" id="discardDraftBtn" style="margin-left:8px; background:none; border:none;' +
+            'color:#0d6efd; text-decoration:underline; cursor:pointer; font-size:12px;">Start over</button>';
+        document.body.appendChild(notice);
+        setTimeout(() => notice.remove(), 8000);
+        document.getElementById('discardDraftBtn').addEventListener('click', function () {
+            clearDraft();
+            window.location.reload();
+        });
+    }
+
+    function restoreDraft() {
+        const draft = readDraft();
+        if (!draft) return;
+
+        let restoredSomething = false;
+
+        TEXT_FIELDS.forEach(name => {
+            const el = form.querySelector(`[name="${name}"]`);
+            if (el && draft.fields[name]) { el.value = draft.fields[name]; restoredSomething = true; }
+        });
+        SELECT_FIELDS.forEach(name => {
+            const el = form.querySelector(`[name="${name}"]`);
+            if (el && draft.selects[name]) { el.value = draft.selects[name]; restoredSomething = true; }
+        });
+        const terms = document.getElementById('termsCheck');
+        if (terms) terms.checked = !!draft.terms;
+
+        // The address selects populate asynchronously (region -> province ->
+        // city/municipality -> barangay via the PSGC API), so each level has to
+        // wait for its own options to actually exist before it can be selected
+        // and cascade to the next one.
+        function restoreLevel(i) {
+            if (i >= ADDRESS_SELECTS.length) return;
+            const { select } = ADDRESS_SELECTS[i];
+            const saved = draft.address[select];
+            if (!saved || !saved.value) return;
+
+            const selEl = document.getElementById(select);
+            let attempts = 0;
+            const poll = setInterval(function () {
+                attempts++;
+                const hasOption = Array.from(selEl.options).some(o => o.value === saved.value);
+                if (hasOption) {
+                    clearInterval(poll);
+                    selEl.value = saved.value;
+                    selEl.dispatchEvent(new Event('change'));
+                    restoreLevel(i + 1);
+                } else if (attempts > 40) { // ~12s of trying, then give up on this level
+                    clearInterval(poll);
+                }
+            }, 300);
+        }
+        if (draft.address[ADDRESS_SELECTS[0].select] && draft.address[ADDRESS_SELECTS[0].select].value) {
+            restoredSomething = true;
+        }
+        restoreLevel(0);
+
+        if (restoredSomething) showRestoredNotice();
+    }
+
+    const debounce = (fn, ms) => {
+        let t;
+        return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    };
+    const debouncedSave = debounce(saveDraft, 400);
+
+    [...TEXT_FIELDS, ...SELECT_FIELDS].forEach(name => {
+        const el = form.querySelector(`[name="${name}"]`);
+        if (el) el.addEventListener('input', debouncedSave);
+    });
+    ADDRESS_SELECTS.forEach(({ select }) => {
+        const el = document.getElementById(select);
+        if (el) el.addEventListener('change', debouncedSave);
+    });
+    const termsCheckbox = document.getElementById('termsCheck');
+    if (termsCheckbox) termsCheckbox.addEventListener('change', saveDraft);
+    // The "I Understand" button in the Terms modal checks the box programmatically,
+    // which doesn't fire a native 'change' event — so catch it separately.
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.matches('.modal-footer .btn-primary')) {
+            setTimeout(saveDraft, 50);
+        }
+    });
+
+    // create_resident() (server-side) prints a #toast element ABOVE this page's
+    // own markup when the form was submitted, before redirecting on success.
+    // If that toast is already in the DOM by the time this script runs, this
+    // page load IS the result of a submission attempt:
+    //   - succeeded  -> clear the draft, nothing left to protect
+    //   - failed     -> the re-rendered form below is blank, so restore anyway
+    const existingToast = document.getElementById('toast');
+    const succeeded = existingToast && existingToast.textContent.includes('Registration Submitted');
+
+    if (succeeded) {
+        clearDraft();
+    } else {
+        restoreDraft();
+    }
 })();
     </script>
 </body>

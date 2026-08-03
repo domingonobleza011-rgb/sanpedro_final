@@ -6,7 +6,7 @@ if (isset($_POST['search_femaleres'])) {
     $keyword = $_POST['keyword'];
     $kw      = "%$keyword%";
     $page    = max(1, (int)($_GET['page'] ?? 1));
-    $perPage = 2;
+    $perPage = 10;
 
     $countStmt = $conn->prepare("SELECT COUNT(*) FROM `tbl_resident` WHERE (sex = 'Female' AND (is_archived = 0 OR is_archived IS NULL)) AND (`lname` LIKE :kw OR `mi` LIKE :kw OR `fname` LIKE :kw OR `age` LIKE :kw OR `sex` LIKE :kw OR `status` LIKE :kw OR `houseno` LIKE :kw OR `street` LIKE :kw OR `brgy` LIKE :kw OR `municipal` LIKE :kw OR `contact` LIKE :kw OR `bdate` LIKE :kw OR `bplace` LIKE :kw OR `nationality` LIKE :kw OR `family_role` LIKE :kw OR `role` LIKE :kw OR `email` LIKE :kw)");
     $countStmt->execute([':kw' => $kw]);

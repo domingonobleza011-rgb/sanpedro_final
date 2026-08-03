@@ -1,5 +1,6 @@
 <?php
     require_once __DIR__ . '/../vendor/autoload.php';
+    require_once __DIR__ . '/security.php';
 function notif($message, $type = 'info') {
     $msg = addslashes($message);
     echo "<script>showNotif('$msg', '$type');</script>";
@@ -325,11 +326,19 @@ public function openConn() {
     }
     public function login() {
     if (session_status() === PHP_SESSION_NONE) { session_start(); }
+    require_once __DIR__ . '/security.php';
     if(isset($_POST['login'])) {
         $identity       = $_POST['login_identity'];
         $password_input = $_POST['password'];
 
         $connection = $this->openConn();
+
+        if (bmis_is_locked_out($connection, $identity)) {
+            $wait_min = (int) ceil(bmis_lockout_seconds_remaining($connection, $identity) / 60);
+            $_SESSION['login_error'] = "Too many failed login attempts. Please try again in $wait_min minute(s).";
+            header('Location: ' . $_SERVER['PHP_SELF']);
+            exit();
+        }
 
         // 1. Check ADMIN table
         $stmt = $connection->prepare("SELECT * FROM tbl_admin WHERE email = ? OR phone_number = ?");
@@ -338,6 +347,7 @@ public function openConn() {
 
         if($user && password_verify($password_input, $user['password'])) {
             if(in_array(strtolower($user['role']), ['admin', 'administrator'])) {
+                bmis_reset_login_attempts($connection, $identity);
                 $this->set_userdata($user);
                 $this->log_login_event('login', $user);
                 header('Location: admn_dashboard.php');
@@ -352,6 +362,7 @@ public function openConn() {
 
         if($user && password_verify($password_input, $user['password'])) {
             if($user['role'] == 'user') {
+                bmis_reset_login_attempts($connection, $identity);
                 $this->set_userdata($user);
                 $this->log_login_event('login', $user);
 
@@ -391,6 +402,7 @@ public function openConn() {
 
         if($user && password_verify($password_input, $user['password'])) {
             if($user['role'] == 'resident') {
+                bmis_reset_login_attempts($connection, $identity);
                 $this->set_userdata($user);
                 // residents are not admins — skip admin log
                 header('Location: resident_homepage.php');
@@ -399,6 +411,7 @@ public function openConn() {
         }
 
         // Invalid credentials
+        bmis_record_failed_login($connection, $identity);
         $this->log_login_event('failed', [], $identity);
         $_SESSION['login_error'] = 'Invalid credentials. Please check your Email/Phone and Password.';
         header('Location: ' . $_SERVER['PHP_SELF']);
@@ -545,15 +558,24 @@ public function openConn() {
  
             if(isset($_FILES['announcement_img']) && !empty($_FILES['announcement_img']['name'][0])) {
                 $upload_dir = "uploads/";
-                if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
+                if (!is_dir($upload_dir)) { mkdir($upload_dir, 0755, true); }
  
                 foreach($_FILES['announcement_img']['name'] as $key => $name) {
                     if($_FILES['announcement_img']['error'][$key] == 0) {
-                        $file_ext  = pathinfo($name, PATHINFO_EXTENSION);
-                        $new_name  = time() . '_' . uniqid() . '.' . $file_ext;
-                        $target_file = $upload_dir . $new_name;
-                        if(move_uploaded_file($_FILES['announcement_img']['tmp_name'][$key], $target_file)) {
-                            $uploaded_images[] = $new_name;
+                        $single_file = [
+                            'name'     => $name,
+                            'type'     => $_FILES['announcement_img']['type'][$key],
+                            'tmp_name' => $_FILES['announcement_img']['tmp_name'][$key],
+                            'error'    => $_FILES['announcement_img']['error'][$key],
+                            'size'     => $_FILES['announcement_img']['size'][$key],
+                        ];
+                        $validated = bmis_validate_image_upload($single_file);
+                        if ($validated['ok']) {
+                            $new_name    = time() . '_' . $validated['safe_name'];
+                            $target_file = $upload_dir . $new_name;
+                            if(move_uploaded_file($single_file['tmp_name'], $target_file)) {
+                                $uploaded_images[] = $new_name;
+                            }
                         }
                     }
                 }

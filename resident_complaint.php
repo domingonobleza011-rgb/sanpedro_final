@@ -37,9 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
         if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
             $upload_dir = __DIR__ . '/uploads/complaints/';
             if (!is_dir($upload_dir)) { mkdir($upload_dir, 0755, true); }
-            $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg','jpeg','png','gif','webp'])) {
-                $filename = 'complaint_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+            // Content-sniffed validation (finfo) on top of the extension
+            // check — an extension alone can be spoofed by renaming a file.
+            $validated = bmis_validate_image_upload($_FILES['photo']);
+            if ($validated['ok']) {
+                $filename = 'complaint_' . time() . '_' . $validated['safe_name'];
                 if (move_uploaded_file($_FILES['photo']['tmp_name'], $upload_dir . $filename)) {
                     $photo_path = 'uploads/complaints/' . $filename;
                 }

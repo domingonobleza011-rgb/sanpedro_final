@@ -49,37 +49,37 @@
                         <div class="row mt-3">
                             <div class="col">
                                 <label class="form-group"> Last Name:</label>
-                                <input type="text" class="form-control" name="lname" value="<?= htmlspecialchars($staff['lname']);?>">
+                                <input type="text" class="form-control" name="lname" value="<?= htmlspecialchars($staff['lname']);?>" readonly>
                             </div>
                             <div class="col">
                                 <label class="form-group">First Name: </label>
-                                <input type="text" class="form-control" name="fname" value="<?= htmlspecialchars($staff['fname']);?>">
+                                <input type="text" class="form-control" name="fname" value="<?= htmlspecialchars($staff['fname']);?>" readonly>
                             </div>
                             <div class="col">
                                 <label class="form-group"> Middle Name: </label>
-                                <input type="text" class="form-control" name="mi" value="<?= htmlspecialchars($staff['mi']);?>">
+                                <input type="text" class="form-control" name="mi" value="<?= htmlspecialchars($staff['mi']);?>" readonly>
                             </div>
                         </div>
                         
                         <div class="row mt-3">
                             <div class="col">
                                 <label class="form-group">Login Identity (Email or Phone): </label>
-                                <input type="text" class="form-control" name="login_identity" value="<?= htmlspecialchars($staff['login_identity']);?>" placeholder="Enter Email or Phone Number" required>
+                                <input type="text" class="form-control" name="login_identity" value="<?= htmlspecialchars($staff['login_identity']);?>" placeholder="Enter Email or Phone Number" readonly
                             </div>
                             <div class="col">
                                 <label class="form-group">Password:</label>
-                                <input type="password" class="form-control" name="password" placeholder="Enter new password to change">
+                                <input type="password" class="form-control" name="password" placeholder="Enter new password to change" readonly>
                             </div>
                             <div class="col">
                                 <label class="form-group">Contact Number:</label>
-                                <input type="tel" class="form-control" name="contact" value="<?= htmlspecialchars($staff['contact']);?>">
+                                <input type="tel" class="form-control" name="contact" value="<?= htmlspecialchars($staff['contact']);?>" readonly>
                             </div>
                         </div>
  
                         <div class="row mt-3">
                             <div class="col"> 
                                 <label class="form-group">Position: </label>
-                                <select class="form-control" name="position" required>
+                                <select class="form-control" name="position" readonly>
                                     <option value="<?= $staff['position'];?>" selected><?= $staff['position'];?></option>
                                     <option value="Punong Barangay">Punong Barangay</option>
                                     <option value="Secretary">Secretary</option>
@@ -103,12 +103,12 @@
                         <div class="row mt-3">
                             <div class="col-md-8">
                                 <label class="form-group">Address</label>
-                                <input class="form-control" type="text" name="address" value="<?= htmlspecialchars($staff['address']);?>">
+                                <input class="form-control" type="text" name="address" value="<?= htmlspecialchars($staff['address']);?>" readonly>
                             </div>
                            
                             <div class="col-md-2">
                                 <label class="form-group"> Gender: </label>
-                                <select class="form-control" name="sex" required>
+                                <select class="form-control" name="sex" readonly>
                                     <option value="Male" <?= $staff['sex'] == 'Male' ? 'selected' : ''; ?>>Male</option>
                                     <option value="Female" <?= $staff['sex'] == 'Female' ? 'selected' : ''; ?>>Female</option>
                                 </select>

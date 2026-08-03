@@ -1,6 +1,7 @@
 <?php 
 
     require_once('main.class.php');
+    require_once __DIR__ . '/security.php';
 
     class StaffClass extends BMISClass {
 
@@ -73,14 +74,17 @@ public function create_staff() {
             if(isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
                 $target_dir = "uploads/";
                 if (!is_dir($target_dir)) {
-                    mkdir($target_dir, 0777, true);
+                    mkdir($target_dir, 0755, true);
                 }
 
-                $filename = time() . "_" . basename($_FILES["photo"]["name"]);
-                $target_file = $target_dir . $filename;
-                
-                if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
-                    $photo = $target_file; 
+                // Content-sniffed validation + random filename — never trust
+                // the uploaded file's original name or extension directly.
+                $validated = bmis_validate_image_upload($_FILES['photo']);
+                if ($validated['ok']) {
+                    $target_file = $target_dir . time() . "_" . $validated['safe_name'];
+                    if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
+                        $photo = $target_file; 
+                    }
                 }
             }
 
@@ -163,20 +167,24 @@ public function update_staff() {
         if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
             // Define your upload path here
             $target_dir = "uploads/"; 
-            $target_file = $target_dir . time() . "_" . basename($_FILES["photo"]["name"]);
+            $validated  = bmis_validate_image_upload($_FILES['photo']);
 
-            if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
-                // Delete old photo
-                $stmt_old = $connection->prepare("SELECT photo FROM tbl_user WHERE id_user = ?");
-                $stmt_old->execute([$id_user]);
-                $old_photo = $stmt_old->fetch();
-                
-                if ($old_photo && !empty($old_photo['photo']) && file_exists($old_photo['photo'])) {
-                    unlink($old_photo['photo']); 
+            if ($validated['ok']) {
+                $target_file = $target_dir . time() . "_" . $validated['safe_name'];
+
+                if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
+                    // Delete old photo
+                    $stmt_old = $connection->prepare("SELECT photo FROM tbl_user WHERE id_user = ?");
+                    $stmt_old->execute([$id_user]);
+                    $old_photo = $stmt_old->fetch();
+
+                    if ($old_photo && !empty($old_photo['photo']) && file_exists($old_photo['photo'])) {
+                        unlink($old_photo['photo']);
+                    }
+
+                    $photo_query = ", `photo` = ?";
+                    $photo_param[] = $target_file;
                 }
-
-                $photo_query = ", `photo` = ?";
-                $photo_param[] = $target_file;
             }
         }
 

@@ -121,42 +121,65 @@ function bmis_require_resident(): array {
 }
 
 // ─── 5. Brute-force / Rate Limiting ─────────────────────────────────────────
+// Backed by `tbl_login_attempts` (see add_login_attempts_table.sql) rather
+// than $_SESSION, because a session-based counter resets the moment an
+// attacker drops their cookie — it does not actually stop repeated guesses.
 define('BMIS_MAX_LOGIN_ATTEMPTS', 5);
 define('BMIS_LOCKOUT_SECONDS',    900); // 15 minutes
 
-function bmis_record_failed_login(string $identity): void {
-    bmis_session_start();
-    $key = 'login_fail_' . md5($identity);
-    if (empty($_SESSION[$key])) {
-        $_SESSION[$key] = ['count' => 0, 'first' => time()];
+function bmis_record_failed_login(PDO $conn, string $identity): void {
+    $hash = hash('sha256', strtolower(trim($identity)));
+    $stmt = $conn->prepare("SELECT attempt_count, first_attempt FROM tbl_login_attempts WHERE identity_hash = ?");
+    $stmt->execute([$hash]);
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        $conn->prepare("INSERT INTO tbl_login_attempts (identity_hash, attempt_count, first_attempt, last_attempt) VALUES (?, 1, NOW(), NOW())")
+             ->execute([$hash]);
+        return;
     }
-    $_SESSION[$key]['count']++;
+
+    // If the previous lockout window has fully expired, start a fresh count.
+    $first = strtotime($row['first_attempt']);
+    if ((time() - $first) > BMIS_LOCKOUT_SECONDS) {
+        $conn->prepare("UPDATE tbl_login_attempts SET attempt_count = 1, first_attempt = NOW(), last_attempt = NOW() WHERE identity_hash = ?")
+             ->execute([$hash]);
+        return;
+    }
+
+    $conn->prepare("UPDATE tbl_login_attempts SET attempt_count = attempt_count + 1, last_attempt = NOW() WHERE identity_hash = ?")
+         ->execute([$hash]);
 }
 
-function bmis_is_locked_out(string $identity): bool {
-    bmis_session_start();
-    $key = 'login_fail_' . md5($identity);
-    if (empty($_SESSION[$key])) return false;
-    $data = $_SESSION[$key];
-    if ($data['count'] < BMIS_MAX_LOGIN_ATTEMPTS) return false;
-    if ((time() - $data['first']) > BMIS_LOCKOUT_SECONDS) {
-        unset($_SESSION[$key]); // Lockout expired
+function bmis_is_locked_out(PDO $conn, string $identity): bool {
+    $hash = hash('sha256', strtolower(trim($identity)));
+    $stmt = $conn->prepare("SELECT attempt_count, first_attempt FROM tbl_login_attempts WHERE identity_hash = ?");
+    $stmt->execute([$hash]);
+    $row = $stmt->fetch();
+    if (!$row) return false;
+
+    if ($row['attempt_count'] < BMIS_MAX_LOGIN_ATTEMPTS) return false;
+
+    if ((time() - strtotime($row['first_attempt'])) > BMIS_LOCKOUT_SECONDS) {
+        // Lockout window expired — clear it so the next attempt starts clean.
+        $conn->prepare("DELETE FROM tbl_login_attempts WHERE identity_hash = ?")->execute([$hash]);
         return false;
     }
     return true;
 }
 
-function bmis_reset_login_attempts(string $identity): void {
-    bmis_session_start();
-    $key = 'login_fail_' . md5($identity);
-    unset($_SESSION[$key]);
+function bmis_reset_login_attempts(PDO $conn, string $identity): void {
+    $hash = hash('sha256', strtolower(trim($identity)));
+    $conn->prepare("DELETE FROM tbl_login_attempts WHERE identity_hash = ?")->execute([$hash]);
 }
 
-function bmis_lockout_seconds_remaining(string $identity): int {
-    bmis_session_start();
-    $key = 'login_fail_' . md5($identity);
-    if (empty($_SESSION[$key])) return 0;
-    $elapsed = time() - $_SESSION[$key]['first'];
+function bmis_lockout_seconds_remaining(PDO $conn, string $identity): int {
+    $hash = hash('sha256', strtolower(trim($identity)));
+    $stmt = $conn->prepare("SELECT first_attempt FROM tbl_login_attempts WHERE identity_hash = ?");
+    $stmt->execute([$hash]);
+    $row = $stmt->fetch();
+    if (!$row) return 0;
+    $elapsed = time() - strtotime($row['first_attempt']);
     return max(0, BMIS_LOCKOUT_SECONDS - $elapsed);
 }
 
@@ -167,33 +190,59 @@ function bmis_regenerate_session(): void {
 }
 
 // ─── 7. Secure File Upload Validation ───────────────────────────────────────
+// The extension check alone is NOT enough — $_FILES[...]['type'] and the
+// original filename are both attacker-controlled. A file can be named
+// "id.jpg" and still be a PHP webshell, so the real MIME type is sniffed
+// from the file's content with finfo before it's ever trusted, and the file
+// is always saved under a random name (never the attacker's original name)
+// into a directory that has a .htaccess disabling script execution.
 $BMIS_ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 $BMIS_ALLOWED_IMAGE_EXTS  = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+$BMIS_ALLOWED_DOC_TYPES   = ['application/pdf'];
+$BMIS_ALLOWED_DOC_EXTS    = ['pdf'];
 $BMIS_MAX_UPLOAD_BYTES    = 5 * 1024 * 1024; // 5 MB
 
-function bmis_validate_image_upload(array $file): array {
-    global $BMIS_ALLOWED_IMAGE_TYPES, $BMIS_ALLOWED_IMAGE_EXTS, $BMIS_MAX_UPLOAD_BYTES;
+/**
+ * Validate an uploaded file against a real, content-sniffed whitelist.
+ * @param array $file       One entry from $_FILES.
+ * @param bool  $allow_pdf  Also allow application/pdf (used for valid-ID uploads).
+ */
+function bmis_validate_image_upload(array $file, bool $allow_pdf = false): array {
+    global $BMIS_ALLOWED_IMAGE_TYPES, $BMIS_ALLOWED_IMAGE_EXTS,
+           $BMIS_ALLOWED_DOC_TYPES, $BMIS_ALLOWED_DOC_EXTS, $BMIS_MAX_UPLOAD_BYTES;
 
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        return ['ok' => false, 'msg' => 'Upload error code: ' . $file['error']];
+    if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'msg' => 'Upload error code: ' . ($file['error'] ?? 'none')];
     }
     if ($file['size'] > $BMIS_MAX_UPLOAD_BYTES) {
         return ['ok' => false, 'msg' => 'File too large (max 5 MB).'];
     }
+    if (!is_uploaded_file($file['tmp_name'])) {
+        return ['ok' => false, 'msg' => 'Invalid upload.'];
+    }
 
-    // Check MIME type with finfo (not the browser-supplied type)
+    $allowed_types = $BMIS_ALLOWED_IMAGE_TYPES;
+    $allowed_exts  = $BMIS_ALLOWED_IMAGE_EXTS;
+    if ($allow_pdf) {
+        $allowed_types = array_merge($allowed_types, $BMIS_ALLOWED_DOC_TYPES);
+        $allowed_exts  = array_merge($allowed_exts, $BMIS_ALLOWED_DOC_EXTS);
+    }
+
+    // Check MIME type with finfo, sniffed from content — not the
+    // browser-supplied $file['type'], which is trivially spoofed.
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime  = $finfo->file($file['tmp_name']);
-    if (!in_array($mime, $BMIS_ALLOWED_IMAGE_TYPES, true)) {
-        return ['ok' => false, 'msg' => 'Invalid file type. Only JPG, PNG, GIF, WebP allowed.'];
+    if (!in_array($mime, $allowed_types, true)) {
+        $label = $allow_pdf ? 'JPG, PNG, GIF, WebP, or PDF' : 'JPG, PNG, GIF, WebP';
+        return ['ok' => false, 'msg' => "Invalid file type. Only $label allowed."];
     }
 
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    if (!in_array($ext, $BMIS_ALLOWED_IMAGE_EXTS, true)) {
+    if (!in_array($ext, $allowed_exts, true)) {
         return ['ok' => false, 'msg' => 'Invalid file extension.'];
     }
 
-    // Generate a safe, random filename
+    // Generate a safe, random filename — the original filename is never used.
     $safe_name = bin2hex(random_bytes(16)) . '.' . $ext;
     return ['ok' => true, 'safe_name' => $safe_name, 'mime' => $mime];
 }

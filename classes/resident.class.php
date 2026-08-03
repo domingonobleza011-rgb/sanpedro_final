@@ -1,7 +1,7 @@
 <?php 
 
     require_once('main.class.php');
-    
+    require_once __DIR__ . '/security.php';
 
     class ResidentClass extends BMISClass {
         //------------------------------------ RESIDENT CRUD FUNCTIONS ----------------------------------------
@@ -59,27 +59,27 @@
                 $upload_error = 'Please upload a valid government ID to complete your registration.';
             } else {
                 $file = $_FILES['valid_id_file'];
-                $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-                $max_size = 5 * 1024 * 1024; // 5MB
+                // Content-sniffed validation (finfo), not the browser-supplied
+                // $file['type'] — that header is attacker-controlled and can
+                // claim "image/jpeg" for any file, including a PHP script.
+                $validated = bmis_validate_image_upload($file, /* allow_pdf */ true);
 
-                if (!in_array($file['type'], $allowed_types)) {
-                    $upload_error = 'Only JPG, PNG, and PDF files are allowed for the valid ID.';
-                } elseif ($file['size'] > $max_size) {
-                    $upload_error = 'Valid ID file size must not exceed 5MB.';
+                if (!$validated['ok']) {
+                    $upload_error = $validated['msg'];
                 } else {
                     $upload_dir = 'uploads/valid_ids/';
                     if (!is_dir($upload_dir)) {
                         mkdir($upload_dir, 0755, true);
                     }
-                    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-                    $new_filename = 'pendingreg_' . time() . '_' . uniqid() . '.' . $ext;
+                    // Random name — never trust/reuse the attacker-supplied filename.
+                    $new_filename = 'pendingreg_' . time() . '_' . $validated['safe_name'];
                     $dest = $upload_dir . $new_filename;
 
                     if (!move_uploaded_file($file['tmp_name'], $dest)) {
                         $upload_error = 'Valid ID upload failed. Please try again.';
                     } else {
                         $original_name = $file['name'];
-                        $file_type     = $file['type'];
+                        $file_type     = $validated['mime'];
                     }
                 }
             }

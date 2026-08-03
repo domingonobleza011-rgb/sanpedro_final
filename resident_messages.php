@@ -43,24 +43,22 @@ if (isset($_POST['upload_valid_id'])) {
         $upload_error = 'Please select a valid file to upload.';
     } else {
         $file = $_FILES['valid_id_file'];
-        $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-        $max_size = 5 * 1024 * 1024;
+        // Content-sniffed validation (finfo) — $file['type'] is supplied by
+        // the browser and can claim any MIME type regardless of content.
+        $validated = bmis_validate_image_upload($file, /* allow_pdf */ true);
 
-        if (!in_array($file['type'], $allowed_types)) {
-            $upload_error = 'Only JPG, PNG, and PDF files are allowed.';
-        } elseif ($file['size'] > $max_size) {
-            $upload_error = 'File size must not exceed 5MB.';
+        if (!$validated['ok']) {
+            $upload_error = $validated['msg'];
         } else {
             $upload_dir = 'uploads/valid_ids/';
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0755, true);
             }
-            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $new_filename = 'validid_' . $resident_id . '_' . time() . '.' . $ext;
+            $new_filename = 'validid_' . $resident_id . '_' . time() . '_' . $validated['safe_name'];
             $dest = $upload_dir . $new_filename;
 
             if (move_uploaded_file($file['tmp_name'], $dest)) {
-                if ($main->uploadValidID($resident_id, $new_filename, $file['name'], $file['type'], $message_note)) {
+                if ($main->uploadValidID($resident_id, $new_filename, $file['name'], $validated['mime'], $message_note)) {
                     $main->sendMessageToAdmin($resident_id, "VALID ID SUBMITTED - Please verify my account. Note: " . ($message_note ?: 'none'));
                     echo "<script>alert('Your valid ID has been submitted! Please wait for admin approval.'); window.location.href='resident_messages.php';</script>";
                     exit();

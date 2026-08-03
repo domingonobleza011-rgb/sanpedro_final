@@ -1,0 +1,25 @@
+# Uploaded files must never be executable, even if a bad file slips through
+# application-level validation. This is the last line of defense.
+
+# Apache 2.4+
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(php|php3|php4|php5|php7|phtml|pl|py|jsp|asp|aspx|sh|cgi|exe)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+# Apache 2.2 fallback
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(php|php3|php4|php5|php7|phtml|pl|py|jsp|asp|aspx|sh|cgi|exe)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# Belt-and-braces: even if the above is ignored, tell Apache/PHP-FPM to
+# serve these files as plain text/octet-stream rather than executing them.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+AddHandler cgi-script .php .php3 .php4 .php5 .php7 .phtml .pl .py .jsp .asp .aspx .sh .cgi
+Options -ExecCGI -Indexes

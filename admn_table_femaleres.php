@@ -7,7 +7,7 @@ require_once('secure_header.php');
    require('classes/resident.class.php');
    $userdetails = $bmis->get_userdata();
    $bmis->validate_staff_or_admin();
-   $view = $residentbmis->view_resident_female_paginated(2);
+   $view = $residentbmis->view_resident_female_paginated(10);
    
 ?>
 

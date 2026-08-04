@@ -50,89 +50,211 @@ $resident_nav_items = [
 <html lang="en">
 
 <head>
-
     <title>Barangay San Pedro</title>
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
 </head>
+
 <style>
-/* ===== Shared Resident Nav Styling (resident_navbar.php) ===== */
+/* ===== SHARED RESIDENT NAVBAR STYLES ===== */
+
+/* ----- DESKTOP NAVBAR ----- */
+.resident-desktop-nav {
+    background: linear-gradient(135deg, #1b74e4 0%, #0a5ecf 100%) !important;
+    padding: 0.6rem 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+.resident-desktop-nav .navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.3px;
+    color: #fff;
+}
+.resident-desktop-nav .navbar-brand i {
+    font-size: 1.4rem;
+}
+.resident-desktop-nav .btn-nav {
+    border-radius: 40px;
+    padding: 0.45rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: all 0.2s ease;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.85);
+    margin-right: 0.4rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.resident-desktop-nav .btn-nav:hover {
+    background: rgba(255,255,255,0.28);
+    color: #fff;
+    transform: translateY(-1px);
+}
+.resident-desktop-nav .btn-nav.active-nav {
+    background: #ffffff;
+    color: #1b74e4;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.resident-desktop-nav .btn-nav.active-nav:hover {
+    background: #f0f4ff;
+}
+.resident-desktop-nav .btn-nav-logout {
+    border-radius: 40px;
+    padding: 0.45rem 1.4rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+    border: none;
+    background: rgba(220, 53, 69, 0.85);
+    color: #fff;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.resident-desktop-nav .btn-nav-logout:hover {
+    background: #dc3545;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(220, 53, 69, 0.35);
+}
+
+/* ----- MOBILE BOTTOM NAV ----- */
 .mobile-bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 65px;
-    background-color: #ffffff;
+    height: 68px;
+    background: #ffffff;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
     z-index: 1050;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .mobile-bottom-nav .nav-item {
     text-decoration: none;
-    color: #6c757d;
+    color: #8a8f9a;
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 0.7rem;
-    font-weight: 500;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    min-width: 52px;
+    position: relative;
 }
 
 .mobile-bottom-nav .nav-item i {
     font-size: 1.4rem;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    transition: transform 0.2s ease;
 }
 
-.mobile-bottom-nav .nav-item:active,
+.mobile-bottom-nav .nav-item:active {
+    transform: scale(0.92);
+}
+
 .mobile-bottom-nav .nav-item.active-nav {
-    color: #0d6efd;
+    color: #1b74e4;
 }
 
-.resident-desktop-nav .btn.active-nav {
-    background-color: #0a58ca;
-    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6);
+.mobile-bottom-nav .nav-item.active-nav i {
+    transform: translateY(-2px);
 }
 
-/* Padding so page content isn't hidden behind the fixed mobile nav */
+.mobile-bottom-nav .nav-item.active-nav::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 30%;
+    right: 30%;
+    height: 3px;
+    background: #1b74e4;
+    border-radius: 0 0 4px 4px;
+}
+
+.mobile-bottom-nav .nav-item.logout-item {
+    color: #dc3545;
+}
+
+.mobile-bottom-nav .nav-item.logout-item:active {
+    color: #b02a37;
+}
+
+/* ----- PADDING FOR MOBILE (so content isn't hidden) ----- */
 @media (max-width: 767px) {
     body {
-        padding-bottom: 80px;
+        padding-bottom: 85px;
+    }
+}
+
+/* ----- RESPONSIVE ADJUSTMENTS ----- */
+@media (max-width: 576px) {
+    .mobile-bottom-nav {
+        height: 62px;
+    }
+    .mobile-bottom-nav .nav-item {
+        font-size: 0.6rem;
+        min-width: 44px;
+        padding: 0.2rem 0.4rem;
+    }
+    .mobile-bottom-nav .nav-item i {
+        font-size: 1.2rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .resident-desktop-nav .btn-nav {
+        font-size: 0.8rem;
+        padding: 0.4rem 1rem;
+    }
+    .resident-desktop-nav .btn-nav-logout {
+        font-size: 0.8rem;
+        padding: 0.4rem 1rem;
     }
 }
 </style>
 
-<!-- DESKTOP NAVBAR (Hidden on Mobile) -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top d-none d-md-block shadow">
-    <div class="container-fluid resident-desktop-nav">
-        <a class="navbar-brand fw-bold" href="resident_homepage.php">
+<!-- ===== DESKTOP NAVBAR (Hidden on Mobile) ===== -->
+<nav class="navbar navbar-expand-lg sticky-top d-none d-md-block resident-desktop-nav">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="resident_homepage.php">
             <i class="bi bi-building-fill me-2"></i> Barangay San Pedro
         </a>
-        <div class="d-flex ms-auto">
+        <div class="d-flex align-items-center ms-auto">
             <?php foreach ($resident_nav_items as $item): ?>
                 <?php $isActive = in_array($resident_nav_current, $item['match'], true); ?>
-                <a href="<?= htmlspecialchars($item['href']) ?>" class="btn btn-primary me-1<?= $isActive ? ' active-nav' : '' ?>">
-                    <i class="bi <?= htmlspecialchars($item['icon']) ?> me-1"></i> <?= htmlspecialchars($item['label']) ?>
+                <a href="<?= htmlspecialchars($item['href']) ?>" class="btn-nav <?= $isActive ? 'active-nav' : '' ?>">
+                    <i class="bi <?= htmlspecialchars($item['icon']) ?>"></i> <?= htmlspecialchars($item['label']) ?>
                 </a>
             <?php endforeach; ?>
-            <a href="logout.php" class="btn btn-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            <a href="logout.php" class="btn-nav-logout">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
         </div>
     </div>
 </nav>
 
-<!-- MOBILE BOTTOM NAV (Hidden on Desktop) -->
+<!-- ===== MOBILE BOTTOM NAV (Hidden on Desktop) ===== -->
 <div class="mobile-bottom-nav d-md-none">
     <?php foreach ($resident_nav_items as $item): ?>
         <?php $isActive = in_array($resident_nav_current, $item['match'], true); ?>
-        <a href="<?= htmlspecialchars($item['href']) ?>" class="nav-item<?= $isActive ? ' active-nav' : '' ?>">
+        <a href="<?= htmlspecialchars($item['href']) ?>" class="nav-item <?= $isActive ? 'active-nav' : '' ?>">
             <i class="bi <?= htmlspecialchars($item['icon']) ?>"></i>
             <span><?= htmlspecialchars($item['mobile']) ?></span>
         </a>
     <?php endforeach; ?>
-
-    <a href="logout.php" class="nav-item text-danger">
+    <a href="logout.php" class="nav-item logout-item">
         <i class="bi bi-box-arrow-right"></i>
         <span>Exit</span>
     </a>

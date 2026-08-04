@@ -122,168 +122,388 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>YOUTH PORTAL — Barangay San Pedro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Youth Portal | Barangay San Pedro</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
+    <!-- Bootstrap 5 + Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
     <style>
-        /* ── TOKENS — matches resident_youth_profiling.php blue theme ── */
-        .container1
-            {
-                background-color: #3498DB;
-                height: 342px;
-                color: black;
-                font-family: Arial, Helvetica, sans-serif;
-                text-align: center;
-            }
-        :root {
-            --primary:      #3661D5;
-            --primary-dark: #3498DB;
-            --primary-pale: #ebf5fb;
-            --gold:         #c9943a;
-            --gold-pale:    #fdf3e3;
-            --bg:           #f0f4f8;
-            --card-bg:      #ffffff;
-            --border:       #d6e4f0;
-            --text:         #1a2a3a;
-            --muted:        #6888a0;
+        /* ----- GLOBAL RESETS ----- */
+        body {
+            background: #f0f2f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
 
-        body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text); }
-        
-        
-        
-        
-        
-
-        /* ── HERO — same blue gradient as the profiling page ── */
-        .page-hero {
-            background: var(--primary-dark);
-            padding: 36px 24px 30px;
-            position: relative;
-            overflow: hidden;
+        /* ----- HERO BANNER ----- */
+        .youth-hero {
+            background: linear-gradient(135deg, #1b74e4 0%, #0a5ecf 100%);
+            padding: 2.5rem 1.5rem;
+            border-radius: 0 0 40px 40px;
+            color: #fff;
+            margin-bottom: 2rem;
             text-align: center;
         }
-        .page-hero::before {
-            content: '';
-            position: absolute; inset: 0;
+        .youth-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
-        .page-hero h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; margin: 0; position:relative; }
-        .page-hero p  { opacity: .85; margin: 8px 0 0; font-size: .92rem; position:relative; }
-        .hero-actions { margin-top: 22px; position: relative; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-
-        /* ── TABS ── */
-        .sk-tabs { display:flex; gap:6px; background:var(--card-bg); border-radius:14px; padding:6px; box-shadow:0 2px 8px rgba(0,0,0,.06); border:1.5px solid var(--border); }
-        .sk-tab {
-            flex:1; text-align:center; padding:10px 6px; border-radius:10px; font-size:.85rem;
-            font-weight:700; color:var(--muted); text-decoration:none; transition:all .2s; border:none; background:transparent; cursor:pointer;
+        .youth-hero .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 1.25rem;
         }
-        .sk-tab.active, .sk-tab:hover { background: var(--primary); color:#fff; }
-        .sk-tab i { display:block; font-size:1.1rem; margin-bottom:2px; }
+        .youth-hero .btn-hero {
+            border-radius: 40px;
+            padding: 0.6rem 1.8rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .youth-hero .btn-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+        .youth-hero .btn-hero-light {
+            background: #fff;
+            color: #1b74e4;
+        }
+        .youth-hero .btn-hero-outline {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.6);
+        }
+        .youth-hero .btn-hero-outline:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: #fff;
+        }
+        @media (max-width: 576px) {
+            .youth-hero h1 {
+                font-size: 1.8rem;
+            }
+            .youth-hero {
+                padding: 1.8rem 1rem;
+                border-radius: 0 0 24px 24px;
+            }
+            .youth-hero .btn-hero {
+                font-size: 0.85rem;
+                padding: 0.5rem 1.2rem;
+                width: 100%;
+            }
+            .youth-hero .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
 
-        /* ── FILTER CHIPS ── */
-        .chip-bar { display:flex; flex-wrap:wrap; gap:8px; }
+        /* ----- TABS ----- */
+        .portal-tabs {
+            display: flex;
+            gap: 6px;
+            background: #fff;
+            border-radius: 14px;
+            padding: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1.5px solid #dce0e4;
+            margin-bottom: 1.5rem;
+        }
+        .portal-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.7rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #65676b;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        .portal-tab i {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+        .portal-tab.active, .portal-tab:hover {
+            background: #1b74e4;
+            color: #fff;
+        }
+        @media (max-width: 576px) {
+            .portal-tab {
+                font-size: 0.7rem;
+                padding: 0.5rem 0.3rem;
+            }
+            .portal-tab i {
+                font-size: 1rem;
+            }
+        }
+
+        /* ----- FILTER CHIPS ----- */
         .chip-filter {
-            padding:5px 14px; border-radius:20px; font-size:.78rem; font-weight:700;
-            border:1.5px solid var(--border); background:var(--card-bg); color:var(--muted);
-            text-decoration:none; transition:all .15s;
+            padding: 0.35rem 1rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border: 1.5px solid #dce0e4;
+            background: #fff;
+            color: #65676b;
+            text-decoration: none;
+            transition: all 0.15s;
+            display: inline-block;
         }
-        .chip-filter:hover, .chip-filter.active { border-color:var(--primary); background:var(--primary); color:#fff; }
+        .chip-filter:hover,
+        .chip-filter.active {
+            border-color: #1b74e4;
+            background: #1b74e4;
+            color: #fff;
+        }
 
-        /* ── SECTION PANEL ── */
-        .section-panel { background:var(--card-bg); border-radius:14px; padding:20px 22px; box-shadow:0 2px 8px rgba(52,152,219,.07); border:1.5px solid var(--border); }
+        /* ----- SECTION PANEL ----- */
+        .section-panel {
+            background: #fff;
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1.5px solid #dce0e4;
+        }
 
-        /* ── BULLETIN CARDS ── */
+        /* ----- BULLETIN CARDS ----- */
         .bulletin-card {
-            background:var(--card-bg); border-radius:16px; padding:22px;
-            box-shadow:0 2px 10px rgba(0,0,0,.06); border:1.5px solid var(--border);
-            position:relative; transition:transform .15s, box-shadow .15s;
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border: 1.5px solid #dce0e4;
+            position: relative;
+            transition: transform 0.15s, box-shadow 0.15s;
+            height: 100%;
         }
-        .bulletin-card:hover { transform:translateY(-3px); box-shadow:0 8px 28px rgba(0,0,0,.1); }
-        .bulletin-card.pinned { border-color:var(--gold); background:linear-gradient(135deg,#fffdf7,#fff); }
+        .bulletin-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+        }
+        .bulletin-card.pinned {
+            border-color: #c9943a;
+            background: linear-gradient(135deg, #fffdf7, #fff);
+        }
         .pin-ribbon {
-            position:absolute; top:-1px; right:16px; background:var(--gold); color:#fff;
-            font-size:.65rem; font-weight:800; padding:3px 10px 6px; border-radius:0 0 10px 10px;
-            letter-spacing:.8px; text-transform:uppercase;
+            position: absolute;
+            top: -1px;
+            right: 16px;
+            background: #c9943a;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 0.2rem 0.8rem 0.5rem;
+            border-radius: 0 0 10px 10px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
         }
-        .b-type-badge { display:inline-block; border-radius:8px; padding:3px 11px; font-size:.72rem; font-weight:800; margin-bottom:10px; }
-        .t-announcement { background:#ebf5fb; color:#2471a3; }
-        .t-opportunity   { background:#e8f0fe; color:#1967d2; }
-        .t-reminder      { background:#fdf3e3; color:#c9943a; }
-        .t-achievement   { background:#f0eafe; color:#6200ea; }
-        .t-general       { background:#f0f4f8; color:#555; }
-        .b-title   { font-size:1rem; font-weight:800; color:var(--primary-dark); margin-bottom:8px; line-height:1.4; }
-        .b-content { font-size:.875rem; color:#444; line-height:1.7; margin-bottom:12px; }
-        .b-meta    { font-size:.74rem; color:var(--muted); display:flex; flex-wrap:wrap; gap:10px; }
-        .b-meta span { display:flex; align-items:center; gap:4px; }
+        .b-type-badge {
+            display: inline-block;
+            border-radius: 8px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            margin-bottom: 0.6rem;
+        }
+        .t-announcement { background: #ebf5fb; color: #2471a3; }
+        .t-opportunity   { background: #e8f0fe; color: #1967d2; }
+        .t-reminder      { background: #fdf3e3; color: #c9943a; }
+        .t-achievement   { background: #f0eafe; color: #6200ea; }
+        .t-general       { background: #f0f4f8; color: #555; }
+        .b-title { font-size: 1.05rem; font-weight: 800; color: #1b74e4; margin-bottom: 0.5rem; line-height: 1.4; }
+        .b-content { font-size: 0.9rem; color: #444; line-height: 1.7; margin-bottom: 0.75rem; }
+        .b-meta { font-size: 0.75rem; color: #65676b; display: flex; flex-wrap: wrap; gap: 12px; }
+        .b-meta span { display: flex; align-items: center; gap: 4px; }
 
-        /* ── PROGRAM CARDS ── */
+        /* ----- PROGRAM CARDS ----- */
         .prog-card {
-            background:var(--card-bg); border-radius:16px; padding:22px;
-            box-shadow:0 2px 10px rgba(0,0,0,.06);
-            border-top:1.5px solid var(--border); border-right:1.5px solid var(--border); border-bottom:1.5px solid var(--border);
-            border-left:5px solid var(--border);
-            transition:transform .15s, box-shadow .15s;
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border-top: 1.5px solid #dce0e4;
+            border-right: 1.5px solid #dce0e4;
+            border-bottom: 1.5px solid #dce0e4;
+            border-left: 5px solid #dce0e4;
+            transition: transform 0.15s, box-shadow 0.15s;
+            height: 100%;
         }
-        .prog-card:hover   { transform:translateY(-3px); box-shadow:0 8px 28px rgba(0,0,0,.1); }
-        .prog-card.upcoming   { border-left-color:var(--primary); }
-        .prog-card.ongoing    { border-left-color:#27ae60; }
-        .prog-card.completed  { border-left-color:#999; }
-        .prog-card.cancelled  { border-left-color:#c0392b; }
-        .p-title { font-size:1.05rem; font-weight:800; color:var(--primary-dark); margin:8px 0 6px; }
-        .p-meta  { font-size:.79rem; color:var(--muted); display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
-        .p-meta span { display:flex; align-items:center; gap:4px; }
-        .p-desc  { font-size:.875rem; color:#444; line-height:1.65; margin-bottom:12px; }
-        .p-req   { font-size:.78rem; color:#888; margin-bottom:14px; }
+        .prog-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+        }
+        .prog-card.upcoming   { border-left-color: #1b74e4; }
+        .prog-card.ongoing    { border-left-color: #27ae60; }
+        .prog-card.completed  { border-left-color: #999; }
+        .prog-card.cancelled  { border-left-color: #c0392b; }
+        .p-title { font-size: 1.05rem; font-weight: 800; color: #1b74e4; margin: 0.4rem 0 0.3rem; }
+        .p-meta { font-size: 0.79rem; color: #65676b; display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 0.6rem; }
+        .p-meta span { display: flex; align-items: center; gap: 4px; }
+        .p-desc { font-size: 0.875rem; color: #444; line-height: 1.65; margin-bottom: 0.75rem; }
+        .p-req { font-size: 0.78rem; color: #888; margin-bottom: 0.75rem; }
 
-        .badge-ptype     { background:var(--primary-pale); color:var(--primary-dark); border-radius:7px; padding:3px 10px; font-size:.72rem; font-weight:800; }
-        .badge-upcoming  { background:#ebf5fb; color:#2471a3; border-radius:7px; padding:3px 10px; font-size:.72rem; font-weight:800; }
-        .badge-ongoing   { background:#eafaf1; color:#27ae60; border-radius:7px; padding:3px 10px; font-size:.72rem; font-weight:800; }
-        .badge-completed { background:#f0f4f8; color:#555; border-radius:7px; padding:3px 10px; font-size:.72rem; font-weight:800; }
-        .badge-cancelled { background:#fde8e8; color:#c0392b; border-radius:7px; padding:3px 10px; font-size:.72rem; font-weight:800; }
+        .badge-ptype {
+            background: #ebf5fb;
+            color: #1b74e4;
+            border-radius: 7px;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+        .badge-upcoming  { background: #ebf5fb; color: #2471a3; border-radius: 7px; padding: 0.2rem 0.7rem; font-size: 0.72rem; font-weight: 800; }
+        .badge-ongoing   { background: #eafaf1; color: #27ae60; border-radius: 7px; padding: 0.2rem 0.7rem; font-size: 0.72rem; font-weight: 800; }
+        .badge-completed { background: #f0f4f8; color: #555; border-radius: 7px; padding: 0.2rem 0.7rem; font-size: 0.72rem; font-weight: 800; }
+        .badge-cancelled { background: #fde8e8; color: #c0392b; border-radius: 7px; padding: 0.2rem 0.7rem; font-size: 0.72rem; font-weight: 800; }
 
-        /* ── BUTTONS ── */
+        /* ----- BUTTONS ----- */
         .btn-primary-custom {
-            background:var(--primary); color:#fff; border:none; border-radius:10px;
-            padding:8px 20px; font-size:.85rem; font-weight:700; cursor:pointer;
-            transition:all .2s; display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+            background: #1b74e4;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1.4rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
         }
-        .btn-primary-custom:hover { background:var(--primary-dark); color:#fff; transform:translateY(-1px); }
+        .btn-primary-custom:hover {
+            background: #0a5ecf;
+            color: #fff;
+            transform: translateY(-1px);
+        }
         .btn-enrolled {
-            background:var(--primary-pale); color:var(--primary-dark); border:1.5px solid var(--primary);
-            border-radius:10px; padding:8px 20px; font-size:.85rem; font-weight:700;
-            cursor:default; display:inline-flex; align-items:center; gap:6px;
+            background: #ebf5fb;
+            color: #1b74e4;
+            border: 1.5px solid #1b74e4;
+            border-radius: 10px;
+            padding: 0.5rem 1.4rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: default;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .btn-closed {
-            background:#f0f4f8; color:#999; border:1.5px solid #ccc;
-            border-radius:10px; padding:8px 20px; font-size:.85rem; font-weight:700;
-            cursor:not-allowed; display:inline-flex; align-items:center; gap:6px;
+            background: #f0f4f8;
+            color: #999;
+            border: 1.5px solid #ccc;
+            border-radius: 10px;
+            padding: 0.5rem 1.4rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: not-allowed;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        /* ── TOAST ── */
+        /* ----- TOAST ----- */
         .toast-alert {
-            position:fixed; top:20px; right:20px; z-index:9999;
-            padding:14px 22px; border-radius:12px; font-size:.875rem; font-weight:700;
-            box-shadow:0 6px 24px rgba(0,0,0,.15); animation:slideIn .3s ease;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
         }
-        .toast-success { background:var(--primary); color:#fff; }
-        .toast-warning { background:var(--gold); color:#fff; }
-        .toast-danger  { background:#c0392b; color:#fff; }
-        @keyframes slideIn { from{transform:translateX(80px);opacity:0} to{transform:translateX(0);opacity:1} }
+        .toast-success { background: #1b74e4; color: #fff; }
+        .toast-warning { background: #c9943a; color: #fff; }
+        .toast-danger  { background: #c0392b; color: #fff; }
+        @keyframes slideIn {
+            from { transform: translateX(80px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
 
-        /* ── EMPTY STATE ── */
-        .empty-state { text-align:center; padding:50px 20px; color:var(--muted); }
-        .empty-state i { font-size:3rem; opacity:.3; margin-bottom:12px; display:block; }
+        /* ----- EMPTY STATE ----- */
+        .empty-state { text-align: center; padding: 3rem 1.5rem; color: #65676b; }
+        .empty-state i { font-size: 3rem; opacity: 0.3; margin-bottom: 0.75rem; display: block; }
 
-        /* ── MODAL HEADER ── */
-        .modal-header-blue { background:var(--primary); color:#fff; border-radius:12px 12px 0 0; }
-        .modal-header-blue .btn-close { filter:invert(1); }
+        /* ----- MODAL ----- */
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .modal-header-blue {
+            background: linear-gradient(135deg, #1b74e4, #0a5ecf);
+            color: #fff;
+            border: none;
+            padding: 1.25rem 1.5rem;
+        }
+        .modal-header-blue .btn-close { filter: invert(1); }
+        .modal-body { background: #f8f9fa; }
+        .modal-footer { background: #fff; border-top: 1px solid #dce0e4; }
+        .form-control-sm, .form-select-sm {
+            border-radius: 8px;
+            border: 1px solid #dce0e4;
+        }
+        .form-control-sm:focus, .form-select-sm:focus {
+            border-color: #1b74e4;
+            box-shadow: 0 0 0 3px rgba(27, 116, 228, 0.15);
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #4b4f56;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* ----- BACK TO TOP ----- */
+        .top-link {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #1b74e4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 999;
+        }
+        .top-link.hide {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8);
+        }
+        .top-link svg {
+            fill: #fff;
+            width: 20px;
+            height: 12px;
+        }
+        .top-link:hover {
+            background: #0a5ecf;
+        }
     </style>
 </head>
 <body>
 
 
+
+<!-- INCLUDE NAVBAR -->
 <?php include __DIR__ . '/resident_navbar.php'; ?>
 
 <!-- ── TOAST ALERTS ── -->
@@ -300,33 +520,33 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 <?php endif; ?>
 
 <!-- ── HERO ── -->
-<div class="page-hero">
-    <h1><i class="bi bi-megaphone-fill me-2"></i>YOUTH PORTAL</h1>
-    <div class="hero-actions">
-        <!-- Youth Profiling Button -->
-        <button type="button"
-            class="btn btn-light fw-bold px-4 py-2"
-            style="border-radius:10px;color:var(--primary-dark);font-size:.95rem;"
-            data-bs-toggle="modal" data-bs-target="#youthProfilingModal">
-            <i class="fas fa-id-card me-2"></i>Youth Profiling
-        </button>
-        <a href="?tab=programs" class="btn btn-outline-light fw-bold px-4 py-2" style="border-radius:10px;font-size:.95rem;">
-            <i class="bi bi-calendar-event-fill me-2"></i>Browse Programs
-        </a>
+<div class="youth-hero">
+    <div class="container">
+        <h1><i class="bi bi-megaphone-fill me-2"></i>Youth Portal</h1>
+        <p style="opacity:0.9; margin-top:0.25rem;">Your hub for SK announcements, programs, and youth activities</p>
+        <div class="hero-actions">
+            <button type="button" class="btn-hero btn-hero-light" data-bs-toggle="modal" data-bs-target="#youthProfilingModal">
+                <i class="fas fa-id-card me-2"></i>Youth Profiling
+            </button>
+            <a href="?tab=programs" class="btn-hero btn-hero-outline">
+                <i class="bi bi-calendar-event-fill me-2"></i>Browse Programs
+            </a>
+        </div>
     </div>
 </div>
 
-<div class="container py-4">
+<!-- ── MAIN CONTENT ── -->
+<div class="container py-2 pb-5">
 
     <!-- ── TAB SWITCHER ── -->
-    <div class="sk-tabs mb-4">
-        <a href="?tab=announcements" class="sk-tab <?= $active_tab==='announcements'?'active':'' ?>">
+    <div class="portal-tabs">
+        <a href="?tab=announcements" class="portal-tab <?= $active_tab==='announcements'?'active':'' ?>">
             <i class="bi bi-megaphone-fill"></i> Bulletins
         </a>
-        <a href="?tab=programs" class="sk-tab <?= $active_tab==='programs'?'active':'' ?>">
+        <a href="?tab=programs" class="portal-tab <?= $active_tab==='programs'?'active':'' ?>">
             <i class="bi bi-calendar-event-fill"></i> Programs
         </a>
-        <a href="?tab=myenrollments" class="sk-tab <?= $active_tab==='myenrollments'?'active':'' ?>">
+        <a href="?tab=myenrollments" class="portal-tab <?= $active_tab==='myenrollments'?'active':'' ?>">
             <i class="bi bi-person-check-fill"></i> My Enrollments
         </a>
     </div>
@@ -339,10 +559,10 @@ $active_tab = $_GET['tab'] ?? 'announcements';
     <div class="section-panel mb-4">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
-                <h5 class="mb-0 fw-bold" style="color:var(--primary-dark);"><i class="bi bi-pin-angle-fill me-2"></i>SK Bulletins</h5>
+                <h5 class="mb-0 fw-bold" style="color:#1b74e4;"><i class="bi bi-pin-angle-fill me-2"></i>SK Bulletins</h5>
                 <small class="text-muted">Official announcements from your Sangguniang Kabataan</small>
             </div>
-            <div class="chip-bar">
+            <div class="d-flex flex-wrap gap-2">
                 <a href="?tab=announcements" class="chip-filter <?= !$type_filter?'active':'' ?>">All</a>
                 <?php foreach ($post_types as $pt): ?>
                 <a href="?tab=announcements&type=<?= urlencode($pt) ?>" class="chip-filter <?= $type_filter===$pt?'active':'' ?>"><?= $pt ?></a>
@@ -355,6 +575,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
         <div class="section-panel empty-state">
             <i class="bi bi-megaphone"></i>
             <p class="fw-semibold">No bulletins posted yet.</p>
+            <small class="text-muted">Check back later for updates.</small>
         </div>
     <?php else:
         $pinned  = array_filter($bulletins, fn($b) => $b['is_pinned']);
@@ -364,8 +585,8 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 
     <?php if ($pinned): ?>
     <div class="d-flex align-items-center gap-2 mb-3">
-        <i class="bi bi-pin-fill" style="color:var(--gold);"></i>
-        <span class="fw-bold" style="font-size:.8rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;">Pinned</span>
+        <i class="bi bi-pin-fill" style="color:#c9943a;"></i>
+        <span class="fw-bold" style="font-size:0.8rem;color:#c9943a;text-transform:uppercase;letter-spacing:0.08em;">Pinned</span>
     </div>
     <div class="row g-3 mb-4">
     <?php foreach ($pinned as $b): $tc = $tc_map[$b['post_type']] ?? 't-general'; ?>
@@ -389,7 +610,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
     <?php if ($regular): ?>
     <?php if ($pinned): ?>
     <div class="d-flex align-items-center gap-2 mb-3">
-        <span class="fw-bold" style="font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Other Posts</span>
+        <span class="fw-bold" style="font-size:0.8rem;color:#65676b;text-transform:uppercase;letter-spacing:0.08em;">Other Posts</span>
     </div>
     <?php endif; ?>
     <div class="row g-3">
@@ -419,10 +640,10 @@ $active_tab = $_GET['tab'] ?? 'announcements';
     <div class="section-panel mb-4">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
-                <h5 class="mb-0 fw-bold" style="color:var(--primary-dark);"><i class="bi bi-calendar-event-fill me-2"></i>Youth Programs</h5>
+                <h5 class="mb-0 fw-bold" style="color:#1b74e4;"><i class="bi bi-calendar-event-fill me-2"></i>Youth Programs</h5>
                 <small class="text-muted">Browse and enroll in SK programs and activities</small>
             </div>
-            <div class="chip-bar">
+            <div class="d-flex flex-wrap gap-2">
                 <a href="?tab=programs" class="chip-filter <?= !$status_filter?'active':'' ?>">All</a>
                 <?php foreach ($prog_statuses as $st): ?>
                 <a href="?tab=programs&pstatus=<?= urlencode($st) ?>" class="chip-filter <?= $status_filter===$st?'active':'' ?>"><?= $st ?></a>
@@ -435,6 +656,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
         <div class="section-panel empty-state">
             <i class="bi bi-calendar-x"></i>
             <p class="fw-semibold">No programs available at the moment.</p>
+            <small class="text-muted">Check back later for upcoming activities.</small>
         </div>
     <?php else: ?>
     <div class="row g-3">
@@ -461,26 +683,26 @@ $active_tab = $_GET['tab'] ?? 'announcements';
             <?php if ($p['description']): ?><div class="p-desc"><?= htmlspecialchars(substr($p['description'],0,150)).(strlen($p['description'])>150?'…':'') ?></div><?php endif; ?>
             <?php if ($p['requirements']): ?><div class="p-req"><i class="fas fa-clipboard me-1"></i><em><?= htmlspecialchars($p['requirements']) ?></em></div><?php endif; ?>
 
-           <?php if ($is_enrolled): ?>
-    <span class="btn-enrolled"><i class="bi bi-check-circle-fill"></i> Enrolled</span>
-<?php elseif (!$can_enroll): ?>
-    <span class="btn-closed"><i class="bi bi-x-circle"></i> <?= htmlspecialchars($p['status']) ?></span>
-<?php elseif (!$youth_id_resolved): ?>
-    <button class="btn-closed" 
-        data-bs-toggle="modal" data-bs-target="#youthProfilingModal"
-        style="cursor:pointer; border:1.5px solid #c9943a; background:#fdf3e3; color:#c9943a;">
-        <i class="bi bi-person-x-fill"></i> Complete Profile to Enroll
-    </button>
-<?php else: ?>
-    <button class="btn-primary-custom"
-        data-bs-toggle="modal" data-bs-target="#enrollModal"
-        data-id="<?= $p['id_program'] ?>"
-        data-title="<?= htmlspecialchars($p['program_title'],ENT_QUOTES) ?>"
-        data-date="<?= $p['event_date'] ? date('M d, Y', strtotime($p['event_date'])) : 'TBA' ?>"
-        data-venue="<?= htmlspecialchars($p['venue']??'TBA',ENT_QUOTES) ?>">
-        <i class="bi bi-person-plus-fill"></i> Enroll Now
-    </button>
-<?php endif; ?>
+            <?php if ($is_enrolled): ?>
+                <span class="btn-enrolled"><i class="bi bi-check-circle-fill"></i> Enrolled</span>
+            <?php elseif (!$can_enroll): ?>
+                <span class="btn-closed"><i class="bi bi-x-circle"></i> <?= htmlspecialchars($p['status']) ?></span>
+            <?php elseif (!$youth_id_resolved): ?>
+                <button class="btn-closed" 
+                    data-bs-toggle="modal" data-bs-target="#youthProfilingModal"
+                    style="cursor:pointer; border:1.5px solid #c9943a; background:#fdf3e3; color:#c9943a;">
+                    <i class="bi bi-person-x-fill"></i> Complete Profile to Enroll
+                </button>
+            <?php else: ?>
+                <button class="btn-primary-custom"
+                    data-bs-toggle="modal" data-bs-target="#enrollModal"
+                    data-id="<?= $p['id_program'] ?>"
+                    data-title="<?= htmlspecialchars($p['program_title'],ENT_QUOTES) ?>"
+                    data-date="<?= $p['event_date'] ? date('M d, Y', strtotime($p['event_date'])) : 'TBA' ?>"
+                    data-venue="<?= htmlspecialchars($p['venue']??'TBA',ENT_QUOTES) ?>">
+                    <i class="bi bi-person-plus-fill"></i> Enroll Now
+                </button>
+            <?php endif; ?>
         </div>
     </div>
     <?php endforeach; ?>
@@ -503,7 +725,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
     ?>
 
     <div class="section-panel mb-4">
-        <h5 class="mb-0 fw-bold" style="color:var(--primary-dark);"><i class="bi bi-person-check-fill me-2"></i>My Program Enrollments</h5>
+        <h5 class="mb-0 fw-bold" style="color:#1b74e4;"><i class="bi bi-person-check-fill me-2"></i>My Program Enrollments</h5>
         <small class="text-muted">Track your participation in SK youth programs</small>
     </div>
 
@@ -522,10 +744,30 @@ $active_tab = $_GET['tab'] ?? 'announcements';
         $dropped_c  = count(array_filter($my_programs, fn($e)=>$e['status']==='Dropped'));
     ?>
     <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3"><div class="section-panel text-center py-3"><div style="font-size:2rem;font-weight:900;color:var(--primary);"><?= $total_my ?></div><div style="font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Total</div></div></div>
-        <div class="col-6 col-md-3"><div class="section-panel text-center py-3"><div style="font-size:2rem;font-weight:900;color:#2471a3;"><?= $enrolled_c ?></div><div style="font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Enrolled</div></div></div>
-        <div class="col-6 col-md-3"><div class="section-panel text-center py-3"><div style="font-size:2rem;font-weight:900;color:#27ae60;"><?= $attended_c ?></div><div style="font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Attended</div></div></div>
-        <div class="col-6 col-md-3"><div class="section-panel text-center py-3"><div style="font-size:2rem;font-weight:900;color:#c0392b;"><?= $dropped_c ?></div><div style="font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Dropped</div></div></div>
+        <div class="col-6 col-md-3">
+            <div class="section-panel text-center py-3">
+                <div style="font-size:2rem;font-weight:900;color:#1b74e4;"><?= $total_my ?></div>
+                <div style="font-size:0.75rem;color:#65676b;font-weight:700;text-transform:uppercase;">Total</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="section-panel text-center py-3">
+                <div style="font-size:2rem;font-weight:900;color:#2471a3;"><?= $enrolled_c ?></div>
+                <div style="font-size:0.75rem;color:#65676b;font-weight:700;text-transform:uppercase;">Enrolled</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="section-panel text-center py-3">
+                <div style="font-size:2rem;font-weight:900;color:#27ae60;"><?= $attended_c ?></div>
+                <div style="font-size:0.75rem;color:#65676b;font-weight:700;text-transform:uppercase;">Attended</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="section-panel text-center py-3">
+                <div style="font-size:2rem;font-weight:900;color:#c0392b;"><?= $dropped_c ?></div>
+                <div style="font-size:0.75rem;color:#65676b;font-weight:700;text-transform:uppercase;">Dropped</div>
+            </div>
+        </div>
     </div>
     <div class="row g-3">
     <?php foreach ($my_programs as $ep):
@@ -535,10 +777,10 @@ $active_tab = $_GET['tab'] ?? 'announcements';
         $ps_badge = $ps_badge_map[$ep['prog_status']] ?? 'badge-completed';
     ?>
     <div class="col-md-6">
-        <div class="section-panel" style="border-left:5px solid var(--primary);">
-            <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="section-panel" style="border-left:5px solid #1b74e4;">
+            <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
                 <span class="badge-ptype"><?= htmlspecialchars($ep['program_type']) ?></span>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap">
                     <span class="<?= $ps_badge ?>"><?= htmlspecialchars($ep['prog_status']) ?></span>
                     <span class="<?= $ep_badge ?>">My Status: <?= htmlspecialchars($ep['status']) ?></span>
                 </div>
@@ -564,7 +806,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 ══════════════════════════════════════ -->
 <div class="modal fade" id="youthProfilingModal" tabindex="-1" aria-labelledby="youthProfilingTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
-        <div class="modal-content" style="border-radius:15px;overflow:hidden;border:none;">
+        <div class="modal-content">
             <div class="modal-header modal-header-blue">
                 <h5 class="modal-title fw-bold" id="youthProfilingTitle">
                     <i class="fas fa-id-card me-2"></i> Youth Profile Registration
@@ -579,17 +821,17 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                     <hr class="mt-0 mb-3">
                     <div class="row g-2 mb-2">
                         <div class="col-12 col-md-4">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Last Name</label>
+                            <label class="form-label">Last Name</label>
                             <input name="lname" type="text" class="form-control form-control-sm" placeholder="Required"
                                 value="<?= isset($userdetails['lname']) ? htmlspecialchars($userdetails['lname']) : '' ?>" required>
                         </div>
                         <div class="col-12 col-md-4">
-                            <label class="fw-bold small text-uppercase form-label mb-1">First Name</label>
+                            <label class="form-label">First Name</label>
                             <input name="fname" type="text" class="form-control form-control-sm" placeholder="Required"
                                 value="<?= isset($userdetails['fname']) ? htmlspecialchars($userdetails['fname']) : '' ?>" required>
                         </div>
                         <div class="col-12 col-md-4">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Middle Name</label>
+                            <label class="form-label">Middle Name</label>
                             <input name="mi" type="text" class="form-control form-control-sm" placeholder="Required" required>
                         </div>
                     </div>
@@ -597,7 +839,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                     <!-- Demographics -->
                     <div class="row g-2 mb-2">
                         <div class="col-6 col-md-4">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Age</label>
+                            <label class="form-label">Age</label>
                             <?php
                                 $computed_age = '';
                                 if (!empty($userdetails['bdate'])) {
@@ -608,11 +850,10 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                                 }
                             ?>
                             <input name="age" type="number" class="form-control form-control-sm"
-                                value="<?= htmlspecialchars($computed_age) ?>" required
-                                 title="Auto-computed from your birthdate">
+                                value="<?= htmlspecialchars($computed_age) ?>" required>
                         </div>
                         <div class="col-6 col-md-4">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Sex</label>
+                            <label class="form-label">Sex</label>
                             <select name="sex" class="form-select form-select-sm" required>
                                 <option value="" disabled selected>Select</option>
                                 <option value="Male"   <?= (isset($userdetails['sex']) && $userdetails['sex']==='Male')   ? 'selected':'' ?>>Male</option>
@@ -620,7 +861,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                             </select>
                         </div>
                         <div class="col-12 col-md-4">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Civil Status</label>
+                            <label class="form-label">Civil Status</label>
                             <select name="civil_status" class="form-select form-select-sm" required>
                                 <option value="Single">Single</option>
                                 <option value="Married">Married</option>
@@ -635,7 +876,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                     <hr class="mt-0 mb-3">
                     <div class="row g-2">
                         <div class="col-12 col-md-6">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Contact Number</label>
+                            <label class="form-label">Contact Number</label>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">+63</span>
                                 <input type="text" class="form-control" name="contact_number"
@@ -643,17 +884,17 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Email Address</label>
+                            <label class="form-label">Email Address</label>
                             <input type="email" class="form-control form-control-sm" name="email_address"
                                 placeholder="name@example.com" required inputmode="email">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Educational Attainment</label>
+                            <label class="form-label">Educational Attainment</label>
                             <input type="text" class="form-control form-control-sm" name="educ_attain"
                                 placeholder="e.g. College Undergraduate" required>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Employment Status</label>
+                            <label class="form-label">Employment Status</label>
                             <select name="emp_status" class="form-select form-select-sm" required>
                                 <option value="Employed">Employed</option>
                                 <option value="Unemployed">Unemployed</option>
@@ -662,7 +903,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="fw-bold small text-uppercase form-label mb-1">Special Skills / Interests</label>
+                            <label class="form-label">Special Skills / Interests</label>
                             <textarea class="form-control form-control-sm" name="skill_name" rows="2"
                                 placeholder="e.g. Graphic Design, Public Speaking, Sports" required></textarea>
                         </div>
@@ -683,29 +924,28 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 <!-- ── ENROLL CONFIRMATION MODAL ── -->
 <div class="modal fade" id="enrollModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:16px;overflow:hidden;border:none;">
+        <div class="modal-content">
             <div class="modal-header modal-header-blue">
                 <h5 class="modal-title"><i class="bi bi-person-plus-fill me-2"></i>Confirm Enrollment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <p class="mb-3">You are about to enroll in:</p>
-                <div class="section-panel" style="border-left:4px solid var(--primary);">
-                    <div class="fw-bold" style="color:var(--primary-dark);font-size:1rem;" id="modal_prog_title">—</div>
+                <div class="section-panel" style="border-left:4px solid #1b74e4;">
+                    <div class="fw-bold" style="color:#1b74e4;font-size:1rem;" id="modal_prog_title">—</div>
                     <div class="p-meta mt-2">
                         <span><i class="fas fa-calendar"></i><span id="modal_prog_date">—</span></span>
                         <span><i class="fas fa-map-marker-alt"></i><span id="modal_prog_venue">—</span></span>
                     </div>
                 </div>
-                <p class="mt-3 mb-0" style="font-size:.85rem;color:var(--muted);">
+                <p class="mt-3 mb-0" style="font-size:0.85rem;color:#65676b;">
                     <i class="bi bi-info-circle me-1"></i>Your profile info will be submitted. The SK admin will track your participation.
                 </p>
             </div>
             <div class="modal-footer bg-light px-4 py-3">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form method="POST">
-              
-<input type="hidden" name="id_program" id="modal_prog_id">
+                    <input type="hidden" name="id_program" id="modal_prog_id">
                     <button type="submit" name="enroll_program" class="btn-primary-custom">
                         <i class="bi bi-check-circle-fill"></i> Confirm Enrollment
                     </button>
@@ -715,15 +955,32 @@ $active_tab = $_GET['tab'] ?? 'announcements';
     </div>
 </div>
 
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.getElementById('enrollModal').addEventListener('show.bs.modal', function(e) {
-    const b = e.relatedTarget;
-    document.getElementById('modal_prog_id').value          = b.dataset.id;
-    document.getElementById('modal_prog_title').textContent = b.dataset.title;
-    document.getElementById('modal_prog_date').textContent  = b.dataset.date;
-    document.getElementById('modal_prog_venue').textContent = b.dataset.venue;
-});
+    // Back-to-top visibility
+    const topBtn = document.getElementById('js-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            topBtn.classList.remove('hide');
+        } else {
+            topBtn.classList.add('hide');
+        }
+    });
+    topBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Enroll modal data population
+    document.getElementById('enrollModal').addEventListener('show.bs.modal', function(e) {
+        const b = e.relatedTarget;
+        document.getElementById('modal_prog_id').value          = b.dataset.id;
+        document.getElementById('modal_prog_title').textContent = b.dataset.title;
+        document.getElementById('modal_prog_date').textContent  = b.dataset.date;
+        document.getElementById('modal_prog_venue').textContent = b.dataset.venue;
+    });
 </script>
 </body>
 </html>

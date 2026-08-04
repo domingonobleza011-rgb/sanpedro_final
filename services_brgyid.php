@@ -1,737 +1,463 @@
 <?php 
-    define('BMIS_ROLE_REQUIRED', 'resident');
+define('BMIS_ROLE_REQUIRED', 'resident');
 require('secure_header.php'); 
-    require('classes/main.class.php');
-    require('classes/resident.class.php');
-    
-    $userdetails = $bmis->get_userdata();
-    $bmis->create_brgyid();
+require('classes/main.class.php');
+require('classes/resident.class.php');
 
-
+$userdetails = $bmis->get_userdata();
+$bmis->create_brgyid();
+$is_verified = $bmis->isResidentVerified($userdetails['id_resident']);
 ?>
-
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Barangay ID | Barangay San Pedro</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+    <style>
+        /* ----- GLOBAL RESETS ----- */
+        body {
+            background: #f0f2f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        /* ----- HERO BANNER ----- */
+        .hero-id {
+            background: linear-gradient(135deg, #1b74e4 0%, #0a5ecf 100%);
+            padding: 3rem 1.5rem;
+            border-radius: 0 0 40px 40px;
+            color: #fff;
+            margin-bottom: 2rem;
+        }
+        .hero-id h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .hero-id .doc-icon {
+            max-width: 90px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+        .hero-id .doc-icon:hover {
+            transform: translateY(-6px) scale(1.05);
+        }
+        @media (max-width: 576px) {
+            .hero-id h1 {
+                font-size: 1.8rem;
+            }
+            .hero-id .doc-icon {
+                max-width: 60px;
+            }
+            .hero-id {
+                padding: 2rem 1rem;
+                border-radius: 0 0 24px 24px;
+            }
+        }
 
-<html>
-  <head> 
-    <title> Barangay Management System </title>
-      <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
-      <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-        <!-- responsive tags for screen compatibility -->
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- custom css --> 
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
-        <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  
-        <style>
-
-            /* Navbar Buttons */
-
-            .btn1 {
+        /* ----- PROCEDURE CARDS ----- */
+        .step-card {
+            background: #fff;
+            border: none;
             border-radius: 20px;
-            border: none; /* Remove borders */
-            color: white; /* White text */
-            font-size: 16px; /* Set a font size */
-            cursor: pointer; /* Mouse pointer on hover */
-            margin-left: 23%;
-            padding: 8px 22px;
-            }
+            padding: 1.75rem 1rem;
+            height: 100%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+        .step-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+        }
+        .step-card i {
+            font-size: 3.2rem;
+            color: #1b74e4;
+            margin-bottom: 1rem;
+        }
+        .step-card h5 {
+            font-weight: 700;
+            color: #1c1e21;
+        }
+        .step-card p {
+            color: #65676b;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
 
-            .btn2 {
+        /* ----- REQUEST BUTTON ----- */
+        .btn-request {
+            background: #1b74e4;
+            border: none;
+            border-radius: 60px;
+            padding: 0.9rem 3rem;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #fff;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 4px 14px rgba(27, 116, 228, 0.35);
+        }
+        .btn-request:hover {
+            background: #0a5ecf;
+            color: #fff;
+            transform: scale(1.02);
+        }
+        .btn-request i {
+            margin-right: 10px;
+        }
+
+        /* ----- MODAL STYLING ----- */
+        .modal-content {
+            border: none;
             border-radius: 20px;
-            border: none; /* Remove borders */
-            color: white; /* White text */
-            font-size: 16px; /* Set a font size */
-            cursor: pointer; /* Mouse pointer on hover */
-            padding: 8px 22px;
-            margin-left: .1%;
-            }
+            overflow: hidden;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #1b74e4, #0a5ecf);
+            color: #fff;
+            border: none;
+            padding: 1.25rem 1.5rem;
+        }
+        .modal-header h5 {
+            font-weight: 700;
+        }
+        .modal-body {
+            background: #f8f9fa;
+            padding: 1.75rem;
+        }
+        .modal-footer {
+            background: #fff;
+            border-top: 1px solid #e4e6ea;
+            padding: 1rem 1.5rem;
+        }
+        .form-section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1b74e4;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .form-section-title:first-of-type {
+            margin-top: 0;
+        }
+        .form-section-title-danger {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #dc3545;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 1px solid #dce0e4;
+            padding: 0.65rem 1rem;
+            font-size: 0.95rem;
+            background: #fff;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #1b74e4;
+            box-shadow: 0 0 0 3px rgba(27, 116, 228, 0.15);
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #4b4f56;
+            margin-bottom: 0.3rem;
+        }
+        .modal .btn-secondary {
+            border-radius: 40px;
+            padding: 0.6rem 1.8rem;
+        }
+        .modal .btn-primary {
+            border-radius: 40px;
+            padding: 0.6rem 2.2rem;
+            background: #1b74e4;
+            border: none;
+            font-weight: 700;
+        }
+        .modal .btn-primary:hover {
+            background: #0a5ecf;
+        }
 
-            .btn3 {
-            border-radius: 20px;
-            border: none; /* Remove borders */
-            color: white; /* White text */
-            font-size: 16px; /* Set a font size */
-            cursor: pointer; /* Mouse pointer on hover */
-            padding: 8px 22px;
-            margin-left: .1%;
-            }
-
-            .btn4 {
-            border-radius: 20px;
-            border: none; /* Remove borders */
-            color: white; /* White text */
-            font-size: 16px; /* Set a font size */
-            cursor: pointer; /* Mouse pointer on hover */
-            padding: 8px 22px;
-            margin-left: .1%;
-            }
-
-            .btn5 {
-            border-radius: 20px;
-            border: none; /* Remove borders */
-            color: white; /* White text */
-            font-size: 16px; /* Set a font size */
-            cursor: pointer; /* Mouse pointer on hover */
-            padding: 8px 22px;
-            margin-left: .1%;
-            }
-
-            /* Darker background on mouse-over */
-            .btn1:hover {
-            background-color: RoyalBlue;
-            color: black;
-            }
-
-            .btn2:hover {
-            background-color: RoyalBlue;
-            color: black;
-            }
-
-            .btn3:hover {
-            background-color: RoyalBlue;
-            color: black;
-            }
-
-            .btn4:hover {
-            background-color: RoyalBlue;
-            color: black;
-            }
-
-            .btn5:hover {
-            background-color: RoyalBlue;
-            color: black;
-            }
-
-            /* Back-to-Top */
-
-            .top-link {
-            transition: all 0.25s ease-in-out;
+        /* ----- BACK TO TOP ----- */
+        .top-link {
             position: fixed;
-            bottom: 0;
-            right: 0;
-            display: inline-flex;
-            cursor: pointer;
+            bottom: 2rem;
+            right: 2rem;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #1b74e4;
+            display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 3em 3em 0;
-            border-radius: 50%;
-            padding: 0.25em;
-            width: 80px;
-            height: 80px;
-            background-color: #3661D5;
-            }
-            .top-link.show {
-            visibility: visible;
-            opacity: 1;
-            }
-            .top-link.hide {
-            visibility: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 999;
+        }
+        .top-link.hide {
             opacity: 0;
-            }
-            .top-link svg {
-            fill: white;
-            width: 24px;
+            pointer-events: none;
+            transform: scale(0.8);
+        }
+        .top-link svg {
+            fill: #fff;
+            width: 20px;
             height: 12px;
+        }
+        .top-link:hover {
+            background: #0a5ecf;
+        }
+
+        /* ----- RESPONSIVE TWEAKS ----- */
+        @media (max-width: 576px) {
+            .step-card {
+                padding: 1.25rem 0.75rem;
             }
-            .top-link:hover {
-            background-color: #3498DB;
+            .step-card i {
+                font-size: 2.5rem;
             }
-            .top-link:hover svg {
-            fill: #000000;
+            .btn-request {
+                font-size: 1rem;
+                padding: 0.75rem 1.5rem;
+                width: 100%;
             }
-
-            .screen-reader-text {
-            position: absolute;
-            clip-path: inset(50%);
-            margin: -1px;
-            border: 0;
-            padding: 0;
-            width: 1px;
-            height: 1px;
-            overflow: hidden;
-            word-wrap: normal !important;
-            clip: rect(1px, 1px, 1px, 1px);
+            .modal-body {
+                padding: 1.25rem;
             }
-            .screen-reader-text:focus {
-            display: block;
-            top: 5px;
-            left: 5px;
-            z-index: 100000;
-            clip-path: none;
-            background-color: #eee;
-            padding: 15px 23px 14px;
-            width: auto;
-            height: auto;
-            text-decoration: none;
-            line-height: normal;
-            color: #444;
-            font-size: 1em;
-            clip: auto !important;
+        }
+        @media (min-width: 768px) {
+            .hero-id h1 {
+                font-size: 3rem;
             }
+        }
+    </style>
+</head>
+<body>
 
-            .container1
-            {
-                background-color: #3498DB;
-                height: 342px;
-                color: black;
-                font-family: Arial, Helvetica, sans-serif;
-                text-align: center;
-            }
+<!-- BACK TO TOP BUTTON -->
+<a class="top-link hide" id="js-top" href="#">
+    <svg viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
+    <span class="visually-hidden">Back to top</span>
+</a>
 
-            .idpicture{
-                border: 1px solid black;
-            }
-
-            .applybutton
-            {
-                width: 100% !important;
-                height: 50px !important;
-                border-radius: 20px;
-                margin-top: 5%;
-                margin-bottom: 8%;
-                font-size: 25px;
-                letter-spacing: 2px;
-            }
-
-            .paa
-            {
-                margin-top: 10px;
-                position: relative;
-                left: -28%;
-            }
-
-            .text1{
-                margin-top: 30px;
-                font-size: 50px;
-            }
-
-            .picture{
-                height: 120px;
-                width: 120px;
-            }
-
-            /* width */
-            ::-webkit-scrollbar {
-            width: 5px;
-            }
-
-            /* Track */
-            ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            }
-            
-            /* Handle */
-            ::-webkit-scrollbar-thumb {
-            background: #888; 
-            }
-
-            /* Handle on hover */
-            ::-webkit-scrollbar-thumb:hover {
-            background: #555; 
-            }
-
-            .card4 {
-                width: 195px;
-                height: 210px;
-                overflow: auto;
-                margin: auto;
-                color: white;
-            }
-
-            .card3 {
-                width: 195px;
-                height: 210px;
-                overflow: hidden;
-                margin: auto;
-                color: white;
-            }
-
-            .card2 {
-                width: 195px;
-                height: 210px;
-                overflow: auto;
-                margin: auto;
-                color: white;
-            }
-
-            .card1 {
-                width: 195px;
-                height: 210px;
-                overflow: auto;
-                margin: auto;
-                color: white;
-            }
-
-            a{
-                color:white;
-                }
-            .shfooter .collapse {
-                display: inherit;
-            }
-                @media (max-width:767px) {
-            .shfooter ul {
-                    margin-bottom: 0;
-            }
-
-            .shfooter .collapse {
-                    display: none;
-            }
-
-            .shfooter .collapse.show {
-                    display: block;
-            }
-
-            .shfooter .title .fa-angle-up,
-            .shfooter .title[aria-expanded=true] .fa-angle-down {
-                    display: none;
-            }
-
-            .shfooter .title[aria-expanded=true] .fa-angle-up {
-                    display: block;
-            }
-
-            .shfooter .navbar-toggler {
-                    display: inline-block;
-                    padding: 0;
-            }
-
-            }
-
-            .resize {
-                text-align: center;
-            }
-            .resize {
-                margin-top: 3rem;
-                font-size: 1.25rem;
-            }
-            /*RESIZESCREEN ANIMATION*/
-            .fa-angle-double-right {
-                animation: rightanime 1s linear infinite;
-            }
-
-            .fa-angle-double-left {
-                animation: leftanime 1s linear infinite;
-            }
-            @keyframes rightanime {
-                50% {
-                    transform: translateX(10px);
-                    opacity: 0.5;
-            }
-                100% {
-                    transform: translateX(10px);
-                    opacity: 0;
-            }
-            }
-            @keyframes leftanime {
-                50% {
-                    transform: translateX(-10px);
-                    opacity: 0.5;
-            }
-                100% {
-                    transform: translateX(-10px);
-                    opacity: 0;
-            }
-            }
-
-            /* Contact Chip */
-
-            .chip {
-            display: inline-block;
-            padding: 0 25px;
-            height: 50px;
-            line-height: 50px;
-            border-radius: 25px;
-            background-color: #2C54C1;
-            margin-top: 5px;
-            }
-
-            .chip img {
-            float: left;
-            margin: 0 10px 0 -25px;
-            height: 50px;
-            width: 50px;
-            border-radius: 50%;
-            }
-
-            .zoom {
-            transition: transform .3s;
-            }
-
-            .zoom:hover {
-            -ms-transform: scale(1.4); /* IE 9 */
-            -webkit-transform: scale(1.4); /* Safari 3-8 */
-            transform: scale(1.4); 
-            }
-            .container1 img {
-    /* Prevents icons from getting too large on desktop */
-    max-height: 120px; 
-    object-fit: contain;
-}
-
-@media (max-width: 576px) {
-    .text1 {
-        font-size: 1.8rem; /* Shrinks the title slightly on phones */
-    }
-}
-                
-
-
-
-
-
-
-
-
-
-
-        </style>
-  </head>
-
-    <body>
-
-        <!-- Back-to-Top and Back Button -->
-
-        <a data-toggle="tooltip" title="Back-To-Top" class="top-link hide" href="" id="js-top">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
-            <span class="screen-reader-text">Back to top</span>
-        </a>
-
-        
-
+<!-- INCLUDE NAVBAR -->
 <?php include __DIR__ . '/resident_navbar.php'; ?>
 
-       <div class="container-fluid container1 py-4"> 
-    <div class="row justify-content-center text-center"> 
-        <div class="col-12 col-md-10 col-lg-8"> 
-            
-            <div class="header mb-4">
-                <h1 class="text1 display-4 fw-bold">Barangay ID</h1>
-            </div>
-
-            <div class="row g-3 justify-content-center align-items-center">
-                <div class="col-4 col-sm-3">
-                    <img class="img-fluid" src="icons/Documents/docu1.png" alt="Document 1">
-                </div>
-                <div class="col-4 col-sm-3">
-                    <img class="img-fluid" src="icons/Documents/docu3.png" alt="Document 3">
-                </div>
-                <div class="col-4 col-sm-3">
-                    <img class="img-fluid" src="icons/Documents/docu2.png" alt="Document 2">
-                </div>
-            </div>
-
+<!-- ===== HERO BANNER ===== -->
+<section class="hero-id text-center">
+    <div class="container">
+        <h1 class="mb-3">Barangay ID</h1>
+        <p class="mb-4 opacity-75" style="font-size:1.1rem;">Secure your official Barangay ID to identify yourself as a resident of Barangay San Pedro</p>
+        <div class="d-flex flex-wrap justify-content-center align-items-center gap-4">
+            <img class="doc-icon" src="icons/Documents/docu1.png" alt="Document">
+            <img class="doc-icon" src="icons/Documents/docu3.png" alt="Document">
+            <img class="doc-icon" src="icons/Documents/docu2.png" alt="Document">
         </div>
     </div>
-</div>
+</section>
 
-        <div id="down3"></div>
-
-        <br>
-        <br>
-        <br>
-
-               <div class="container text-center">
-            <div class="row">
-                <div class="col">
-                    <h1>Procedure</h1>
-                    <hr style="background-color: black;">
-                </div>
+<!-- ===== PROCEDURE STEPS ===== -->
+<section class="container mb-5">
+    <h2 class="text-center fw-bold mb-4">How to Apply</h2>
+    <div class="row g-4">
+        <div class="col-6 col-md-3">
+            <div class="step-card">
+                <i class="bi bi-clipboard2-check"></i>
+                <h5>Step 1: Prepare</h5>
+                <p>Gather all required personal information.</p>
             </div>
-
-            <br>
-
-            <div class="row">
-                <div class="col">
-                    <i class="fas fa-id-card fa-7x"></i>
-
-                    <br>
-                    <br>
-
-                    <h3>Step 1: Prepare</h3>
-                    <p>First step is to prepare all of the information that will be needed
-                    in acquiring a Barangay ID.</p>
-                </div>
-
-                <div class="col">
-                    <i class="fas fa-laptop fa-7x"></i>
-
-                    <br>
-                    <br>
-
-                    <h3>Step 2: Fill-Up</h3>
-                    <p>Second step is to Fill-Up the entire form in our system.</p>
-                </div>
-
-                <div class="col">
-                    <i class="fas fa-user-check fa-7x"></i>
-
-                    <br>
-                    <br>
-
-                    <h3>Step 3: Assessment</h3>
-                    <p>Third step is to verify all of the information you've been given
-                    in our system that we can use to make the information of your document
-                    accurately.</p>
-                </div>
-
-                <div class="col">
-                    <i class="fas fa-file fa-7x"></i>
-
-                    <br>
-                    <br>
-
-                    <h3>Step 4: Release</h3>
-                    <p>Fourth step is for releasing of your Barangay ID.</p>
-                </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="step-card">
+                <i class="bi bi-laptop"></i>
+                <h5>Step 2: Fill-Up</h5>
+                <p>Complete the online request form.</p>
             </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="step-card">
+                <i class="bi bi-person-check"></i>
+                <h5>Step 3: Assessment</h5>
+                <p>Your information will be verified.</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="step-card">
+                <i class="bi bi-file-earmark-check"></i>
+                <h5>Step 4: Release</h5>
+                <p>Claim your Barangay ID.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-            <div id="down2"></div>
-
-            <br>
-           
-
-        <div id="down1"></div>
-
-        <br>
-        <br>
-        <br>
-
-        <!-- Button trigger modal -->
-
-<div class="container py-4">
-    <h1 class="text-center">Registration</h1>
-    <hr class="bg-dark">
-
-<div class="col-12 text-center">   
-    <!-- Added 'btn-block' for older Bootstrap or 'w-100' for Bootstrap 4/5 -->
-    <!-- Added 'py-3' for extra vertical height and 'mb-4' for spacing -->
-    <button type="button" 
-        class="btn btn-primary btn-lg w-100 w-md-auto py-3 px-5 shadow-sm" 
-        style="font-weight: 600; font-size: 1.25rem; border-radius: 10px;"
-        data-bs-toggle="modal" 
-        data-bs-target="#exampleModalCenter">
-        <i class="fas fa-edit mr-2"></i> Request Form
+<!-- ===== REQUEST BUTTON ===== -->
+<section class="container text-center mb-5">
+    <button type="button" class="btn btn-request" data-bs-toggle="modal" data-bs-target="#idModal">
+        <i class="bi bi-pencil-square"></i> Request Form
     </button>
-</div>
+</section>
 
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document"> <!-- Added modal-lg for better spacing on desktop -->
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Barangay ID Form</h5>
-                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                     
+<!-- ===== MODAL: REQUEST FORM ===== -->
+<div class="modal fade" id="idModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-vcard me-2"></i>Barangay ID Request Form</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post" novalidate enctype="multipart/form-data">
+                <div class="modal-body">
+                    <!-- Personal Info -->
+                    <div class="form-section-title"><i class="bi bi-person me-1"></i> Personal Information</div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Last Name</label>
+                            <input name="lname" type="text" class="form-control" value="<?= htmlspecialchars($userdetails['surname']) ?>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">First Name</label>
+                            <input name="fname" type="text" class="form-control" value="<?= htmlspecialchars($userdetails['firstname']) ?>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Middle Name</label>
+                            <input name="mi" type="text" class="form-control" value="<?= htmlspecialchars($userdetails['mname']) ?>" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Contact No.</label>
+                            <input name="contact" type="tel" class="form-control" placeholder="09123456789" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Date of Birth</label>
+                            <input name="bdate" type="date" class="form-control" value="<?= htmlspecialchars($userdetails['bdate'] ?? '') ?>" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-12">
+                            <label class="form-label">Birth Place</label>
+                            <input name="bplace" type="text" class="form-control" placeholder="City, Province" required>
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-section-title mt-4"><i class="bi bi-geo-alt me-1"></i> Residential Address</div>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">House No.</label>
+                            <input name="houseno" type="text" class="form-control" value="<?= htmlspecialchars($userdetails['houseno']) ?>" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Street</label>
+                            <input name="street" type="text" class="form-control" value="<?= htmlspecialchars($userdetails['street']) ?>" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Barangay</label>
+                            <input name="brgy" type="text" class="form-control" value="<?= htmlspecialchars($userdetails['brgy']) ?>" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Municipality</label>
+                            <input name="municipal" type="text" class="form-control" value="<?= htmlspecialchars($userdetails['municipal']) ?>" required>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Contact -->
+                    <div class="form-section-title-danger mt-4"><i class="bi bi-exclamation-triangle-fill me-1"></i> In Case of Emergency</div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Last Name</label>
+                            <input name="inc_lname" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">First Name</label>
+                            <input name="inc_fname" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Middle Name</label>
+                            <input name="inc_mi" type="text" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Contact Number</label>
+                            <input name="inc_contact" type="text" class="form-control" placeholder="09123456789" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Relation</label>
+                            <input name="relation" type="text" class="form-control" placeholder="e.g. Mother, Father, Spouse" required>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Contact Address -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-3">
+                            <label class="form-label">House No.</label>
+                            <input name="inc_houseno" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Street</label>
+                            <input name="inc_street" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Barangay</label>
+                            <input name="inc_brgy" type="text" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Municipality</label>
+                            <input name="inc_municipal" type="text" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields -->
+                    <input name="id_resident" type="hidden" value="<?= $userdetails['id_resident'] ?>">
                 </div>
 
-                <div class="modal-body p-4">
-                    <form method="post" class="was-validated" enctype="multipart/form-data">
-                        
-                        <h6 class="text-primary font-weight-bold mb-3">Personal Information</h6>
-                        <div class="row">
-                            <!-- col-md-4 ensures 3 items per row on desktop, but stacks them on mobile -->
-                            <div class="col-12 col-md-4">
-                                <div class="form-group">
-                                    <label for="lname">Last Name</label>
-                                    <input name="lname" type="text" class="form-control" value="<?= $userdetails['surname']?>" required>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="form-group">
-                                    <label for="fname">First Name</label>
-                                    <input name="fname" type="text" class="form-control" value="<?= $userdetails['firstname']?>" required>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="form-group">
-                                    <label for="mi">Middle Name</label>
-                                    <input name="mi" type="text" class="form-control" value="<?= $userdetails['mname']?>" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12 col-md-6">
-                                <div class="form-group">
-                                    <label>Contact No.</label>
-                                    <input name="contact" type="tel" class="form-control" placeholder="09123456789" required>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <div class="form-group">
-                                    <label>Date of Birth</label>
-                                    <input name="bdate" type="date" class="form-control" value="<?= $userdetails['bdate']?>" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Birth Place</label>
-                            <input type="text" class="form-control" name="bplace" required>
-                        </div>
-
-                        <hr>
-                        <h6 class="text-primary font-weight-bold mb-3">Address</h6>
-                        <div class="row">
-                            <div class="col-6 col-md-3">
-                                <div class="form-group">
-                                    <label>House No.</label>
-                                    <input type="text" class="form-control" name="houseno" value="<?= $userdetails['houseno']?>" required>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="form-group">
-                                    <label>Street</label>
-                                    <input type="text" class="form-control" name="street" value="<?= $userdetails['street']?>" required>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="form-group">
-                                    <label>Barangay</label>
-                                    <input type="text" class="form-control" name="brgy" value="<?= $userdetails['brgy']?>" required>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="form-group">
-                                    <label>Municipality</label>
-                                    <input type="text" class="form-control" name="municipal" value="<?= $userdetails['municipal']?>" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr>
-                        <h6 class="text-danger font-weight-bold mb-3"><i class="fas fa-exclamation-triangle mr-2"></i>In case of emergency:</h6>
-
-                        <div class="row">
-                            <div class="col-12 col-md-4">
-                                <div class="form-group">
-                                    <label>Last Name</label>
-                                    <input name="inc_lname" type="text" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="form-group">
-                                    <label>First Name</label>
-                                    <input name="inc_fname" type="text" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="form-group">
-                                    <label>Middle Name</label>
-                                    <input name="inc_mi" type="text" class="form-control" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12 col-md-6">
-                                <div class="form-group">
-                                    <label>Contact Number</label>
-                                    <input name="inc_contact" type="text" maxlength="11" class="form-control" pattern="[0-9]{11}" placeholder="11-digit number" required>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <div class="form-group">
-                                    <label>Relation</label>
-                                    <input name="relation" type="text" class="form-control" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Full width Address for Emergency Contact -->
-                        <div class="row">
-                            <div class="col-6 col-md-3">
-                                <div class="form-group"><label>House No.</label><input type="text" class="form-control" name="inc_houseno" required></div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="form-group"><label>Street</label><input type="text" class="form-control" name="inc_street" required></div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="form-group"><label>Barangay</label><input type="text" class="form-control" name="inc_brgy" required></div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="form-group"><label>Municipality</label><input type="text" class="form-control" name="inc_municipal" required></div>
-                            </div>
-                        </div>
-
-                </div> <!-- End Modal Body -->
-
-                <div class="modal-footer bg-light">
-                    <input name="id_resident" type="hidden" value="<?= $userdetails['id_resident']?>">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button name="create_brgyid" type="submit" class="btn btn-primary px-4">Submit Request</button>
-                </div> 
-                </form>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button name="create_brgyid" type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-        </form>
-      
 
-        <script>
-            // Add the following code if you want the name of the file appear on select
-            $(".custom-file-input").on("change", function() {
-            var fileName = $(this).val().split("\\").pop();
-            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-            });
-        </script>
-
-        <script>
-            function readURL(input) {
-                if (input.files && input.files[0]) {
-                    var reader = new FileReader();
-
-                    reader.onload = function (e) {
-                        $('#blah')
-                            .attr('src', e.target.result)
-                            .width(200)
-                            .height(200);
-                    };
-
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
-        </script>
-
-        <script>
-            $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip();   
-            });
-        </script>
-
-        <script>
-            $(document).ready(function(){
-            // Add smooth scrolling to all links
-            $("a").on('click', function(event) {
-
-                // Make sure this.hash has a value before overriding default behavior
-                if (this.hash !== "") {
-                // Prevent default anchor click behavior
-                event.preventDefault();
-
-                // Store hash
-                var hash = this.hash;
-
-                // Using jQuery's animate() method to add smooth page scroll
-                // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
-                $('html, body').animate({
-                    scrollTop: $(hash).offset().top
-                }, 800, function(){
-
-                    // Add hash (#) to URL when done scrolling (default click behavior)
-                    window.location.hash = hash;
-                });
-                } // End if
-            });
-            });
-        </script>
+<!-- SCRIPTS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Back-to-top visibility
+    const topBtn = document.getElementById('js-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            topBtn.classList.remove('hide');
+        } else {
+            topBtn.classList.add('hide');
+        }
+    });
+    topBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
-    </body>
+    // Tooltip initialization (if any)
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+</body>
 </html>

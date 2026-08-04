@@ -29,10 +29,10 @@ if (isset($conn) && $conn instanceof PDO) {
     // A row in these tables IS the pending request; it's removed
     // once the admin processes/archives it, so COUNT(*) = "new".
     $cert_sources = [
-        ['label' => 'Certificate of Residency', 'table' => 'tbl_rescert',    'where' => 'is_deleted = 0', 'page' => 'admn_certofres.php',       'icon' => 'fa-file-word'],
+        ['label' => 'Certificate of Residency', 'table' => 'tbl_rescert',    'where' => '1=1', 'page' => 'admn_certofres.php',       'icon' => 'fa-file-word'],
         ['label' => 'Certificate of Indigency',  'table' => 'tbl_indigency', 'where' => '1=1',             'page' => 'admn_certofindigency.php', 'icon' => 'fa-table'],
         ['label' => 'Business Permit',           'table' => 'tbl_bspermit', 'where' => '1=1',             'page' => 'admn_bspermit.php',        'icon' => 'fa-file-contract'],
-        ['label' => 'Barangay ID',               'table' => 'tbl_brgyid',   'where' => 'is_deleted = 0', 'page' => 'admn_brgyid.php',          'icon' => 'fa-id-card'],
+        ['label' => 'Barangay ID',               'table' => 'tbl_brgyid',   'where' => '1=1', 'page' => 'admn_brgyid.php',          'icon' => 'fa-id-card'],
         ['label' => 'Barangay Clearance',        'table' => 'tbl_clearance','where' => '1=1',             'page' => 'admn_brgyclearance.php',   'icon' => 'fa-file'],
         ['label' => 'Complaints',                'table' => 'tbl_complaints', 'where' => '1=1',           'page' => 'admn_complaints.php',      'icon' => 'fa-file'],
     ];

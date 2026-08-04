@@ -11,16 +11,8 @@
         <tr>
             <th> Actions</th>
             <th> Resident ID </th>
-            <th> Surname </th>
-            <th> First Name </th>
-            <th> Middle Name </th>
-            <th> Business Name </th>
-            <th> House No. </th>
-            <th> Street </th>
-            <th> Barangay </th>
-            <th> Municipality </th>
-            <th> Business Industry </th>
-            <th> Area of Establishment </th>
+            <th> Fullname </th>
+            <th> Address </th>
         </tr>
     </thead>
 </div>
@@ -45,17 +37,9 @@
                         </button>
                     </form>
                 </td>
-                <td> <?= $view['id_resident'];?> </td> 
-                <td> <?= $view['lname'];?> </td>
-                <td> <?= $view['fname'];?> </td>
-                <td> <?= $view['mi'];?> </td>
-                <td> <?= $view['bsname'];?> </td>
-                <td> <?= $view['houseno'];?> </td>
-                <td> <?= $view['street'];?> </td>
-                <td> <?= $view['brgy'];?> </td>
-                <td> <?= $view['municipal'];?> </td>
-                <td> <?= $view['bsindustry'];?> </td>
-                <td> <?= $view['aoe'];?> </td>
+                    <td> <?= $view['id_resident'];?> </td> 
+                    <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
+                    <td> <?= $view['houseno'];?>,  <?= $view['street'];?>, <?= $view['brgy'];?>  <?= $view['municipal'];?></td>
                 <td> 
                     
 
@@ -106,9 +90,6 @@
             <th> Resident ID </th>
             <th> Fullname </th>
             <th> Address </th>
-            <th> Business Name </th>
-            <th> Business Industry </th>
-            <th> Area of Establishment </th>
         </tr>
     </thead>
 </div>
@@ -130,9 +111,6 @@
                     <td> <?= $view['id_resident'];?> </td> 
                     <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
                     <td> <?= $view['houseno'];?>,  <?= $view['street'];?>, <?= $view['brgy'];?>  <?= $view['municipal'];?></td>
-                    <td> <?= $view['bsname'];?> </td>
-                    <td> <?= $view['bsindustry'];?> </td>
-                    <td> <?= $view['aoe'];?> </td>
 
                     <!-- Message Modal -->
                     <div class="modal fade" id="messageModal<?= $view['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">

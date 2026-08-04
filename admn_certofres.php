@@ -8,7 +8,9 @@ require('secure_header.php');
     $userdetails = $bmis->get_userdata();
     $bmis->validate_staff_or_admin();
     $bmis->delete_certofres();
+    $bmis->create_certofres();
     $view = $bmis->view_certofres();
+    $residents_list = $residentbmis->view_resident();
     $id_resident = $_GET['id_resident'];
     $resident = $residentbmis->get_single_certofres($id_resident);
    
@@ -443,11 +445,15 @@ hr {
                 <i class="fa fa-search icon"></i>
                 <input type="search" class="form-control" name="keyword" value="" required="" style="border-radius: 30px;"/>
             </div>
-                <button class="btn btn-success" name="search_certofres" style="width: 90px; font-size: 17px; border-radius:30px; margin-left:41.5%;">
+                <button class="btn btn-success" name="search_certofres" style="width: 100px; font-size: 17px; border-radius:30px; margin-left: 40%;">
                     Search
                 </button>
-                <a href="admn_certofres.php" class="btn btn-info" style="width: 90px; font-size: 17px; border-radius:30px;">Reload</a>
+                <a href="admn_certofres.php" class="btn btn-info" style="width: 100px; font-size: 17px; border-radius:30px;">Reload</a>
+                <button type="button" class="btn" style="background:var(--primary); color:#fff; border-radius:30px; font-weight:600;" data-bs-toggle="modal" data-bs-target="#addCertofresModal">
+                     Add Certificate
+                </button>
             </form>
+           
             <br>
         </div>
     </div>
@@ -463,7 +469,134 @@ hr {
     </div>
     
     <!-- /.container-fluid -->
-    
+
+    <!-- Add Certificate of Residency Modal -->
+    <div class="modal fade" id="addCertofresModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border-radius:14px; overflow:hidden;">
+                <form method="POST" id="addCertofresForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-file-earmark-plus"></i>&nbsp; Add Certificate of Residency</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Resident</label>
+                            <select class="form-select" id="admCertofresResident" name="id_resident" required>
+                                <option value="" selected disabled>-- Choose a resident --</option>
+                                <option value="0">🡒 Not in resident list (walk-in / manual entry)</option>
+                                <?php foreach ($residents_list as $r): ?>
+                                    <option
+                                        value="<?= htmlspecialchars($r['id_resident']) ?>"
+                                        data-lname="<?= htmlspecialchars($r['lname']) ?>"
+                                        data-fname="<?= htmlspecialchars($r['fname']) ?>"
+                                        data-mi="<?= htmlspecialchars($r['mi']) ?>"
+                                        data-age="<?= htmlspecialchars($r['age']) ?>"
+                                        data-nationality="<?= htmlspecialchars($r['nationality']) ?>"
+                                        data-houseno="<?= htmlspecialchars($r['houseno']) ?>"
+                                        data-street="<?= htmlspecialchars($r['street']) ?>"
+                                        data-brgy="<?= htmlspecialchars($r['brgy']) ?>"
+                                        data-municipal="<?= htmlspecialchars($r['municipal']) ?>"
+                                    >
+                                        <?= htmlspecialchars($r['lname'] . ', ' . $r['fname'] . ' ' . $r['mi']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-text" id="admCertofresWalkinNote" style="display:none; color:#b8860b;">
+                                <i class="bi bi-info-circle"></i> Walk-in applicant — fill in the details below manually.
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                <input type="text" class="form-control" name="lname" id="admCertofresLname" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">First Name</label>
+                                <input type="text" class="form-control" name="fname" id="admCertofresFname" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">M.I.</label>
+                                <input type="text" class="form-control" name="mi" id="admCertofresMi">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Age</label>
+                                <input type="number" class="form-control" name="age" id="admCertofresAge" required>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label fw-semibold">Nationality</label>
+                                <input type="text" class="form-control" name="nationality" id="admCertofresNationality" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">House No.</label>
+                                <input type="text" class="form-control" name="houseno" id="admCertofresHouseno" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Street</label>
+                                <input type="text" class="form-control" name="street" id="admCertofresStreet" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Barangay</label>
+                                <input type="text" class="form-control" name="brgy" id="admCertofresBrgy" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Municipality</label>
+                                <input type="text" class="form-control" name="municipal" id="admCertofresMunicipal" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Purpose</label>
+                                <select class="form-select" name="purpose" required>
+                                    <option value="" selected disabled>Choose Purpose...</option>
+                                    <option value="Job/Employment">Job/Employment</option>
+                                    <option value="Business Establishment">Business Establishment</option>
+                                    <option value="Financial Transaction">Financial Transaction</option>
+                                    <option value="Certify that you are living in a certain barangay">Barangay Residency Certification</option>
+                                    <option value="Other important transactions.">Other important transactions.</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Date</label>
+                                <input type="date" class="form-control" name="date" value="<?= date('Y-m-d') ?>" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="create_certofres" class="btn" style="background:var(--primary); color:#fff; font-weight:600;">Submit Certificate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('admCertofresResident').addEventListener('change', function () {
+            var opt = this.options[this.selectedIndex];
+            var isWalkin = this.value === '0';
+            document.getElementById('admCertofresWalkinNote').style.display = isWalkin ? 'block' : 'none';
+            document.getElementById('admCertofresLname').value = isWalkin ? '' : (opt.getAttribute('data-lname') || '');
+            document.getElementById('admCertofresFname').value = isWalkin ? '' : (opt.getAttribute('data-fname') || '');
+            document.getElementById('admCertofresMi').value = isWalkin ? '' : (opt.getAttribute('data-mi') || '');
+            document.getElementById('admCertofresAge').value = isWalkin ? '' : (opt.getAttribute('data-age') || '');
+            document.getElementById('admCertofresNationality').value = isWalkin ? '' : (opt.getAttribute('data-nationality') || '');
+            document.getElementById('admCertofresHouseno').value = isWalkin ? '' : (opt.getAttribute('data-houseno') || '');
+            document.getElementById('admCertofresStreet').value = isWalkin ? '' : (opt.getAttribute('data-street') || '');
+            document.getElementById('admCertofresBrgy').value = isWalkin ? '' : (opt.getAttribute('data-brgy') || '');
+            document.getElementById('admCertofresMunicipal').value = isWalkin ? '' : (opt.getAttribute('data-municipal') || '');
+            if (isWalkin) { document.getElementById('admCertofresLname').focus(); }
+        });
+    </script>
+
 </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -473,4 +606,3 @@ hr {
 <?php 
     include('dashboard_sidebar_end.php');
 ?>
-

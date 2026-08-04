@@ -12,11 +12,7 @@
             <th> Actions</th>
             <th> Resident ID </th>
             <th> Full Name </th>
-            <th> Age </th>
-            <th> Nationality </th>
             <th> Address </th>
-            <th> Date </th>
-            <th> Purpose </th>
         </tr>
     </thead>
 </div>
@@ -42,11 +38,7 @@
                 </td>
                 <td> <?= $view['id_resident'];?> </td> 
                 <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
-                <td> <?= $view['age'];?> </td>
-                <td> <?= $view['nationality'];?> </td>
                 <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
-                <td> <?= $view['date'];?> </td>
-                <td> <?= $view['purpose'];?> </td>
 
                 <!-- Message Modal -->
                 <div class="modal fade" id="messageModal<?= $view['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -97,11 +89,8 @@
             <th> Actions</th>
             <th> Resident ID </th>
             <th> Full Name </th>
-            <th> Age </th>
-            <th> Nationality </th>
             <th> Address </th>
-            <th> Date </th>
-            <th> Purpose </th>
+
 			</tr>
 		</thead>
 
@@ -121,11 +110,7 @@
                         </td>
                         <td> <?= $view['id_resident'];?> </td> 
                         <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
-                        <td> <?= $view['age'];?> </td>
-                        <td> <?= $view['nationality'];?> </td>
                         <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
-                        <td> <?= $view['date'];?> </td>
-                        <td> <?= $view['purpose'];?> </td>
 
                         <!-- Message Modal -->
                         <div class="modal fade" id="messageModal<?= $view['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">

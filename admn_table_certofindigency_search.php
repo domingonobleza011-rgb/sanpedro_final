@@ -12,10 +12,7 @@
             <th> Actions</th>
             <th> Resident ID </th>
             <th> Full Name </th>
-            <th> Nationality </th>
             <th> Address </th>
-            <th> Purpose </th>
-            <th> Date </th>
         </tr>
     </thead>
 </div>
@@ -41,10 +38,7 @@
                 </td>
                 <td> <?= $view['id_resident'];?> </td> 
                 <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
-                <td> <?= $view['nationality'];?> </td>
                 <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
-                <td> <?= $view['purpose'];?> </td>
-                <td> <?= $view['date'];?> </td>
 
                 <!-- Message Modal -->
                 <div class="modal fade" id="messageModal<?= $view['id_resident'];?>_<?= $view['id_indigency'];?>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -94,10 +88,7 @@
             <th> Actions</th>
             <th> Resident ID </th>
             <th> Full Name </th>
-            <th> Nationality </th>
             <th> Address </th>
-            <th> Purpose </th>
-            <th> Date </th>
         </tr>
     </thead>
 </div>
@@ -115,12 +106,9 @@
                             </button>
                         </form>
                     </td>
-                    <td> <?= $view['id_resident'];?> </td> 
+                <td> <?= $view['id_resident'];?> </td> 
                 <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
-                <td> <?= $view['nationality'];?> </td>
                 <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
-                <td> <?= $view['purpose'];?> </td>
-                <td> <?= $view['date'];?> </td>
 
                 <!-- Message Modal -->
                 <div class="modal fade" id="messageModal<?= $view['id_resident'];?>_<?= $view['id_indigency'];?>" tabindex="-1" role="dialog" aria-hidden="true">

@@ -8,7 +8,9 @@ require('secure_header.php');
     $userdetails = $bmis->get_userdata();
     $bmis->validate_staff_or_admin();
     $bmis->delete_clearance();
+    $bmis->create_brgyclearance();
     $view = $bmis->view_clearance();
+    $residents_list = $residentbmis->view_resident();
     $id_resident = $_GET['id_resident'];
     $resident = $residentbmis->get_single_clearance($id_resident);
    
@@ -248,7 +250,9 @@ hr {
             </div>
                 <button class="btn btn-success" name="search_clearance" style="width: 90px; font-size: 18px; border-radius:30px; margin-left:41.5%;">Search</button>
                 <a href="admn_brgyclearance.php" class="btn btn-info" style="width: 90px; font-size: 18px; border-radius:30px;">Reload</a>
-            
+                            <button type="button" class="btn" style="background:var(--navy); color:#fff; border-radius:30px; font-weight:600; padding:8px 24px;" data-bs-toggle="modal" data-bs-target="#addClearanceModal">
+                    Add Certificate
+                </button>
             </form>
             <br>
         </div>
@@ -263,7 +267,132 @@ hr {
             ?>
         </div>
     </div>
-    
+
+    <!-- Add Barangay Clearance Modal -->
+    <div class="modal fade" id="addClearanceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border-radius:14px; overflow:hidden;">
+                <form method="POST" id="addClearanceForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-file-earmark-plus"></i>&nbsp; Add Barangay Clearance</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Resident</label>
+                            <select class="form-select" id="admClearanceResident" name="id_resident" required>
+                                <option value="" selected disabled>-- Choose a resident --</option>
+                                <option value="0">🡒 Not in resident list (walk-in / manual entry)</option>
+                                <?php foreach ($residents_list as $r): ?>
+                                    <option
+                                        value="<?= htmlspecialchars($r['id_resident']) ?>"
+                                        data-lname="<?= htmlspecialchars($r['lname']) ?>"
+                                        data-fname="<?= htmlspecialchars($r['fname']) ?>"
+                                        data-mi="<?= htmlspecialchars($r['mi']) ?>"
+                                        data-age="<?= htmlspecialchars($r['age']) ?>"
+                                        data-houseno="<?= htmlspecialchars($r['houseno']) ?>"
+                                        data-street="<?= htmlspecialchars($r['street']) ?>"
+                                        data-brgy="<?= htmlspecialchars($r['brgy']) ?>"
+                                        data-municipal="<?= htmlspecialchars($r['municipal']) ?>"
+                                    >
+                                        <?= htmlspecialchars($r['lname'] . ', ' . $r['fname'] . ' ' . $r['mi']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-text" id="admClearanceWalkinNote" style="display:none; color:#b8860b;">
+                                <i class="bi bi-info-circle"></i> Walk-in applicant — fill in the details below manually.
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                <input type="text" class="form-control" name="lname" id="admClearanceLname" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">First Name</label>
+                                <input type="text" class="form-control" name="fname" id="admClearanceFname" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">M.I.</label>
+                                <input type="text" class="form-control" name="mi" id="admClearanceMi">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Age</label>
+                                <input type="number" class="form-control" name="age" id="admClearanceAge" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Civil Status</label>
+                                <select class="form-select" name="status" required>
+                                    <option value="" selected disabled>Choose...</option>
+                                    <option value="Single">Single</option>
+                                    <option value="Married">Married</option>
+                                    <option value="Widowed">Widowed</option>
+                                    <option value="Separated">Separated</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Purpose</label>
+                                <select class="form-select" name="purpose" required>
+                                    <option value="" selected disabled>Choose Purpose...</option>
+                                    <option value="Job Requirement">Job Requirement</option>
+                                    <option value="Open a Bank Account">Open a Bank Account</option>
+                                    <option value="NBI Clearance">NBI Clearance</option>
+                                    <option value="Police Clearance">Police Clearance</option>
+                                    <option value="Postal ID">Postal ID</option>
+                                    <option value="Business Requirement">Business Requirement</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">House No.</label>
+                                <input type="text" class="form-control" name="houseno" id="admClearanceHouseno" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Street</label>
+                                <input type="text" class="form-control" name="street" id="admClearanceStreet" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Barangay</label>
+                                <input type="text" class="form-control" name="brgy" id="admClearanceBrgy" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Municipality</label>
+                                <input type="text" class="form-control" name="municipal" id="admClearanceMunicipal" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="create_brgyclearance" class="btn" style="background:var(--navy); color:#fff; font-weight:600;">Submit Certificate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('admClearanceResident').addEventListener('change', function () {
+            var opt = this.options[this.selectedIndex];
+            var isWalkin = this.value === '0';
+            document.getElementById('admClearanceWalkinNote').style.display = isWalkin ? 'block' : 'none';
+            document.getElementById('admClearanceLname').value = isWalkin ? '' : (opt.getAttribute('data-lname') || '');
+            document.getElementById('admClearanceFname').value = isWalkin ? '' : (opt.getAttribute('data-fname') || '');
+            document.getElementById('admClearanceMi').value = isWalkin ? '' : (opt.getAttribute('data-mi') || '');
+            document.getElementById('admClearanceAge').value = isWalkin ? '' : (opt.getAttribute('data-age') || '');
+            document.getElementById('admClearanceHouseno').value = isWalkin ? '' : (opt.getAttribute('data-houseno') || '');
+            document.getElementById('admClearanceStreet').value = isWalkin ? '' : (opt.getAttribute('data-street') || '');
+            document.getElementById('admClearanceBrgy').value = isWalkin ? '' : (opt.getAttribute('data-brgy') || '');
+            document.getElementById('admClearanceMunicipal').value = isWalkin ? '' : (opt.getAttribute('data-municipal') || '');
+            if (isWalkin) { document.getElementById('admClearanceLname').focus(); }
+        });
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

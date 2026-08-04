@@ -14,12 +14,6 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
             <th> Resident ID </th>
             <th> Full Name </th>
             <th> Address </th>
-            <th> Birth Date </th>
-            <th> Birth Place </th>
-            <th> Contact Number </th>
-            <th> Emergency Contact Person </th>
-            <th> Emergency Contact Number </th>
-            <th>Relation</th>
         </tr>
     </thead>
 
@@ -47,12 +41,6 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
                 <td> <?= $view['id_resident'];?> </td> 
                 <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?></td>
                 <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
-                <td> <?= $view['bdate'];?> </td>
-                <td> <?= $view['bplace'];?> </td>
-                <td> <?= $view['contact'];?> </td>
-                <td> <?= $view['inc_lname'];?>, <?= $view['inc_fname'];?> </td>
-                <td> <?= $view['inc_contact'];?> </td>
-                <td> <?= $view['relation'];?> </td>
 
                 <!-- Message Modal -->
                 <div class="modal fade" id="messageModal<?= $view['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -102,12 +90,6 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
             <th> Resident ID </th>
             <th> Full Name </th>
             <th> Address </th>
-            <th> Birth Date </th>
-            <th> Birth Place </th>
-            <th> Contact Number </th>
-            <th> Emergency Contact Person </th>
-            <th> Emergency Contact Number </th>
-            <th>Relation</th>
         </tr>
     </thead>
     
@@ -128,12 +110,7 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
                                     <td> <?= $row['id_resident'];?> </td> 
                 <td> <?= $row['lname'];?>, <?= $row['fname'];?> <?= $row['mi'];?></td>
                 <td> <?= $row['houseno'];?>, <?= $row['street'];?>, <?= $row['brgy'];?>, <?= $row['municipal'];?> </td>
-                <td> <?= $row['bdate'];?> </td>
-                <td> <?= $row['bplace'];?> </td>
-                <td> <?= $row['contact'];?> </td>
-                <td> <?= $row['inc_lname'];?>, <?= $row['inc_fname'];?> </td>
-                <td> <?= $row['inc_contact'];?> </td>
-                <td> <?= $row['relation'];?> </td>
+
 
                 <!-- Message Modal -->
                 <div class="modal fade" id="messageModal<?= $row['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">

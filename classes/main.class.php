@@ -1,9 +1,71 @@
 <?php
     require_once __DIR__ . '/../vendor/autoload.php';
     require_once __DIR__ . '/security.php';
-function notif($message, $type = 'info') {
-    $msg = addslashes($message);
-    echo "<script>showNotif('$msg', '$type');</script>";
+function notif($message, $type = 'success') {
+    $msg = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+
+    $palette = [
+        'success' => [
+            'border' => '#1D9E75', 'iconbg' => '#E1F5EE', 'title' => '#085041', 'text' => '#0F6E56',
+            'label'  => 'Success!',
+            'icon'   => "<circle cx='12' cy='12' r='10' fill='#1D9E75'/><path d='M7.5 12.5l3 3 6-6' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>",
+        ],
+        'error' => [
+            'border' => '#E24B4A', 'iconbg' => '#FCEBEB', 'title' => '#501313', 'text' => '#A32D2D',
+            'label'  => 'Error',
+            'icon'   => "<circle cx='12' cy='12' r='10' fill='#E24B4A'/><path d='M15 9l-6 6M9 9l6 6' stroke='#fff' stroke-width='2' stroke-linecap='round'/>",
+        ],
+        'warning' => [
+            'border' => '#D9A404', 'iconbg' => '#FDF3D8', 'title' => '#6B4E00', 'text' => '#8A6400',
+            'label'  => 'Warning',
+            'icon'   => "<circle cx='12' cy='12' r='10' fill='#D9A404'/><path d='M12 7v6' stroke='#fff' stroke-width='2' stroke-linecap='round'/><circle cx='12' cy='16.2' r='1.1' fill='#fff'/>",
+        ],
+        'info' => [
+            'border' => '#3661D5', 'iconbg' => '#E8F0FE', 'title' => '#1B3A8A', 'text' => '#2C54C1',
+            'label'  => 'Notice',
+            'icon'   => "<circle cx='12' cy='12' r='10' fill='#3661D5'/><path d='M12 11v5.5' stroke='#fff' stroke-width='2' stroke-linecap='round'/><circle cx='12' cy='7.7' r='1.1' fill='#fff'/>",
+        ],
+    ];
+    $c = $palette[$type] ?? $palette['success'];
+
+    echo <<<HTML
+    <div id="bmisToast" style="
+        position:fixed; top:24px; right:24px; z-index:99999;
+        background:#fff; border-left:4px solid {$c['border']};
+        border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+        padding:16px 20px 16px 18px; min-width:300px; max-width:380px;
+        display:flex; align-items:flex-start; gap:14px;
+        font-family:Georgia,serif;
+        animation:bmisSlideIn .4s cubic-bezier(.22,1,.36,1) both;
+    ">
+        <div style="width:36px;height:36px;border-radius:50%;background:{$c['iconbg']};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24">{$c['icon']}</svg>
+        </div>
+        <div>
+            <div style="font-weight:700;color:{$c['title']};font-size:15px;margin-bottom:3px;">{$c['label']}</div>
+            <div style="color:{$c['text']};font-size:13px;">{$msg}</div>
+        </div>
+        <button onclick="document.getElementById('bmisToast').remove()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:{$c['border']};font-size:20px;line-height:1;padding:0;flex-shrink:0;">&times;</button>
+    </div>
+    <style>
+        @keyframes bmisSlideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes bmisSlideOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(60px)} }
+        @media (max-width: 480px) {
+            #bmisToast { left:16px; right:16px; top:16px; min-width:unset; max-width:unset; }
+        }
+    </style>
+    <script>
+        setTimeout(function () {
+            var t = document.getElementById('bmisToast');
+            if (t) {
+                t.style.animation = 'bmisSlideOut .35s ease forwards';
+                setTimeout(function () {
+                    if (t && t.parentNode) { t.parentNode.removeChild(t); }
+                }, 350);
+            }
+        }, 10000);
+    </script>
+    HTML;
 }
 
 class BMISClass {
@@ -1458,8 +1520,7 @@ private function getFCMAccessToken(): ?string {
             $stmt = $connection->prepare("INSERT INTO tbl_rescert (`id_rescert`,`id_resident`,`lname`,`fname`,`mi`,`age`,`nationality`,`houseno`,`street`,`brgy`,`municipal`,`date`,`purpose`, `remarks`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
            $stmt->execute([$id_rescert, $id_resident, $lname, $fname, $mi, $age, $nationality, $houseno, $street, $brgy, $municipal, $date, $purpose, ""]);
            
-            notif('Application submitted! You will receive a text message for further details.', 'success');
-            header("refresh: 0");
+            notif('Certificate of Residency submitted! You will receive a text message for further details.', 'success');
         }
     }
  
@@ -1509,8 +1570,7 @@ public function delete_certofres(){
             $stmt = $connection->prepare("INSERT INTO tbl_indigency (`id_indigency`,`id_resident`,`lname`,`fname`,`mi`,`nationality`,`houseno`,`street`,`brgy`,`municipal`,`purpose`,`date`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
             $stmt->execute([$id_indigency, $id_resident, $lname, $fname, $mi, $nationality, $houseno, $street, $brgy, $municipal, $purpose, $date]);
  
-            notif('Application submitted! You will receive a text message for further details.', 'success');
-            header("refresh: 0");
+            notif('Certificate of Indigency submitted! You will receive a text message for further details.', 'success');
         }
     }
  
@@ -1569,8 +1629,7 @@ public function delete_certofres(){
             $stmt = $connection->prepare("INSERT INTO tbl_clearance (`id_clearance`,`id_resident`,`lname`,`fname`,`mi`,`purpose`,`houseno`,`street`,`brgy`,`municipal`,`status`,`age`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
             $stmt->execute([$id_clearance, $id_resident, $lname, $fname, $mi, $purpose, $houseno, $street, $brgy, $municipal, $status, $age]);
  
-            notif('Application submitted! You will receive a text message for further details.', 'success');
-            header("refresh: 0");
+            notif('Barangay Clearance request submitted! You will receive a text message for further details.', 'success');
         }
     }
  
@@ -1675,8 +1734,7 @@ public function delete_certofres(){
             $stmt = $connection->prepare("INSERT INTO tbl_bspermit (`id_bspermit`,`id_resident`,`lname`,`fname`,`mi`,`bsname`,`houseno`,`street`,`brgy`,`municipal`,`bsindustry`,`aoe`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
             $stmt->execute([$id_bspermit, $id_resident, $lname, $fname, $mi, $bsname, $houseno, $street, $brgy, $municipal, $bsindustry, $aoe]);
  
-            notif('Application submitted! You will receive a text message for further details.', 'success');
-            header("refresh: 0");
+            notif('Business Permit application submitted! You will receive a text message for further details.', 'success');
         }
     }
  
@@ -1811,8 +1869,7 @@ public function create_youth() {
             $stmt = $connection->prepare("INSERT INTO tbl_brgyid (`id_resident`,`lname`,`fname`,`mi`,`houseno`,`street`,`brgy`,`municipal`,`bplace`,`bdate`,`contact`,`relation`,`inc_lname`,`inc_fname`,`inc_mi`,`inc_contact`,`inc_houseno`,`inc_street`,`inc_brgy`,`inc_municipal`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             $stmt->execute([$id_resident, $lname, $fname, $mi, $houseno, $street, $brgy, $municipal, $bplace, $bdate, $contact, $relation, $inc_lname, $inc_fname, $inc_mi, $inc_contact, $inc_houseno, $inc_street, $inc_brgy, $inc_municipal]);
  
-            notif('Application submitted! You will receive a text message for further details.', 'success');
-            header("refresh: 0");
+            notif('Barangay ID application submitted! You will receive a text message for further details.', 'success');
         }
     }
  
@@ -1866,7 +1923,6 @@ public function create_youth() {
             $stmt->execute([$id_resident, $lname, $fname, $mi, $houseno, $street, $brgy, $municipal, $contact, $narrative]);
  
             notif('Blotter/Complaint submitted successfully.', 'success');
-            header("refresh: 0");
         }
     }
  

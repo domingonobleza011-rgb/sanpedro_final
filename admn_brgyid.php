@@ -8,7 +8,9 @@ require('secure_header.php');
     $userdetails = $bmis->get_userdata();
     $bmis->validate_staff_or_admin();
     $bmis->delete_brgyid();
+    $bmis->create_brgyid();
     $view = $bmis->view_brgyid();
+    $residents_list = $residentbmis->view_resident();
     $id_resident = $_GET['id_resident'];
     $residentbmis->get_single_brgyid($id_resident);
    
@@ -248,7 +250,11 @@ hr {
             </div>
                 <button class="btn btn-success" name="search_brgyid" style="width: 90px; font-size: 18px; border-radius:30px; margin-left:41.7%;">Search</button>
                 <a href="admn_brgyid.php" class="btn btn-info" style="width: 90px; font-size: 18px; border-radius:30px;">Reload</a>
+                <button type="button" class="btn" style="background:var(--navy); width:100px; color:#fff; border-radius:30px; font-weight:600; padding:8px 24px;" data-bs-toggle="modal" data-bs-target="#addBrgyidModal">
+                     Add Id
+                </button>
             </form>
+           
             <br>
         </div>
     </div>
@@ -264,7 +270,168 @@ hr {
     </div>
     
     <!-- /.container-fluid -->
-    
+
+    <!-- Add Barangay ID Modal -->
+    <div class="modal fade" id="addBrgyidModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border-radius:14px; overflow:hidden;">
+                <form method="POST" id="addBrgyidForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-file-earmark-plus"></i>&nbsp; Add Barangay ID Application</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Resident</label>
+                            <select class="form-select" id="admBrgyidResident" name="id_resident" required>
+                                <option value="" selected disabled>-- Choose a resident --</option>
+                                <option value="0">🡒 Not in resident list (walk-in / manual entry)</option>
+                                <?php foreach ($residents_list as $r): ?>
+                                    <option
+                                        value="<?= htmlspecialchars($r['id_resident']) ?>"
+                                        data-lname="<?= htmlspecialchars($r['lname']) ?>"
+                                        data-fname="<?= htmlspecialchars($r['fname']) ?>"
+                                        data-mi="<?= htmlspecialchars($r['mi']) ?>"
+                                        data-houseno="<?= htmlspecialchars($r['houseno']) ?>"
+                                        data-street="<?= htmlspecialchars($r['street']) ?>"
+                                        data-brgy="<?= htmlspecialchars($r['brgy']) ?>"
+                                        data-municipal="<?= htmlspecialchars($r['municipal']) ?>"
+                                        data-bdate="<?= htmlspecialchars($r['bdate']) ?>"
+                                        data-contact="<?= htmlspecialchars($r['contact'] ?? '') ?>"
+                                    >
+                                        <?= htmlspecialchars($r['lname'] . ', ' . $r['fname'] . ' ' . $r['mi']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-text" id="admBrgyidWalkinNote" style="display:none; color:#b8860b;">
+                                <i class="bi bi-info-circle"></i> Walk-in applicant — fill in the details below manually.
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                <input type="text" class="form-control" name="lname" id="admBrgyidLname" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">First Name</label>
+                                <input type="text" class="form-control" name="fname" id="admBrgyidFname" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">M.I.</label>
+                                <input type="text" class="form-control" name="mi" id="admBrgyidMi">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Birth Date</label>
+                                <input type="date" class="form-control" name="bdate" id="admBrgyidBdate" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Birth Place</label>
+                                <input type="text" class="form-control" name="bplace" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Contact No.</label>
+                                <input type="tel" class="form-control" name="contact" id="admBrgyidContact" placeholder="09123456789" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">House No.</label>
+                                <input type="text" class="form-control" name="houseno" id="admBrgyidHouseno" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Street</label>
+                                <input type="text" class="form-control" name="street" id="admBrgyidStreet" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Barangay</label>
+                                <input type="text" class="form-control" name="brgy" id="admBrgyidBrgy" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Municipality</label>
+                                <input type="text" class="form-control" name="municipal" id="admBrgyidMunicipal" required>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h6 class="fw-bold" style="color:var(--navy);">In Case of Emergency — Contact Person</h6>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                <input type="text" class="form-control" name="inc_lname" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">First Name</label>
+                                <input type="text" class="form-control" name="inc_fname" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">M.I.</label>
+                                <input type="text" class="form-control" name="inc_mi">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Relation to Applicant</label>
+                                <input type="text" class="form-control" name="relation" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Contact No.</label>
+                                <input type="text" class="form-control" name="inc_contact" maxlength="11" pattern="[0-9]{11}" placeholder="11-digit number" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">House No.</label>
+                                <input type="text" class="form-control" name="inc_houseno" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Street</label>
+                                <input type="text" class="form-control" name="inc_street" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Barangay</label>
+                                <input type="text" class="form-control" name="inc_brgy" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-semibold">Municipality</label>
+                                <input type="text" class="form-control" name="inc_municipal" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="create_brgyid" class="btn" style="background:var(--navy); color:#fff; font-weight:600;">Submit Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('admBrgyidResident').addEventListener('change', function () {
+            var opt = this.options[this.selectedIndex];
+            var isWalkin = this.value === '0';
+            document.getElementById('admBrgyidWalkinNote').style.display = isWalkin ? 'block' : 'none';
+            document.getElementById('admBrgyidLname').value = isWalkin ? '' : (opt.getAttribute('data-lname') || '');
+            document.getElementById('admBrgyidFname').value = isWalkin ? '' : (opt.getAttribute('data-fname') || '');
+            document.getElementById('admBrgyidMi').value = isWalkin ? '' : (opt.getAttribute('data-mi') || '');
+            document.getElementById('admBrgyidBdate').value = isWalkin ? '' : (opt.getAttribute('data-bdate') || '');
+            document.getElementById('admBrgyidContact').value = isWalkin ? '' : (opt.getAttribute('data-contact') || '');
+            document.getElementById('admBrgyidHouseno').value = isWalkin ? '' : (opt.getAttribute('data-houseno') || '');
+            document.getElementById('admBrgyidStreet').value = isWalkin ? '' : (opt.getAttribute('data-street') || '');
+            document.getElementById('admBrgyidBrgy').value = isWalkin ? '' : (opt.getAttribute('data-brgy') || '');
+            document.getElementById('admBrgyidMunicipal').value = isWalkin ? '' : (opt.getAttribute('data-municipal') || '');
+            if (isWalkin) { document.getElementById('admBrgyidLname').focus(); }
+        });
+    </script>
+
 </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

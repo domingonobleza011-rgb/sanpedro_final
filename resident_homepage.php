@@ -1,752 +1,359 @@
 <?php
 define('BMIS_ROLE_REQUIRED', 'resident');
-require('secure_header.php'); 
-    error_reporting(E_ALL ^ E_WARNING);
-    include('classes/resident.class.php');
-    $userdetails = $bmis->get_userdata();
+require('secure_header.php');
+error_reporting(E_ALL ^ E_WARNING);
+include('classes/resident.class.php');
 
-    // Check if resident is verified
-    $is_verified = $bmis->isResidentVerified($userdetails['id_resident']);
-
+$userdetails = $bmis->get_userdata();
+$is_verified = $bmis->isResidentVerified($userdetails['id_resident']);
 $unread_msg_count = $bmis->getUnreadResidentMessageCount($userdetails['id_resident']);
 
-    $dt = new DateTime("now", new DateTimeZone('Asia/Manila'));
-    $tm = new DateTime("now", new DateTimeZone('Asia/Manila'));
-    $cdate = $dt->format('Y/m/d');
-    $ctime = $tm->format('H');
+$dt = new DateTime("now", new DateTimeZone('Asia/Manila'));
+$cdate = $dt->format('Y/m/d');
+$ctime = $dt->format('H');
 
-?>
-<?php
-    // 1. Get the current user ID
-    $current_user_id = $userdetails['id_resident'];
-
-    // 2. Pass the ID to the delete function
-    // This calls your hide_announcement logic internally
-    if(isset($_POST['delete_announcement'])) {
-        $bmis->delete_announcement($current_user_id);
-    }
-
-    // 3. Fetch data filtered by the current user's "hidden" list
-    $view = $bmis->view_active_announcements($current_user_id); 
-?>
-    
-
-
-
-<script> 
-    function logout() {
-    window.location.href = "logout.php";
-    }
-    function profile() {
-    window.location.href = "resident_profile.php";
-    }
-</script>
-
-
-<!DOCTYPE html> 
-<html>
-
-    <head> 
-    <title> Barangay San Pedro Iriga </title>
-         <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-        <!-- responsive tags for screen compatibility -->
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- custom css --> 
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> 
-        <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-        
-
-    <style>
-
-
-
-
-
-
-
-
-
-
-
-    /* Navbar Buttons */
-
-  .service-card {
-    transition: all 0.3s ease;
-    border-radius: 15px;
-  }
-
-  .service-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-  }
-
-  .icon-box {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    font-size: 1.8rem;
-  }
-
-  /* Soft Background Colors */
-  .bg-primary-light { background-color: #e7f1ff; }
-  .bg-success-light { background-color: #eafaf1; }
-  .bg-warning-light { background-color: #fef9e7; }
-  
-    .btn1 {
-    border-radius: 20px;
-    border: none; /* Remove borders */
-    color: white; /* White text */
-    font-size: 16px; /* Set a font size */
-    cursor: pointer; /* Mouse pointer on hover */
-    margin-left: 23%;
-    padding: 12px 22px;
-    }
-
-    .btn2 {
-    border-radius: 20px;
-    border: none; /* Remove borders */
-    color: white; /* White text */
-    font-size: 16px; /* Set a font size */
-    cursor: pointer; /* Mouse pointer on hover */
-    padding: 12px 22px;
-    margin-left: .1%;
-    }
-
-    .btn3 {
-    border-radius: 20px;
-    border: none; /* Remove borders */
-    color: white; /* White text */
-    font-size: 16px; /* Set a font size */
-    cursor: pointer; /* Mouse pointer on hover */
-    padding: 12px 22px;
-    margin-left: .1%;
-    }
-
-
-    .top-link {
-    transition: all 0.25s ease-in-out;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    display: inline-flex;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    margin: 0 3em 3em 0;
-    border-radius: 50%;
-    padding: 0.25em;
-    width: 80px;
-    height: 80px;
-    background-color: #3661D5;
-    }
-    .top-link.show {
-    visibility: visible;
-    opacity: 1;
-    }
-    .top-link.hide {
-    visibility: hidden;
-    opacity: 0;
-    }
-    .top-link svg {
-    fill: white;
-    width: 24px;
-    height: 12px;
+// Handle announcement hiding
+if (isset($_POST['delete_announcement'])) {
+    $bmis->delete_announcement($userdetails['id_resident']);
 }
-    .screen-reader-text {
-    position: absolute;
-    clip-path: inset(50%);
-    margin: -1px;
-    border: 0;
-    padding: 0;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    word-wrap: normal !important;
-    clip: rect(1px, 1px, 1px, 1px);
-    }
-    .screen-reader-text:focus {
-    display: block;
-    top: 5px;
-    left: 5px;
-    z-index: 100000;
-    clip-path: none;
-    background-color: #eee;
-    padding: 15px 23px 14px;
-    width: auto;
-    height: auto;
-    text-decoration: none;
-    line-height: normal;
-    color: #444;
-    font-size: 1em;
-    clip: auto !important;
-    }
-
-
-    /* Footer Style */
-    
-    .footerlinks{
-        color:white;
+$announcements = $bmis->view_active_announcements($userdetails['id_resident']);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Barangay San Pedro Iriga</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
+    <style>
+        /* ----- GLOBAL RESETS & TYPOGRAPHY ----- */
+        body {
+            background: #f0f2f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-    .shfooter .collapse {
-        display: inherit;
-    }
-        @media (max-width:767px) {
-    .shfooter ul {
-            margin-bottom: 0;
-    }
-
-    .shfooter .collapse {
-            display: none;
-    }
-
-    .shfooter .collapse.show {
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+        /* ----- SERVICE CARDS ----- */
+        .service-grid .card {
+            border: none;
+            border-radius: 16px;
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            background: #fff;
+            height: 100%;
+        }
+        .service-grid .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        }
+        .service-grid .card .card-body {
+            padding: 1.75rem 1rem;
+        }
+        .service-grid .card i {
+            font-size: 2.6rem;
+            color: #1b74e4;
+            transition: color 0.2s;
+        }
+        .service-grid .card:hover i {
+            color: #0a5ecf;
+        }
+        .service-grid .card h5 {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 0.75rem;
+            color: #1c1e21;
+        }
+        .service-grid .card .badge-verify {
+            font-size: 0.7rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 30px;
+            background: #e7f3ff;
+            color: #1877f2;
+            font-weight: 600;
+        }
+        .service-grid .card .badge-locked {
+            background: #f0f2f5;
+            color: #65676b;
+        }
+        /* ----- VERIFICATION BANNER ----- */
+        .verify-banner {
+            background: #fff3cd;
+            border-left: 6px solid #ffc107;
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .verify-banner .btn-upload {
+            background: #ffc107;
+            border-radius: 40px;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            color: #1c1e21;
+        }
+        .verify-banner .btn-upload:hover {
+            background: #e0a800;
+        }
+        /* ----- FACEBOOK-STYLE ANNOUNCEMENT FEED ----- */
+        .fb-feed-wrapper {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+        .fb-post-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+        .fb-post-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px 6px;
+        }
+        .fb-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1877f2, #0a5ecf);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .fb-post-meta {
+            margin-left: 12px;
+            flex: 1;
+        }
+        .fb-page-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1c1e21;
+        }
+        .fb-post-date {
+            font-size: 0.75rem;
+            color: #65676b;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .fb-hide-btn {
+            background: none;
+            border: none;
+            color: #65676b;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+            font-size: 1.2rem;
+        }
+        .fb-hide-btn:hover {
+            background: #f0f2f5;
+        }
+        .fb-post-body {
+            padding: 0 16px 12px;
+        }
+        .fb-post-text {
+            font-size: 0.97rem;
+            line-height: 1.55;
+            color: #1c1e21;
+            white-space: pre-line;
+            word-break: break-word;
+        }
+        .fb-post-image {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+            margin-top: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .fb-post-footer {
+            border-top: 1px solid #e4e6ea;
+            padding: 6px 16px;
+            display: flex;
+            gap: 8px;
+        }
+        .fb-react-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #65676b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .fb-react-btn:hover {
+            background: #f0f2f5;
+        }
+        .fb-empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: #fff;
+            border-radius: 16px;
+            color: #65676b;
+        }
+        .fb-empty-state i {
+            font-size: 2.8rem;
+            color: #bcc0c4;
             display: block;
-    }
-
-    .shfooter .title .fa-angle-up,
-    .shfooter .title[aria-expanded=true] .fa-angle-down {
-            display: none;
-    }
-
-    .shfooter .title[aria-expanded=true] .fa-angle-up {
-            display: block;
-    }
-
-    .shfooter .navbar-toggler {
-            display: inline-block;
-            padding: 0;
-    }
-
-    }
-
-    .resize {
-        text-align: center;
-    }
-    .resize {
-        margin-top: 3rem;
-        font-size: 1.25rem;
-    }
-    /*RESIZESCREEN ANIMATION*/
-    .fa-angle-double-right {
-        animation: rightanime 1s linear infinite;
-    }
-
-    .fa-angle-double-left {
-        animation: leftanime 1s linear infinite;
-    }
-    @keyframes rightanime {
-        50% {
-            transform: translateX(10px);
-            opacity: 0.5;
-    }
-        100% {
-            transform: translateX(10px);
+            margin-bottom: 12px;
+        }
+        /* ----- BACK TO TOP ----- */
+        .top-link {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #1b74e4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 999;
+        }
+        .top-link.hide {
             opacity: 0;
-    }
-    }
-    @keyframes leftanime {
-        50% {
-            transform: translateX(-10px);
-            opacity: 0.5;
-    }
-        100% {
-            transform: translateX(-10px);
-            opacity: 0;
-    }
-    }
-
-    /* Contact Chip */
-
-    .chip {
-    display: inline-block;
-    padding: 0 25px;
-    height: 50px;
-    line-height: 50px;
-    border-radius: 25px;
-    background-color: #2C54C1;
-    margin-top: 5px;
-    }
-
-    .chip img {
-    float: left;
-    margin: 0 10px 0 -25px;
-    height: 50px;
-    width: 50px;
-    border-radius: 50%;
-    }
-
-
+            pointer-events: none;
+            transform: scale(0.8);
+        }
+        .top-link svg {
+            fill: #fff;
+            width: 20px;
+            height: 12px;
+        }
+        /* ----- RESPONSIVE TWEAKS ----- */
+        @media (max-width: 576px) {
+            .service-grid .card .card-body {
+                padding: 1.25rem 0.75rem;
+            }
+            .service-grid .card i {
+                font-size: 2.2rem;
+            }
+            .service-grid .card h5 {
+                font-size: 0.9rem;
+            }
+            .fb-post-header {
+                padding: 10px 12px 4px;
+            }
+            .fb-post-body {
+                padding: 0 12px 10px;
+            }
+            .verify-banner {
+                padding: 1rem;
+            }
+            .verify-banner .btn-upload {
+                font-size: 0.85rem;
+                padding: 0.4rem 1rem;
+            }
+        }
+        @media (min-width: 992px) {
+            .service-grid .card i {
+                font-size: 3rem;
+            }
+            .service-grid .card h5 {
+                font-size: 1.1rem;
+            }
+        }
     </style>
-    <body> 
+</head>
+<body>
 
-        <!-- Back-to-Top and Back Button -->
+<!-- BACK TO TOP BUTTON -->
+<a class="top-link hide" id="js-top" href="#">
+    <svg viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
+    <span class="visually-hidden">Back to top</span>
+</a>
 
-        <a data-toggle="tooltip" title="Back-To-Top" class="top-link hide" href="" id="js-top">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
-            <span class="screen-reader-text">Back to top</span>
-        </a>
-
-        
-
-        
+<!-- INCLUDE NAVBAR -->
 <?php include __DIR__ . '/resident_navbar.php'; ?>
 
-<style>
-/* ===== FACEBOOK-STYLE ANNOUNCEMENT FEED ===== */
-#announcements-section {
-    background-color: #f0f2f5;
-    padding: 28px 0 10px;
-}
+<main class="container-custom py-4">
 
-.fb-feed-wrapper {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 0 12px;
-}
-
-.fb-feed-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
-
-.fb-feed-header h5 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1c1e21;
-    margin: 0;
-}
-
-.fb-post-card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    margin-bottom: 16px;
-    overflow: hidden;
-    transition: box-shadow 0.2s;
-}
-
-.fb-post-card:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-}
-
-.fb-post-header {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px 8px;
-}
-
-.fb-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #1877f2, #0a5ecf);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
-.fb-post-meta {
-    margin-left: 10px;
-    flex: 1;
-}
-
-.fb-page-name {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #1c1e21;
-    line-height: 1.2;
-}
-
-.fb-page-name a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.fb-post-date {
-    font-size: 0.78rem;
-    color: #65676b;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.fb-post-badge {
-    display: inline-block;
-    background: #e7f3ff;
-    color: #1877f2;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.fb-hide-btn {
-    background: none;
-    border: none;
-    color: #65676b;
-    cursor: pointer;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    transition: background 0.15s;
-    margin-left: auto;
-}
-
-.fb-hide-btn:hover {
-    background: #f0f2f5;
-    color: #1c1e21;
-}
-
-.fb-post-body {
-    padding: 0 16px 10px;
-}
-
-.fb-post-text {
-    font-size: 0.97rem;
-    color: #1c1e21;
-    line-height: 1.55;
-    margin: 0;
-    word-break: break-word;
-    white-space: pre-line;
-}
-
-.fb-post-text.large-text {
-    font-size: 1.2rem;
-    font-weight: 500;
-}
-
-.fb-post-image {
-    width: 100%;
-    max-height: 500px;
-    object-fit: cover;
-    display: block;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.fb-post-image:hover {
-    opacity: 0.95;
-}
-
-.fb-post-footer {
-    border-top: 1px solid #e4e6ea;
-    padding: 6px 16px;
-    display: flex;
-    gap: 4px;
-}
-
-.fb-react-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    color: #65676b;
-    font-size: 0.88rem;
-    font-weight: 600;
-    padding: 8px 0;
-    border-radius: 6px;
-    cursor: default;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: background 0.15s;
-}
-
-.fb-react-btn:hover {
-    background: #f0f2f5;
-    color: #1c1e21;
-}
-
-.fb-empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #65676b;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.fb-empty-state i {
-    font-size: 2.5rem;
-    color: #bcc0c4;
-    display: block;
-    margin-bottom: 10px;
-}
-@media (max-width: 991.98px) {
-    h4 {
-        font-size: 1.3rem;
-    }
-}
-
-@media (max-width: 575.98px) {
-    h4 {
-        font-size: 1.05rem;
-        line-height: 1.4;
-    }
-}
-</style>
-
-        <div id="down1"></div>
-
-    
-<br>
-        <section class="heading-section" id="services-section"> 
-            <div class="container text-center"> 
-                <div class="row"> 
-                    <div class="col"> 
-                        
-                       
-<br><br>
-                        <div class="header"> 
-                            <h4> Welcome to Barangay San Pedro Iriga City </h4><bR>
-                            <h4> You may select the following services offered below </h4>
-                        </div>
-                    </div>
-                </div>
+    <!-- ===== VERIFICATION STATUS BANNER ===== -->
+    <?php if (!$is_verified): ?>
+    <div class="verify-banner d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <span style="font-size:2rem;">&#x1F512;</span>
+            <div>
+                <h5 class="fw-bold mb-1">Account Not Yet Verified</h5>
+                <p class="mb-0 text-muted small">Upload a valid ID to access certificate services.</p>
             </div>
-
-            
-<div class="container my-5">
-
-<?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?>
-<!-- VERIFICATION NOTICE BANNER -->
-<div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 p-4" role="alert" style="border-left: 6px solid #ffc107 !important;">
-    <div class="d-flex align-items-start gap-3">
-        <div style="font-size: 2rem;">&#x1F512;</div>
-        <div>
-            <h5 class="fw-bold mb-1">Account Not Yet Verified</h5>
-            <p class="mb-2">To request barangay certificates and access other services, you must first verify your identity.</p>
-            <p class="mb-3"><strong>How to get verified:</strong> Go to <strong>Messages</strong>, then upload a clear photo of your valid government-issued ID (e.g., PhilSys ID, Driver's License, Passport, Voter's ID). The admin will review and approve your account.</p>
-            <a href="resident_messages.php?id_resident=<?= $userdetails['id_resident'];?>&upload_id=1" class="btn btn-warning fw-bold rounded-pill px-4">
-                <i class="bi bi-upload me-2"></i> Upload Valid ID Now
-            </a>
         </div>
+        <a href="resident_messages.php?id_resident=<?= $userdetails['id_resident']; ?>&upload_id=1" class="btn btn-upload">
+            <i class="bi bi-upload me-2"></i>Upload ID
+        </a>
     </div>
-</div>
-<?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
-<div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 py-2 px-4" role="alert">
-    <i class="bi bi-patch-check-fill me-2"></i> <strong>Account Verified</strong> &mdash; You have full access to all barangay services.
-</div>
-<?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
-
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-
-        <!-- CERTIFICATE SERVICES (locked if not verified) -->
-
-        <div class="col">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
-            <a href="services_business.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
-            <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
-                        <div class="card-body text-center">
-                            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
-                            <i class="bi bi-file-earmark-medical-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
-                            <h4 class="mt-2 text-dark">Business Permit</h4>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
-            <a href="services_brgyid.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
-            <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
-                        <div class="card-body text-center">
-                            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
-                            <i class="bi bi-person-vcard-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
-                            <h4 class="mt-2 text-dark">Barangay ID</h4>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
-            <a href="services_certofindigency.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
-            <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
-                        <div class="card-body text-center">
-                            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
-                            <i class="bi bi-briefcase-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
-                            <h4 class="mt-2 text-dark">Certificate of Indigency</h4>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
-            <a href="services_certofres.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
-            <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
-                        <div class="card-body text-center">
-                            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
-                            <i class="bi bi-house-check-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
-                            <h4 class="mt-2 text-dark">Certificate of Residency</h4>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if ($is_verified): ?>
-            <a href="services_brgyclearance.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); else: ?>
-            <a href="#" class="text-decoration-none" onclick="showVerifyAlert(); return false;">
-            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); endif; ?>
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm <?= !$is_verified ? 'border-secondary opacity-75' : '' ?>">
-                        <div class="card-body text-center">
-                            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-secondary float-end">&#x1F512;</span><?php endif; ?>
-                            <i class="bi bi-shield-lock-fill fs-1 <?= !$is_verified ? 'text-secondary' : '' ?>"></i>
-                            <h4 class="mt-2 text-dark">Barangay Clearance</h4>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- OPEN SERVICES (always accessible) -->
-
-        <div class="col">
-            <a href="resident_youth_profile.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
-                            <i class="bi bi-people-fill fs-1"></i>
-                            <h4 class="mt-2 text-dark">Youth Portal</h4>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-
-               <div class="col">
-            <a href="resident_messages.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
-                            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><span class="badge bg-warning text-dark float-end">Action Needed</span><?php endif; ?>
-                            <span class="position-relative d-inline-block">
-                                <i class="bi bi-chat-dots-fill fs-1"></i>
-                                <?php if ($unread_msg_count > 0): ?>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    <?= $unread_msg_count > 9 ? '9+' : $unread_msg_count ?>
-                                    <span class="visually-hidden">unread messages</span>
-                                </span>
-                                <?php endif; ?>
-                            </span>
-                            <h4 class="mt-2 text-dark">Messages</h4>
-                            <?php
-define('BMIS_ROLE_REQUIRED', 'resident');
-require_once('secure_header.php'); if (!$is_verified): ?><small class="text-warning fw-bold">Upload ID here</small><?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col">
-            <a href="resident_complaint.php?id_resident=<?= $userdetails['id_resident'];?>" class="text-decoration-none">
-                <div class="zoom1 h-100">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
-                            <i class="bi bi-info-circle-fill fs-1"></i>
-                            <h4 class="mt-2 text-dark">Complaint</h4>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
+    <?php else: ?>
+    <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 py-2 px-4 d-flex align-items-center gap-2">
+        <i class="bi bi-patch-check-fill fs-5"></i>
+        <span><strong>Account Verified</strong> &mdash; You have full access to all services.</span>
     </div>
-</div>
+    <?php endif; ?>
 
-<!-- Verification Required Modal -->
+    <!-- ===== SERVICES GRID ===== -->
+    <section class="mb-5">
+        <h4 class="fw-bold mb-3 text-dark">Available Services</h4>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-4 g-3 service-grid">
+            <!-- Each service card -->
+            <?php
+            $services = [
+                ['name' => 'Business Permit', 'icon' => 'bi-file-earmark-medical-fill', 'link' => 'services_business.php', 'locked' => !$is_verified],
+                ['name' => 'Barangay ID', 'icon' => 'bi-person-vcard-fill', 'link' => 'services_brgyid.php', 'locked' => !$is_verified],
+                ['name' => 'Indigency', 'icon' => 'bi-briefcase-fill', 'link' => 'services_certofindigency.php', 'locked' => !$is_verified],
+                ['name' => 'Residency', 'icon' => 'bi-house-check-fill', 'link' => 'services_certofres.php', 'locked' => !$is_verified],
+                ['name' => 'Clearance', 'icon' => 'bi-shield-lock-fill', 'link' => 'services_brgyclearance.php', 'locked' => !$is_verified],
+                ['name' => 'Youth Portal', 'icon' => 'bi-people-fill', 'link' => 'resident_youth_profile.php', 'locked' => false],
+                ['name' => 'Messages', 'icon' => 'bi-chat-dots-fill', 'link' => 'resident_messages.php', 'locked' => false, 'badge' => $unread_msg_count > 0 ? $unread_msg_count : null],
+                ['name' => 'Complaint', 'icon' => 'bi-info-circle-fill', 'link' => 'resident_complaint.php', 'locked' => false],
+            ];
+            foreach ($services as $s):
+                $href = $s['locked'] ? '#' : $s['link'] . '?id_resident=' . $userdetails['id_resident'];
+                $onclick = $s['locked'] ? 'onclick="showVerifyAlert(); return false;"' : '';
+                $badge = isset($s['badge']) ? '<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">'.$s['badge'].'</span>' : '';
+            ?>
+            <div class="col">
+                <a href="<?= $href ?>" class="text-decoration-none" <?= $onclick ?>>
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center position-relative">
+                            <?= $badge ?>
+                            <i class="bi <?= $s['icon'] ?> <?= $s['locked'] ? 'text-secondary' : '' ?>"></i>
+                            <h5 class="text-dark"><?= $s['name'] ?></h5>
+                            <?php if ($s['locked']): ?>
+                            <span class="badge badge-verify badge-locked"><i class="bi bi-lock-fill me-1"></i>Locked</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+   
+
+</main>
+
+<!-- ===== VERIFICATION REQUIRED MODAL ===== -->
 <div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow rounded-4">
@@ -755,75 +362,52 @@ require_once('secure_header.php'); if (!$is_verified): ?><small class="text-warn
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 text-center">
-                <div style="font-size: 3rem;">&#x1F512;</div>
+                <div style="font-size:3rem;">&#x1F512;</div>
                 <h5 class="mt-2 mb-3">You need to verify your account first</h5>
-                <p class="text-muted">Please go to <strong>Messages</strong> and upload a valid government-issued ID. Once the admin approves your ID, you will have full access to all services.</p>
+                <p class="text-muted">Please go to <strong>Messages</strong> and upload a valid government-issued ID. Once approved, you'll have full access.</p>
             </div>
             <div class="modal-footer border-0 justify-content-center">
                 <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
-                <a href="resident_messages.php?id_resident=<?= $userdetails['id_resident'];?>&upload_id=1" class="btn btn-warning fw-bold rounded-pill px-4">
+                <a href="resident_messages.php?id_resident=<?= $userdetails['id_resident']; ?>&upload_id=1" class="btn btn-warning fw-bold rounded-pill px-4">
                     <i class="bi bi-upload me-2"></i>Upload ID
                 </a>
             </div>
         </div>
     </div>
 </div>
-           
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Show the button only if permission hasn't been granted yet
-if (Notification.permission !== 'granted') {
-    document.getElementById('enable-notif-btn').style.display = 'block';
-}
+    // Back-to-top visibility
+    const topBtn = document.getElementById('js-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            topBtn.classList.remove('hide');
+        } else {
+            topBtn.classList.add('hide');
+        }
+    });
+
+    // Smooth scroll for back-to-top
+    topBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Show verification modal
+    function showVerifyAlert() {
+        const modal = new bootstrap.Modal(document.getElementById('verifyModal'));
+        modal.show();
+    }
+
+    // Tooltip initialization (if any)
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
 </script>
-
-<script>
-function showVerifyAlert() {
-    var modal = new bootstrap.Modal(document.getElementById('verifyModal'));
-    modal.show();
-}
-</script>
-
-        </section>
-
-        <script>
-            $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip();   
-            });
-        </script>
-
-        <script>
-            $(document).ready(function(){
-            // Add smooth scrolling to all links
-            $("a").on('click', function(event) {
-
-                // Make sure this.hash has a value before overriding default behavior
-                if (this.hash !== "") {
-                // Prevent default anchor click behavior
-                event.preventDefault();
-
-                // Store hash
-                var hash = this.hash;
-
-                // Using jQuery's animate() method to add smooth page scroll
-                // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
-                $('html, body').animate({
-                    scrollTop: $(hash).offset().top
-                }, 800, function(){
-
-                    // Add hash (#) to URL when done scrolling (default click behavior)
-                    window.location.hash = hash;
-                });
-                } // End if
-            });
-            });
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<!-- FCM (if needed) -->
 <script type="module" src="fcm_init.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
-    </body>
+</body>
 </html>

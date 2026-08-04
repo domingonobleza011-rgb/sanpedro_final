@@ -1,473 +1,506 @@
 <?php 
-    error_reporting(E_ALL ^ E_WARNING);
+error_reporting(E_ALL ^ E_WARNING);
 define('BMIS_ROLE_REQUIRED', 'resident');
 require('secure_header.php'); 
-    require('classes/resident.class.php');
-    ini_set('display_errors',0);
-    $userdetails = $residentbmis->get_userdata();
-    $id_resident = $_GET['id_resident'];
-    $resident = $residentbmis->get_single_resident($id_resident);
-    
+require('classes/resident.class.php');
+ini_set('display_errors',0);
+$userdetails = $residentbmis->get_userdata();
+$id_resident = $_GET['id_resident'];
+$resident = $residentbmis->get_single_resident($id_resident);
 
-    $residentbmis->profile_update();
-
+$residentbmis->profile_update();
+$is_verified = $residentbmis->isResidentVerified($userdetails['id_resident']);
 ?>
-
-<!DOCTYPE html> 
-<html>
-
-    <head> 
-    <title> Barangay Management System </title>
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
-      <!-- responsive tags for screen compatibility -->
-      <meta name="viewport" content="width=device-width, initial-scale=1"><!-- bootstrap css --> 
-      <link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
-      <!-- fontawesome icons --> 
-      <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Resident Profile | Barangay San Pedro</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa/favicon-32x32.png">
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
     <style>
-
-        /* Back-to-Top */
-
-        .top-link {
-        transition: all 0.25s ease-in-out;
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        display: inline-flex;
-        cursor: pointer;
-        align-items: center;
-        justify-content: center;
-        margin: 0 3em 3em 0;
-        border-radius: 50%;
-        padding: 0.25em;
-        width: 80px;
-        height: 80px;
-        background-color: #3661D5;
+        /* ----- GLOBAL RESETS ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .top-link.show {
-        visibility: visible;
-        opacity: 1;
+        html, body {
+            height: 100%;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 85px;
+        }
+        @media (min-width: 768px) {
+            body { padding-bottom: 0; }
+        }
+
+        /* ----- PAGE WRAPPER - FULL SCREEN ----- */
+        .page-wrapper {
+            flex: 1;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 16px 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ----- HERO BANNER ----- */
+        .hero-profile {
+            background: linear-gradient(135deg, #1b74e4 0%, #0a5ecf 100%);
+            padding: 2rem 1.5rem;
+            border-radius: 0 0 40px 40px;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .hero-profile i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .hero-profile h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.25rem;
+        }
+        .hero-profile p {
+            opacity: 0.9;
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 576px) {
+            .hero-profile {
+                padding: 1.5rem 1rem;
+                border-radius: 0 0 24px 24px;
+            }
+            .hero-profile h1 {
+                font-size: 1.5rem;
+            }
+            .hero-profile i {
+                font-size: 2rem;
+            }
+        }
+
+        /* ----- VERIFICATION BANNER ----- */
+        .verify-banner {
+            border-left: 5px solid #ffc107;
+            border-radius: 16px;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1.25rem;
+            background: #fff3cd;
+            flex-shrink: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .verify-banner .btn-upload-sm {
+            background: #ffc107;
+            border-radius: 40px;
+            font-weight: 600;
+            padding: 0.3rem 1.2rem;
+            font-size: 0.85rem;
+            color: #1c1e21;
+            border: none;
+            transition: background 0.2s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .verify-banner .btn-upload-sm:hover {
+            background: #e0a800;
+        }
+        .verify-banner .verify-icon {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+        .verify-banner .verify-text h6 {
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        .verify-banner .verify-text p {
+            margin-bottom: 0;
+            font-size: 0.85rem;
+            color: #856404;
+        }
+
+        .alert-verified {
+            background: #d1e7dd;
+            border: none;
+            border-radius: 16px;
+            padding: 0.6rem 1.25rem;
+            color: #0f5132;
+            margin-bottom: 1.25rem;
+            flex-shrink: 0;
+        }
+        .alert-verified i {
+            color: #198754;
+            font-size: 1.1rem;
+        }
+
+        /* ----- FORM CARD ----- */
+        .form-card {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            padding: 2rem 2rem 1.75rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        @media (max-width: 576px) {
+            .form-card {
+                padding: 1.25rem 1rem;
+                border-radius: 16px;
+            }
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: #4b4f56;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1.5px solid #dee2e6;
+            padding: 0.6rem 1rem;
+            font-size: 0.92rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fafbfc;
+            height: auto;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #1b74e4;
+            box-shadow: 0 0 0 3px rgba(27, 116, 228, 0.12);
+            background: #fff;
+        }
+        .form-control.bg-light {
+            background: #f0f2f5 !important;
+            color: #1c1e21;
+            cursor: default;
+            font-weight: 500;
+        }
+        .form-control.bg-light:focus {
+            box-shadow: none;
+            border-color: #dee2e6;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #1b74e4;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.5rem;
+        }
+        .section-title i {
+            font-size: 1rem;
+            color: #1b74e4;
+        }
+        .section-divider {
+            border: 0;
+            border-top: 2px solid #e4e6ea;
+            margin: 0.25rem 0 1rem;
+            opacity: 1;
+        }
+
+        /* ----- BUTTONS ----- */
+        .btn-submit {
+            background: linear-gradient(135deg, #1b74e4 0%, #0a5ecf 100%);
+            color: #fff;
+            padding: 0.75rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(27, 116, 228, 0.3);
+            min-width: 200px;
+            margin-top: 0.5rem;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(27, 116, 228, 0.35);
+            color: #fff;
+        }
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+        .btn-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+        @media (max-width: 576px) {
+            .btn-submit {
+                font-size: 0.9rem;
+                padding: 0.65rem 1.5rem;
+                width: 100%;
+                min-width: auto;
+            }
+        }
+
+        /* ----- BACK TO TOP ----- */
+        .top-link {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #1b74e4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 999;
+            border: none;
+            cursor: pointer;
         }
         .top-link.hide {
-        visibility: hidden;
-        opacity: 0;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8);
         }
         .top-link svg {
-        fill: white;
-        width: 24px;
-        height: 12px;
+            fill: #fff;
+            width: 20px;
+            height: 12px;
         }
         .top-link:hover {
-        background-color: #3498DB;
-        }
-        .top-link:hover svg {
-        fill: #000000;
+            background: #0a5ecf;
         }
 
-        .screen-reader-text {
-        position: absolute;
-        clip-path: inset(50%);
-        margin: -1px;
-        border: 0;
-        padding: 0;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        word-wrap: normal !important;
-        clip: rect(1px, 1px, 1px, 1px);
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 576px) {
+            .page-wrapper {
+                padding: 0 10px 1rem;
+            }
+            .form-card {
+                padding: 1rem 0.9rem;
+            }
+            .form-control, .form-select {
+                font-size: 0.88rem;
+                padding: 0.5rem 0.8rem;
+            }
+            .section-title {
+                font-size: 0.7rem;
+            }
+            .verify-banner {
+                padding: 0.6rem 1rem;
+            }
+            .verify-banner .verify-icon {
+                font-size: 1.4rem;
+            }
+            .verify-banner .btn-upload-sm {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.8rem;
+            }
         }
-        .screen-reader-text:focus {
-        display: block;
-        top: 5px;
-        left: 5px;
-        z-index: 100000;
-        clip-path: none;
-        background-color: #eee;
-        padding: 15px 23px 14px;
-        width: auto;
-        height: auto;
-        text-decoration: none;
-        line-height: normal;
-        color: #444;
-        font-size: 1em;
-        clip: auto !important;
+        @media (min-width: 768px) {
+            .form-card {
+                padding: 2.5rem;
+            }
         }
-
-        /* Navbar Buttons */
-
-        .btn3 {
-        border-radius: 20px;
-        border: none; /* Remove borders */
-        color: white; /* White text */
-        font-size: 16px; /* Set a font size */
-        cursor: pointer; /* Mouse pointer on hover */
-        margin-left: 23%;
-        padding: 8px 22px;
-        }
-
-        .btn4 {
-        border-radius: 20px;
-        border: none; /* Remove borders */
-        color: white; /* White text */
-        font-size: 16px; /* Set a font size */
-        cursor: pointer; /* Mouse pointer on hover */
-        padding: 8px 22px;
-        margin-left: .1%;
-        }
-
-        .btn5 {
-        border-radius: 20px;
-        border: none; /* Remove borders */
-        color: white; /* White text */
-        font-size: 16px; /* Set a font size */
-        cursor: pointer; /* Mouse pointer on hover */
-        margin-left: .1%;
-        padding: 8px 22px;
-        }
-
-        .btn6 {
-        border-radius: 20px;
-        border: none; /* Remove borders */
-        color: white; /* White text */
-        font-size: 16px; /* Set a font size */
-        cursor: pointer; /* Mouse pointer on hover */
-        padding: 8px 22px;
-        margin-left: .1%;
-        }
-
-
-        /* Darker background on mouse-over */
-
-        .btn3:hover {
-        background-color: RoyalBlue;
-        color: black;
-        }
-
-        .btn4:hover {
-        background-color: RoyalBlue;
-        color: black;
-        }
-
-        .btn5:hover {
-        background-color: RoyalBlue;
-        color: black;
-        }
-
-        .btn6:hover {
-        background-color: RoyalBlue;
-        color: black;
-        }
-
-        .footerlinks{
-        color:white;
-        }
-        .shfooter .collapse {
-            display: inherit;
-        }
-            @media (max-width:767px) {
-        .shfooter ul {
-                margin-bottom: 0;
-        }
-
-        .shfooter .collapse {
-                display: none;
-        }
-
-        .shfooter .collapse.show {
-                display: block;
-        }
-
-        .shfooter .title .fa-angle-up,
-        .shfooter .title[aria-expanded=true] .fa-angle-down {
-                display: none;
-        }
-
-        .shfooter .title[aria-expanded=true] .fa-angle-up {
-                display: block;
-        }
-
-        .shfooter .navbar-toggler {
-                display: inline-block;
-                padding: 0;
-        }
-
-        }
-
-        .resize {
-            text-align: center;
-        }
-        .resize {
-            margin-top: 3rem;
-            font-size: 1.25rem;
-        }
-        /*RESIZESCREEN ANIMATION*/
-        .fa-angle-double-right {
-            animation: rightanime 1s linear infinite;
-        }
-
-        .fa-angle-double-left {
-            animation: leftanime 1s linear infinite;
-        }
-        @keyframes rightanime {
-            50% {
-                transform: translateX(10px);
-                opacity: 0.5;
-        }
-            100% {
-                transform: translateX(10px);
-                opacity: 0;
-        }
-        }
-        @keyframes leftanime {
-            50% {
-                transform: translateX(-10px);
-                opacity: 0.5;
-        }
-            100% {
-                transform: translateX(-10px);
-                opacity: 0;
-        }
-        }
-
-        /* Contact Chip */
-
-        .chip {
-        display: inline-block;
-        padding: 0 25px;
-        height: 50px;
-        line-height: 50px;
-        border-radius: 25px;
-        background-color: #2C54C1;
-        margin-top: 5px;
-        }
-
-        .chip img {
-        float: left;
-        margin: 0 10px 0 -25px;
-        height: 50px;
-        width: 50px;
-        border-radius: 50%;
-        }
-
-        .zoom {
-        transition: transform .3s;
-        }
-
-        .zoom:hover {
-        -ms-transform: scale(1.4); /* IE 9 */
-        -webkit-transform: scale(1.4); /* Safari 3-8 */
-        transform: scale(1.4); 
-        }
-
-
-
-
-
-
-
-
-
-
-
     </style>
-    <body> 
+</head>
+<body>
 
-        <!-- Back-to-Top and Back Button -->
-
-        <a data-toggle="tooltip" title="Back-To-Top" class="top-link hide" href="" id="js-top">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
-            <span class="screen-reader-text">Back to top</span>
-        </a>
-
-        
-
- 
+<!-- NAVBAR -->
 <?php include __DIR__ . '/resident_navbar.php'; ?>
 
-        <div id="down2"></div>
+<div class="page-wrapper">
 
-        <br>
-
-        <div class="container my-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white py-3">
-            <h5 class="mb-0"><i class="fas fa-id-card me-2"></i> Resident Profile Management</h5>
+    <!-- VERIFICATION NOTICE -->
+    <?php if (!$is_verified): ?>
+    <div class="verify-banner">
+        <div class="d-flex align-items-center gap-3">
+            <span class="verify-icon">&#x1F512;</span>
+            <div class="verify-text">
+                <h6>Account Not Yet Verified</h6>
+                <p>Upload a valid ID for admin approval.</p>
+            </div>
         </div>
-        <div class="card-body p-4">
-            <form method="post">
-
-                <div class="d-flex align-items-center mb-3">
-                    <i class="fas fa-user-circle text-primary fa-lg me-2"></i>
-                    <h6 class="mb-0 fw-bold">Permanent Records</h6>
-                </div>
-                <hr class="mt-0">
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="small fw-bold">Last Name</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['lname']); ?>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="small fw-bold">First Name</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['fname']); ?>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="small fw-bold">Middle Name</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['mi']); ?>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="small fw-bold">Email Address</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['email']); ?>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="small fw-bold">Sex</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['sex']); ?>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="small fw-bold">Nationality</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['nationality']); ?>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="small fw-bold">Date of Birth</label>
-                            <input type="date" class="form-control bg-light" value="<?= $resident['bdate']; ?>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="small fw-bold">Place of Birth</label>
-                            <input class="form-control bg-light" value="<?= htmlspecialchars($resident['bplace']); ?>" readonly>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center mb-3 mt-5">
-                    <i class="fas fa-user-edit text-primary fa-lg me-2"></i>
-                    <h6 class="mb-0 fw-bold">Update Account Details</h6>
-                </div>
-                <hr class="mt-0">
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label class="small fw-bold">Age</label>
-                            <input class="form-control" type="number" name="age" value="<?= $resident['age']; ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="form-group">
-                            <label class="small fw-bold">Civil Status</label>
-                            <select class="form-control" name="status">
-                                <option value="Single" <?= $resident['status'] == 'Single' ? 'selected' : ''; ?>>Single</option>
-                                <option value="Married" <?= $resident['status'] == 'Married' ? 'selected' : ''; ?>>Married</option>
-                                <option value="Widowed" <?= $resident['status'] == 'Widowed' ? 'selected' : ''; ?>>Widowed</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="form-group">
-                            <label class="small fw-bold">Contact Number</label>
-                            <input class="form-control" type="tel" name="contact" maxlength="11" placeholder="09XXXXXXXXX" value="<?= $resident['contact']; ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="small fw-bold">House No.</label>
-                            <input class="form-control" type="text" name="houseno" value="<?= $resident['houseno']; ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="small fw-bold">Street</label>
-                            <input class="form-control" type="text" name="street" value="<?= $resident['street']; ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="form-group">
-                            <label class="small fw-bold">Barangay</label>
-                            <input class="form-control" type="text" name="brgy" value="<?= $resident['brgy']; ?>">
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                <div class="row justify-content-center">
-                    <div class="col-auto">
-                        <input name="lname" type="hidden" value="<?= $resident['lname']; ?>"/>
-                        <input name="mi" type="hidden" value="<?= $resident['mi']; ?>" />
-                        
-                        
-                        
-                        <button type="submit" name="profile_update" class="btn btn-primary px-5">
-                            <i class="fas fa-save me-1"></i> Save Changes
-                        </button>
-                    </div>
-                </div>
-
-               
-            </form>
-        </div>
+        <a href="resident_messages.php?upload_id=1" class="btn-upload-sm">
+            <i class="bi bi-upload me-1"></i> Upload ID
+        </a>
     </div>
-</div>
-        <script>
-            $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip();   
-            });
-        </script>
+    <?php else: ?>
+    <div class="alert-verified">
+        <i class="bi bi-patch-check-fill me-2"></i> <strong>Account Verified</strong> &mdash; You have full access to all barangay services.
+    </div>
+    <?php endif; ?>
 
-        <script>
-            $(document).ready(function(){
-            // Add smooth scrolling to all links
-            $("a").on('click', function(event) {
+    <!-- HERO -->
+    <div class="hero-profile">
+        <i class="bi bi-person-badge"></i>
+        <h1>Resident Profile</h1>
+        <p>View your permanent records and update your account details</p>
+    </div>
 
-                // Make sure this.hash has a value before overriding default behavior
-                if (this.hash !== "") {
-                // Prevent default anchor click behavior
-                event.preventDefault();
+    <!-- PROFILE CARD -->
+    <div class="form-card">
 
-                // Store hash
-                var hash = this.hash;
+        <form method="post" class="d-flex flex-column flex-grow-1">
 
-                // Using jQuery's animate() method to add smooth page scroll
-                // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
-                $('html, body').animate({
-                    scrollTop: $(hash).offset().top
-                }, 800, function(){
+            <!-- Permanent Records -->
+            <div class="section-title">
+                <i class="bi bi-file-earmark-person"></i> Permanent Records
+            </div>
+            <hr class="section-divider">
 
-                    // Add hash (#) to URL when done scrolling (default click behavior)
-                    window.location.hash = hash;
-                });
-                } // End if
-            });
-            });
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <div class="row g-3">
+                <div class="col-md-4 col-12">
+                    <label class="form-label">Last Name</label>
+                    <input class="form-control bg-light" value="<?= htmlspecialchars($resident['lname'] ?? ''); ?>" readonly>
+                </div>
+                <div class="col-md-4 col-12">
+                    <label class="form-label">First Name</label>
+                    <input class="form-control bg-light" value="<?= htmlspecialchars($resident['fname'] ?? ''); ?>" readonly>
+                </div>
+                <div class="col-md-4 col-12">
+                    <label class="form-label">Middle Name</label>
+                    <input class="form-control bg-light" value="<?= htmlspecialchars($resident['mi'] ?? ''); ?>" readonly>
+                </div>
+                <div class="col-md-6 col-12">
+                    <label class="form-label">Email Address</label>
+                    <input class="form-control bg-light" value="<?= htmlspecialchars($resident['email'] ?? ''); ?>" readonly>
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label">Sex</label>
+                    <input class="form-control bg-light" value="<?= htmlspecialchars($resident['sex'] ?? ''); ?>" readonly>
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label">Nationality</label>
+                    <input class="form-control bg-light" value="<?= htmlspecialchars($resident['nationality'] ?? ''); ?>" readonly>
+                </div>
+                <div class="col-md-6 col-12">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control bg-light" value="<?= $resident['bdate'] ?? ''; ?>" readonly>
+                </div>
+                <div class="col-md-6 col-12">
+                    <label class="form-label">Place of Birth</label>
+                    <input class="form-control bg-light" value="<?= htmlspecialchars($resident['bplace'] ?? ''); ?>" readonly>
+                </div>
+            </div>
 
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+            <!-- Update Account Details -->
+            <div class="section-title mt-4">
+                <i class="bi bi-pencil-square"></i> Update Account Details
+            </div>
+            <hr class="section-divider">
 
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
+            <div class="row g-3">
+                <div class="col-md-3 col-6">
+                    <label class="form-label">Age</label>
+                    <input class="form-control" type="number" name="age" value="<?= $resident['age'] ?? ''; ?>">
+                </div>
+                <div class="col-md-4 col-6">
+                    <label class="form-label">Civil Status</label>
+                    <select class="form-select" name="status">
+                        <option value="Single" <?= ($resident['status'] ?? '') == 'Single' ? 'selected' : ''; ?>>Single</option>
+                        <option value="Married" <?= ($resident['status'] ?? '') == 'Married' ? 'selected' : ''; ?>>Married</option>
+                        <option value="Widowed" <?= ($resident['status'] ?? '') == 'Widowed' ? 'selected' : ''; ?>>Widowed</option>
+                        <option value="Separated" <?= ($resident['status'] ?? '') == 'Separated' ? 'selected' : ''; ?>>Separated</option>
+                    </select>
+                </div>
+                <div class="col-md-5 col-12">
+                    <label class="form-label">Contact Number</label>
+                    <input class="form-control" type="tel" name="contact" maxlength="11" 
+                           placeholder="09XXXXXXXXX" value="<?= $resident['contact'] ?? ''; ?>">
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label">House No.</label>
+                    <input class="form-control" type="text" name="houseno" value="<?= $resident['houseno'] ?? ''; ?>">
+                </div>
+                <div class="col-md-4 col-6">
+                    <label class="form-label">Street</label>
+                    <input class="form-control" type="text" name="street" value="<?= $resident['street'] ?? ''; ?>">
+                </div>
+                <div class="col-md-5 col-12">
+                    <label class="form-label">Barangay</label>
+                    <input class="form-control" type="text" name="brgy" value="<?= $resident['brgy'] ?? ''; ?>">
+                </div>
+            </div>
 
-    </body>
+            <!-- Hidden Fields -->
+            <input name="lname" type="hidden" value="<?= $resident['lname'] ?? ''; ?>">
+            <input name="mi" type="hidden" value="<?= $resident['mi'] ?? ''; ?>">
+
+            <!-- Submit Button -->
+            <div class="btn-wrapper">
+                <button type="submit" name="profile_update" class="btn-submit">
+                    <i class="bi bi-save me-2"></i> Save Changes
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div><!-- end page-wrapper -->
+
+<!-- BACK TO TOP BUTTON -->
+<a class="top-link hide" id="js-top" href="#">
+    <svg viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
+    <span class="visually-hidden">Back to top</span>
+</a>
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Back-to-top visibility
+    const topBtn = document.getElementById('js-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            topBtn.classList.remove('hide');
+        } else {
+            topBtn.classList.add('hide');
+        }
+    });
+    topBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Tooltip initialization (if any)
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+</body>
 </html>

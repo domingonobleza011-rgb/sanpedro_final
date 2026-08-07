@@ -10,7 +10,7 @@ require('secure_header.php');
     $bmis->delete_certofres();
     $bmis->create_certofres();
     $view = $bmis->view_certofres();
-    $residents_list = $residentbmis->view_resident();
+    $residents_list = $residentbmis->view_resident_lite();
     $id_resident = $_GET['id_resident'];
     $resident = $residentbmis->get_single_certofres($id_resident);
    

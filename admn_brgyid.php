@@ -10,7 +10,7 @@ require('secure_header.php');
     $bmis->delete_brgyid();
     $bmis->create_brgyid();
     $view = $bmis->view_brgyid();
-    $residents_list = $residentbmis->view_resident();
+    $residents_list = $residentbmis->view_resident_lite();
     $id_resident = $_GET['id_resident'];
     $residentbmis->get_single_brgyid($id_resident);
    
@@ -250,11 +250,11 @@ hr {
             </div>
                 <button class="btn btn-success" name="search_brgyid" style="width: 90px; font-size: 18px; border-radius:30px; margin-left:41.7%;">Search</button>
                 <a href="admn_brgyid.php" class="btn btn-info" style="width: 90px; font-size: 18px; border-radius:30px;">Reload</a>
-                <button type="button" class="btn" style="background:var(--navy); width:100px; color:#fff; border-radius:30px; font-weight:600; padding:8px 24px;" data-bs-toggle="modal" data-bs-target="#addBrgyidModal">
+                <button type="button" class="btn" style="background:var(--navy); color:#fff; border-radius:30px; font-weight:600; padding:8px 24px;" data-bs-toggle="modal" data-bs-target="#addBrgyidModal">
                      Add Id
                 </button>
             </form>
-           
+          
             <br>
         </div>
     </div>

@@ -1,4 +1,7 @@
 <?php
+if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'admin_dashboard'); }
+require_once __DIR__ . '/secure_header.php';
+
 require 'classes/conn.php';
 require_once 'pagination_helper.php';
 

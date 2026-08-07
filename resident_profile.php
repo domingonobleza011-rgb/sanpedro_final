@@ -167,6 +167,7 @@ $is_verified = $residentbmis->isResidentVerified($userdetails['id_resident']);
             .form-card {
                 padding: 1.25rem 1rem;
                 border-radius: 16px;
+                margin-bottom:4rem;
             }
         }
 
@@ -331,7 +332,11 @@ $is_verified = $residentbmis->isResidentVerified($userdetails['id_resident']);
 
 <!-- NAVBAR -->
 <?php include __DIR__ . '/resident_navbar.php'; ?>
-
+    <!-- HERO -->
+    <div class="hero-profile">
+        <i class="bi bi-person-badge"></i>
+        <h1>Resident Profile</h1>
+    </div>
 <div class="page-wrapper">
 
     <!-- VERIFICATION NOTICE -->
@@ -354,12 +359,7 @@ $is_verified = $residentbmis->isResidentVerified($userdetails['id_resident']);
     </div>
     <?php endif; ?>
 
-    <!-- HERO -->
-    <div class="hero-profile">
-        <i class="bi bi-person-badge"></i>
-        <h1>Resident Profile</h1>
-        <p>View your permanent records and update your account details</p>
-    </div>
+
 
     <!-- PROFILE CARD -->
     <div class="form-card">
@@ -407,66 +407,50 @@ $is_verified = $residentbmis->isResidentVerified($userdetails['id_resident']);
                 </div>
             </div>
 
-            <!-- Update Account Details -->
-            <div class="section-title mt-4">
-                <i class="bi bi-pencil-square"></i> Update Account Details
-            </div>
-            <hr class="section-divider">
-
+<br>
             <div class="row g-3">
-                <div class="col-md-3 col-6">
-                    <label class="form-label">Age</label>
-                    <input class="form-control" type="number" name="age" value="<?= $resident['age'] ?? ''; ?>">
-                </div>
-                <div class="col-md-4 col-6">
+                
+                <div class="col-md-6 col-6">
                     <label class="form-label">Civil Status</label>
-                    <select class="form-select" name="status">
+                    <select class="form-control bg-light" name="status" valu="<?= htmlspecialchars($resident['status'] ?? ''); ?>" readonly>
                         <option value="Single" <?= ($resident['status'] ?? '') == 'Single' ? 'selected' : ''; ?>>Single</option>
                         <option value="Married" <?= ($resident['status'] ?? '') == 'Married' ? 'selected' : ''; ?>>Married</option>
                         <option value="Widowed" <?= ($resident['status'] ?? '') == 'Widowed' ? 'selected' : ''; ?>>Widowed</option>
                         <option value="Separated" <?= ($resident['status'] ?? '') == 'Separated' ? 'selected' : ''; ?>>Separated</option>
                     </select>
                 </div>
-                <div class="col-md-5 col-12">
+                <div class="col-md-6 col-6">
                     <label class="form-label">Contact Number</label>
-                    <input class="form-control" type="tel" name="contact" maxlength="11" 
-                           placeholder="09XXXXXXXXX" value="<?= $resident['contact'] ?? ''; ?>">
+                    <input class="form-control bg-light" type="tel" name="contact" maxlength="11" 
+                           placeholder="09XXXXXXXXX" value="<?= $resident['contact'] ?? ''; ?>" readonly>
                 </div>
                 <div class="col-md-3 col-6">
                     <label class="form-label">House No.</label>
-                    <input class="form-control" type="text" name="houseno" value="<?= $resident['houseno'] ?? ''; ?>">
+                    <input class="form-control bg-light" type="text" name="houseno" value="<?= $resident['houseno'] ?? ''; ?>" readonly>
                 </div>
-                <div class="col-md-4 col-6">
+                <div class="col-md-3 col-6">
                     <label class="form-label">Street</label>
-                    <input class="form-control" type="text" name="street" value="<?= $resident['street'] ?? ''; ?>">
+                    <input class="form-control bg-light" type="text" name="street" value="<?= $resident['street'] ?? ''; ?>" readonly>
                 </div>
-                <div class="col-md-5 col-12">
+                <div class="col-md-3 col-6">
                     <label class="form-label">Barangay</label>
-                    <input class="form-control" type="text" name="brgy" value="<?= $resident['brgy'] ?? ''; ?>">
+                    <input class="form-control bg-light" type="text" name="brgy" value="<?= $resident['brgy'] ?? ''; ?>" readonly>
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label">Municipality</label>
+                    <input class="form-control bg-light" type="text" name="brgy" value="<?= $resident['municipal'] ?? ''; ?>" readonly>
                 </div>
             </div>
 
-            <!-- Hidden Fields -->
-            <input name="lname" type="hidden" value="<?= $resident['lname'] ?? ''; ?>">
-            <input name="mi" type="hidden" value="<?= $resident['mi'] ?? ''; ?>">
+       
 
-            <!-- Submit Button -->
-            <div class="btn-wrapper">
-                <button type="submit" name="profile_update" class="btn-submit">
-                    <i class="bi bi-save me-2"></i> Save Changes
-                </button>
-            </div>
 
         </form>
     </div>
 
 </div><!-- end page-wrapper -->
 
-<!-- BACK TO TOP BUTTON -->
-<a class="top-link hide" id="js-top" href="#">
-    <svg viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
-    <span class="visually-hidden">Back to top</span>
-</a>
+
 
 <!-- SCRIPTS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

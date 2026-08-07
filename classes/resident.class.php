@@ -188,6 +188,17 @@
             return $view;
         }
 
+        // Lightweight resident list for populating "Add Certificate" dropdowns.
+        // Pulls only the columns those forms actually use, instead of every
+        // column for every resident (SELECT *), which was slow on large tables.
+        public function view_resident_lite(){
+            $connection = $this->openConn();
+            $stmt = $connection->prepare("SELECT id_resident, lname, fname, mi, age, nationality, houseno, street, brgy, municipal, bdate, contact FROM tbl_resident WHERE (is_archived = 0 OR is_archived IS NULL) ORDER BY lname, fname");
+            $stmt->execute();
+            $view = $stmt->fetchAll();
+            return $view;
+        }
+
         public function update_resident() {
             if (isset($_POST['update_resident'])) {
                 $id_resident = $_GET['id_resident'];

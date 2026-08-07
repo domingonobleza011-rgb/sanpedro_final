@@ -1,4 +1,7 @@
 <?php
+if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'admin_dashboard'); }
+require_once __DIR__ . '/secure_header.php';
+
 	// require the database connection
 	require 'classes/conn.php';
 	if(isset($_POST['search_bspermit'])){

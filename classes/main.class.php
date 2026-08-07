@@ -63,7 +63,7 @@ function notif($message, $type = 'success') {
                     if (t && t.parentNode) { t.parentNode.removeChild(t); }
                 }, 350);
             }
-        }, 10000);
+        }, 3000);
     </script>
     HTML;
 }
@@ -1688,12 +1688,15 @@ public function delete_certofres(){
     }
  
     public function validate_staff() {
-        if(isset($userdetails)) {
-            if($userdetails['role'] != "administrator" || $userdetails['role'] != "user") {
-                $this->show_404();
-            } else {
-                return $userdetails;
-            }
+        $userdetails = $this->get_userdata();
+        if (!isset($userdetails)) {
+            $this->show_404();
+            return;
+        }
+        if ($userdetails['role'] != "administrator" && $userdetails['role'] != "user") {
+            $this->show_404();
+        } else {
+            return $userdetails;
         }
     }
 

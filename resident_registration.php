@@ -339,11 +339,6 @@ $residentbmis->create_resident();
 <!-- ===== HERO BANNER ===== -->
 <div class="hero-registration">
     <div class="hero-content">
-        <div class="hero-icons">
-            <i class="bi bi-person-plus"></i>
-            <i class="bi bi-file-earmark-person"></i>
-            <i class="bi bi-shield-check"></i>
-        </div>
         <h1>Resident Registration</h1>
         <p>Create your account to access barangay services</p>
         <span class="hero-badge"><i class="bi bi-building me-1"></i> Barangay San Pedro, Iriga City</span>

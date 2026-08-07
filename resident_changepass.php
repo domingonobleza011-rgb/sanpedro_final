@@ -316,15 +316,15 @@ $residentbmis->resident_changepass();
 
 <!-- NAVBAR -->
 <?php include __DIR__ . '/resident_navbar.php'; ?>
-
-<div class="page-wrapper">
-
     <!-- HERO -->
     <div class="password-hero">
         <i class="bi bi-shield-lock-fill"></i>
         <h1>Change Password</h1>
         <p>Keep your account secure by updating your password regularly</p>
     </div>
+<div class="page-wrapper">
+
+
 
     <!-- FORM CARD -->
     <div class="form-card">

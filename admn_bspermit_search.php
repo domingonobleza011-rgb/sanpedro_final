@@ -13,6 +13,7 @@
             <th> Resident ID </th>
             <th> Fullname </th>
             <th> Address </th>
+            <th> Business Name </th>
         </tr>
     </thead>
 </div>
@@ -32,14 +33,21 @@
                         <a class="btn btn-success"  style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="businesspermit_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
                         <input type="hidden" name="id_bspermitid" value="<?= $view['id_bspermit'];?>">
                         <button class="btn btn-danger"  style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_certofres"> Delete</button>
-                        <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                        <?php if ((int)$view['id_resident'] === 0): ?>
+                        <button type="button" class="btn btn-secondary btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;opacity:0.65;cursor:not-allowed;" disabled title="Not available for walk-in / manual entries">
                             <i class="fas fa-comment-alt"></i> Message
                         </button>
+                        <?php else: ?>
+<button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                            <i class="fas fa-comment-alt"></i> Message
+                        </button>
+                        <?php endif; ?>
                     </form>
                 </td>
-                    <td> <?= $view['id_resident'];?> </td> 
+<td> <?= $view['id_resident'];?> </td> 
                     <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
                     <td> <?= $view['houseno'];?>,  <?= $view['street'];?>, <?= $view['brgy'];?>  <?= $view['municipal'];?></td>
+                    <td> <?= $view['bsname'];?> </td>
                 <td> 
                     
 
@@ -90,6 +98,8 @@
             <th> Resident ID </th>
             <th> Fullname </th>
             <th> Address </th>
+            <th> Business Name </th>
+
         </tr>
     </thead>
 </div>
@@ -103,14 +113,21 @@
                             <a class="btn btn-success"  style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="businesspermit_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
                             <input type="hidden" name="id_bspermit" value="<?= $view['id_bspermit'];?>">
                             <button class="btn btn-danger"  style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_bspermit"> Delete </button>
-                            <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                            <?php if ((int)$view['id_resident'] === 0): ?>
+                            <button type="button" class="btn btn-secondary btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;opacity:0.65;cursor:not-allowed;" disabled title="Not available for walk-in / manual entries">
                                 <i class="fas fa-comment-alt"></i> Message
                             </button>
+                            <?php else: ?>
+<button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                                <i class="fas fa-comment-alt"></i> Message
+                            </button>
+                            <?php endif; ?>
                         </form>
                     </td>
                     <td> <?= $view['id_resident'];?> </td> 
                     <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
                     <td> <?= $view['houseno'];?>,  <?= $view['street'];?>, <?= $view['brgy'];?>  <?= $view['municipal'];?></td>
+                    <td> <?= $view['bsname'];?> </td>
 
                     <!-- Message Modal -->
                     <div class="modal fade" id="messageModal<?= $view['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -151,18 +168,6 @@
     </tbody>
     
 </table>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
-<!-- responsive tags for screen compatibility -->
-<meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
-<!-- custom css --> 
-<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
-<!-- bootstrap css --> 
-<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
-<!-- fontawesome icons -->
-<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
 
 <?php
 	}

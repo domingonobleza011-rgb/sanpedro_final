@@ -1,5 +1,6 @@
 <?php
 error_reporting(E_ALL ^ E_WARNING);
+date_default_timezone_set('Asia/Manila');
 define('BMIS_ROLE_REQUIRED', 'resident');
 require('secure_header.php');
 require('classes/main.class.php');
@@ -67,6 +68,13 @@ if (isset($_POST['enroll_program'])) {
         header("Location: resident_youth_profile.php?tab=programs&enroll=noprofile"); exit;
     }
 
+    // Program must exist (prevents FK constraint fatal error if id_program is 0/invalid/deleted)
+    $pchk = $conn->prepare("SELECT id_program FROM tbl_youth_programs WHERE id_program = ?");
+    $pchk->execute([$id_program]);
+    if (!$pchk->fetch()) {
+        header("Location: resident_youth_profile.php?tab=programs&enroll=invalidprogram"); exit;
+    }
+
     // Duplicate check
     $dup = $conn->prepare("SELECT id_enrollment FROM tbl_youth_enrollment WHERE id_program = ? AND id_youth = ?");
     $dup->execute([$id_program, $youth_id_resolved]);
@@ -74,13 +82,14 @@ if (isset($_POST['enroll_program'])) {
         header("Location: resident_youth_profile.php?tab=programs&enroll=duplicate"); exit;
     }
 
-    $ins = $conn->prepare("INSERT INTO tbl_youth_enrollment (id_program, id_youth, youth_name, contact, status) VALUES (?,?,?,?,?)");
+    $ins = $conn->prepare("INSERT INTO tbl_youth_enrollment (id_program, id_youth, youth_name, contact, status, enrolled_at) VALUES (?,?,?,?,?,?)");
     $ins->execute([
         $id_program,
         $youth_id_resolved,
         $youth['lname'].', '.$youth['fname'],
         $youth['contact_number'],
-        'Enrolled'
+        'Enrolled',
+        date('Y-m-d H:i:s')
     ]);
     header("Location: resident_youth_profile.php?tab=programs&enroll=success"); exit;
 }
@@ -512,6 +521,7 @@ $active_tab = $_GET['tab'] ?? 'announcements';
     if ($_GET['enroll']==='success')   { $tm = 'Successfully enrolled in the program!'; }
     elseif($_GET['enroll']==='duplicate'){ $tc='toast-warning';$ti='exclamation-circle';$tm='You are already enrolled in this program.'; }
     elseif($_GET['enroll']==='noprofile'){ $tc='toast-danger';$ti='x-circle';$tm='Please complete your Youth Profile first before enrolling.'; }
+    elseif($_GET['enroll']==='invalidprogram'){ $tc='toast-danger';$ti='x-circle';$tm='That program is no longer available. Please refresh and try again.'; }
 ?>
 <div class="toast-alert <?= $tc ?>" id="toastAlert">
     <i class="fas fa-<?= $ti ?> me-2"></i><?= $tm ?>
@@ -961,17 +971,19 @@ $active_tab = $_GET['tab'] ?? 'announcements';
 <script>
     // Back-to-top visibility
     const topBtn = document.getElementById('js-top');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 300) {
-            topBtn.classList.remove('hide');
-        } else {
-            topBtn.classList.add('hide');
-        }
-    });
-    topBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    if (topBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                topBtn.classList.remove('hide');
+            } else {
+                topBtn.classList.add('hide');
+            }
+        });
+        topBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 
     // Enroll modal data population
     document.getElementById('enrollModal').addEventListener('show.bs.modal', function(e) {

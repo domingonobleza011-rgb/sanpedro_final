@@ -1,6 +1,7 @@
 <?php
+    define('BMIS_ROLE_REQUIRED', 'admin');
+    require('secure_header.php');
     require('classes/main.class.php');
-    $userdetails = $bmis->get_userdata();
 
     // ==========================================
     // BACKEND: Handle Bulk Deletion Action

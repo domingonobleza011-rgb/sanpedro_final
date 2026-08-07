@@ -510,7 +510,6 @@ hr {
                             <th> Age </th>
                             <th> Sex </th>
                             <th> Address </th>
-                            <th> Contact </th>
                             <th> Position </th>
                             <th> Role </th>
                             <th> AddedBy </th>
@@ -563,7 +562,6 @@ hr {
                                     <td> <?= $staff['age'];?> </td>
                                     <td> <?= $staff['sex'];?> </td>
                                     <td> <?= $staff['address'];?> </td>
-                                    <td> <?= $staff['contact'];?> </td>
                                     <td> <?= $staff['position'];?> </td>
                                     <td> <?= $staff['role'];?> </td>
                                     <td> <?= $staff['addedby'];?> </td>   

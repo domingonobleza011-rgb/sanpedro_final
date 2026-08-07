@@ -1,0 +1,69 @@
+RewriteEngine On
+
+# 1. Force HTTPS
+RewriteCond %{HTTP:X-Forwarded-Proto} =http
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2. Correct MIME type for the PWA manifest only
+<Files "manifest.json">
+    AddType application/manifest+json .json
+</Files>
+
+# ─────────────────────────────────────────────────────────────
+# SECURITY HARDENING
+# ─────────────────────────────────────────────────────────────
+
+# 3. Block direct access to secrets and config-like files, anywhere in the site
+<FilesMatch "(\.env|\.env\..*|firebase-service-account\.json|composer\.(json|lock)|package(-lock)?\.json|\.git.*|\.htpasswd|\.sql|\.log)$">
+    Require all denied
+</FilesMatch>
+
+# 4. Block direct access to the classes/ folder (should only ever be include()'d, never hit directly)
+RewriteRule ^classes/ - [F,L]
+
+# 5. Block direct access to the debug/test script — delete test_push.php instead of relying on this alone
+<Files "test_push.php">
+    Require all denied
+</Files>
+
+# 6. Prevent directory listing
+Options -Indexes
+
+# 7. Prevent PHP execution inside the uploads folder (uploaded files should never run as code)
+<IfModule mod_php.c>
+    <Directory "uploads">
+        php_flag engine off
+    </Directory>
+</IfModule>
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|pht|phar)$">
+    <If "%{REQUEST_URI} =~ m#^/uploads/#">
+        Require all denied
+    </If>
+</FilesMatch>
+
+# 8. Security headers (belt-and-suspenders alongside bmis_set_security_headers() in PHP)
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=()"
+</IfModule>
+
+# 9. Custom error pages (no default server error output)
+ErrorDocument 403 /403.php
+ErrorDocument 404 /404.php
+ErrorDocument 500 /500.php
+
+# ─────────────────────────────────────────────────────────────
+# EXISTING ROUTING (unchanged)
+# ─────────────────────────────────────────────────────────────
+
+# 10. PERMANENTLY STRIP .PHP (If someone types it or clicks an old link)
+RewriteCond %{REQUEST_METHOD} =GET
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^\ ]+)\.php\ HTTP [NC]
+RewriteRule ^(.*)\.php$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# 11. INTERNAL REWRITE (Serve the .php content behind the scenes)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]

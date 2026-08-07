@@ -10,10 +10,39 @@ $_SESSION['storetime'] = date("h:i:a");
 
 include('autoloader.php');
 require('classes/main.class.php');
+if (isset($_POST['login'])) {
+    $token = $_POST['cf-turnstile-response'] ?? '';
+    $secret = '0x4AAAAAAEHzfRghdiBNzcb0lvRy5zy2Zok';
+
+    $ch = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+        'secret'   => $secret,
+        'response' => $token,
+        'remoteip' => $_SERVER['REMOTE_ADDR']
+    ]));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    $verify = curl_exec($ch);
+    $curlErr = curl_error($ch);
+    curl_close($ch);
+
+    $result = json_decode($verify, true);
+
+    if (!$result || !$result['success']) {
+        $_SESSION['login_error'] = 'CAPTCHA failed: ' . ($curlErr ?: implode(', ', $result['error-codes'] ?? ['no response']));
+        header('Location: index.php');
+        exit;
+    }
+}
+
 $bmis->login();
 require('classes/staff.class.php');
 $userdetails = $bmis->get_userdata();
 $view = $staffbmis->view_staff();
+
+
 
 // ── Role descriptions per position ────────────────────────────────────
 $roleDescriptions = [
@@ -709,6 +738,7 @@ $roleDescriptions = [
             line-height: 1.5;
         }
 
+
         @media (max-width: 576px) {
             .official-card .avatar,
             .official-card .avatar-placeholder {
@@ -814,6 +844,7 @@ $roleDescriptions = [
                     <input type="checkbox" class="form-check-input" id="showCheck" onclick="togglePass()">
                     <label class="form-check-label" for="showCheck">Show Password</label>
                 </div>
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAAEHzfWAU9-zKulev"></div>
 
                 <button type="submit" name="login" class="btn-signin">
                     <i class="fas fa-sign-in-alt me-2"></i> SIGN IN
@@ -917,9 +948,10 @@ $roleDescriptions = [
                     <div>
                         <h5 class="fw-bold mb-0" id="roleModalName">—</h5>
                         <small class="opacity-75" id="roleModalPosition">—</small>
+                    
                     </div>
                 </div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+                
             </div>
 
             <div class="modal-body px-4 py-3">
@@ -939,6 +971,7 @@ $roleDescriptions = [
 <!-- SCRIPTS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
     // ── Toggle Password Visibility ──────────────────────────────────────────
     function togglePass() {

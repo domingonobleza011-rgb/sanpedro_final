@@ -11,9 +11,14 @@ $admin_roles = ['admin', 'Administrator', 'Admin', 'ADMIN', 'administrator'];
 $user_role   = $userdetails['role'] ?? '';
 $is_admin    = in_array($user_role, $admin_roles);
 
-if (!$is_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
+if (!$is_admin) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
+        exit;
+    }
+    http_response_code(403);
+    require('403.php');
     exit;
 }
 

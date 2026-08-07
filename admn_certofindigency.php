@@ -10,7 +10,7 @@ require('secure_header.php');
     $bmis->delete_certofindigency();
     $bmis->create_certofindigency();
     $view = $bmis->view_certofindigency();
-    $residents_list = $residentbmis->view_resident();
+    $residents_list = $residentbmis->view_resident_lite();
     $id_resident = $_GET['id_resident'];
     $residentbmis->get_single_certofindigency($id_resident);
    
@@ -246,14 +246,13 @@ hr {
                     <i class="fa fa-search icon"></i>
                     <input type="search" class="form-control" name="keyword" style="border-radius: 30px;" value="" required=""/>
                 </div>
-               <button class="btn btn-success" name="search_certofindigency" style="width: 100px; font-size: 17px; border-radius:30px; margin-left: 40%;">
-                    Search
+                <button class="btn btn-success" name="search_certofindigency" style="width: 90px; font-size: 18px; border-radius:30px; margin-left:41.5%;">Search</button>
+                <a href="admn_certofindigency.php" class="btn btn-info" style="width: 90px; font-size: 18px; border-radius:30px;">Reload</a>
+                <button type="button" class="btn" style="background:var(--navy); color:#fff; border-radius:30px; font-weight:600; padding:8px 24px;" data-bs-toggle="modal" data-bs-target="#addCertofindigencyModal">
+                    Add Certificate
                 </button>
-                <a href="admn_certofindigency.php" class="btn btn-info" style="width: 100px; font-size: 17px; border-radius:30px;">Reload</a>
-                <button type="button" class="btn" style="background:var(--primary); color:#fff; border-radius:30px; font-weight:600;" data-bs-toggle="modal" data-bs-target="#addCertofindigencyModal">
-                     Add Certificate
-                </button>
-                </form>
+            </form>
+
             <br>
         </div>
     </div>

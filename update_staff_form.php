@@ -70,10 +70,6 @@
                                 <label class="form-group">Password:</label>
                                 <input type="password" class="form-control" name="password" placeholder="Enter new password to change" readonly>
                             </div>
-                            <div class="col">
-                                <label class="form-group">Contact Number:</label>
-                                <input type="tel" class="form-control" name="contact" value="<?= htmlspecialchars($staff['contact']);?>" readonly>
-                            </div>
                         </div>
  
                         <div class="row mt-3">

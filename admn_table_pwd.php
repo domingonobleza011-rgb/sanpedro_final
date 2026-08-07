@@ -72,7 +72,6 @@ require('secure_header.php');
                         <th>Street</th>
                         <th>Barangay</th>
                         <th>Municipality</th>
-                        <th>Contact #</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,7 +117,7 @@ require('secure_header.php');
                                 <td><?= htmlspecialchars($row['street']) ?></td>
                                 <td><?= htmlspecialchars($row['brgy']) ?></td>
                                 <td><?= htmlspecialchars($row['municipal']) ?></td>
-                                <td><?= htmlspecialchars($row['contact']) ?></td>
+                                
                             </tr>
                         <?php }
                     } else { ?>

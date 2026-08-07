@@ -6,6 +6,7 @@
  */
 require('secure_header.php');
 require('classes/main.class.php');
+require_once('classes/conn.php');
 
 header('Content-Type: application/json');
 
@@ -40,7 +41,7 @@ if (empty($ids)) {
 // Option B – raw PDO query (replace $bmis->pdo with your actual connection property):
 try {
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $stmt = $bmis->pdo->prepare("DELETE FROM activity_logs WHERE id IN ($placeholders)");
+    $stmt = $conn->prepare("DELETE FROM tbl_activity_log WHERE id_log IN ($placeholders)");
     $stmt->execute(array_values($ids));
 
     echo json_encode(['success' => true, 'deleted' => $stmt->rowCount()]);

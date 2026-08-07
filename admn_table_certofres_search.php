@@ -12,7 +12,11 @@
             <th> Actions</th>
             <th> Resident ID </th>
             <th> Full Name </th>
+            <th> Age </th>
+            <th> Nationality </th>
             <th> Address </th>
+            <th> Date </th>
+            <th> Purpose </th>
         </tr>
     </thead>
 </div>
@@ -31,14 +35,24 @@
                         <a class="btn btn-success" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="rescert_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
                         <input type="hidden" name="id_rescert" value="<?= $view['id_rescert'];?>">
                         <button class="btn btn-danger" type="submit" style="width: 90px; font-size: 17px; border-radius:30px;" name="delete_certofres"> Archive </button>
-                        <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                        <?php if ((int)$view['id_resident'] === 0): ?>
+                        <button type="button" class="btn btn-secondary btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;opacity:0.65;cursor:not-allowed;" disabled title="Not available for walk-in / manual entries">
                             <i class="fas fa-comment-alt"></i> Message
                         </button>
+                        <?php else: ?>
+<button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                            <i class="fas fa-comment-alt"></i> Message
+                        </button>
+                        <?php endif; ?>
                     </form>
                 </td>
                 <td> <?= $view['id_resident'];?> </td> 
                 <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
+                <td> <?= $view['age'];?> </td>
+                <td> <?= $view['nationality'];?> </td>
                 <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
+                <td> <?= $view['date'];?> </td>
+                <td> <?= $view['purpose'];?> </td>
 
                 <!-- Message Modal -->
                 <div class="modal fade" id="messageModal<?= $view['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -89,8 +103,11 @@
             <th> Actions</th>
             <th> Resident ID </th>
             <th> Full Name </th>
+            <th> Age </th>
+            <th> Nationality </th>
             <th> Address </th>
-
+            <th> Date </th>
+            <th> Purpose </th>
 			</tr>
 		</thead>
 
@@ -103,14 +120,24 @@
                                 <a class="btn btn-success" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="rescert_form.php?id_resident=<?= $view['id_resident'];?>">Generate</a> 
                                 <input type="hidden" name="id_rescert" value="<?= $view['id_rescert'];?>">
                                 <button class="btn btn-danger" type="submit" style="width: 90px; font-size: 17px; border-radius:30px;" name="delete_certofres"> Archive </button>
-                                <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                                <?php if ((int)$view['id_resident'] === 0): ?>
+                                <button type="button" class="btn btn-secondary btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;opacity:0.65;cursor:not-allowed;" disabled title="Not available for walk-in / manual entries">
                                     <i class="fas fa-comment-alt"></i> Message
                                 </button>
+                                <?php else: ?>
+<button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                                    <i class="fas fa-comment-alt"></i> Message
+                                </button>
+                                <?php endif; ?>
                             </form>
                         </td>
                         <td> <?= $view['id_resident'];?> </td> 
                         <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?> </td>
+                        <td> <?= $view['age'];?> </td>
+                        <td> <?= $view['nationality'];?> </td>
                         <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
+                        <td> <?= $view['date'];?> </td>
+                        <td> <?= $view['purpose'];?> </td>
 
                         <!-- Message Modal -->
                         <div class="modal fade" id="messageModal<?= $view['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -152,18 +179,6 @@
 
 	</table>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js" integrity="sha512-/HL24m2nmyI2+ccX+dSHphAHqLw60Oj5sK8jf59VWtFWZi9vx7jzoxbZmcBeeTeCUc7z1mTs3LfyXGuBU32t+w==" crossorigin="anonymous"></script>
-<!-- responsive tags for screen compatibility -->
-<meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
-<!-- custom css --> 
-<link href="../BarangaySystem/customcss/regiformstyle.css" rel="stylesheet" type="text/css">
-<!-- bootstrap css --> 
-<link href="../BarangaySystem/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"> 
-<!-- fontawesome icons -->
-<script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
-<script src="../BarangaySystem/bootstrap/js/bootstrap.bundle.js" type="text/javascript"> </script>
-
 <?php
 	}
 $con = null;

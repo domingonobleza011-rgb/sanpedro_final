@@ -17,7 +17,7 @@ include('secure_header.php');
     $rescountfm = $residentbmis->count_member_resident();
     $rescountvoter = $residentbmis->count_voters();
     $rescountsenior = $residentbmis->count_resident_senior();
-$rescountpwd = $residentbmis->count_pwd();
+    $rescountpwd = $residentbmis->count_pwd();
 
     $staffcount = $staffbmis->count_staff();
     $staffcountm = $staffbmis->count_mstaff();
@@ -32,10 +32,6 @@ $rescountpwd = $residentbmis->count_pwd();
         $complaint_resolved = (int)$conn->query("SELECT COUNT(*) FROM tbl_complaints WHERE status='resolved'")->fetchColumn();
         $complaint_total    = $complaint_pending + $complaint_resolved;
     } catch (Exception $e) { /* table may not exist yet */ }
-    
-
-
-
 ?>
 
 <style> 
@@ -137,8 +133,6 @@ hr {
     text-transform: none !important;
     line-height: 1.3;
 }
-
-
 
 .sidebar-divider {
     border-top-color: rgba(255,255,255,0.08) !important;
@@ -508,8 +502,142 @@ hr {
         transform: none;
     }
 }
-</style>
 
+/* ─── CHART CONTAINERS ────────────────────────────────────── */
+.chart-wrapper {
+    position: relative;
+    margin: 0 auto;
+    max-width: 260px;
+    height: 220px; /* Fixed height to match bar chart */
+}
+
+.chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-legend-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.5rem;
+    margin-top: 1rem;
+}
+
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all var(--transition);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+}
+
+.chart-legend-item:hover {
+    background: rgba(15,45,90,0.05);
+    color: var(--text-dark);
+}
+
+.chart-legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.chart-legend-value {
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.click-hint {
+    font-size: 0.65rem;
+    color: var(--text-light);
+    text-align: center;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+}
+
+/* ─── HORIZONTAL BAR CHART SPECIFIC ────────────────────────── */
+.bar-chart-container {
+    height: 220px; /* Fixed height to match pie chart */
+    position: relative;
+}
+
+.bar-chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.bar-legend-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    margin-top: 0.75rem;
+}
+
+.bar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.03);
+}
+
+.bar-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* ─── EQUAL HEIGHT CARDS ────────────────────────────────────── */
+.equal-height-cards {
+    display: flex;
+    align-items: stretch;
+}
+
+.equal-height-cards .card {
+    height: 100%;
+}
+
+.equal-height-cards .card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chart-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* ─── CARD BODY FLEX ────────────────────────────────────────── */
+.card-body-flex {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 400px;
+}
+
+.card-body-flex .chart-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+</style>
 
 <?php 
     include('dashboard_sidebar_start.php');
@@ -518,63 +646,82 @@ hr {
 <!-- Begin Page Content -->
 <div class="container-fluid">
 
-<!-- Page Heading -->
+    <!-- Page Heading -->
+    <div class="row mt-3 equal-height-cards">
 
-
-    <div class="row mt-3">
-
-    <!-- Pie Chart: Gender -->
-    <div class="col-md-4 mb-3">
-        <div class="card shadow" style="border-top: 3px solid var(--navy-light) !important;">
-            <div class="card-body">
-                <div class="text-xs font-weight-bold text-primary text-uppercase mb-3">
-                    Gender Distribution
+        <!-- Pie Chart: Gender -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow" style="border-top: 3px solid var(--navy-light) !important;">
+                <div class="card-body card-body-flex">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-3">
+                        <i class="fas fa-venus-mars me-1"></i> Gender Distribution
+                    </div>
+                    <div class="chart-section">
+                        <div class="chart-wrapper">
+                            <canvas id="genderPieChart"></canvas>
+                        </div>
+                        <div class="chart-legend-grid">
+                            <span class="chart-legend-item">
+                                <span class="chart-legend-color" style="background:#1a4480;"></span>
+                                Male <span class="chart-legend-value" data-live="res_male"><?= $rescountm ?></span>
+                            </span>
+                            <span class="chart-legend-item">
+                                <span class="chart-legend-color" style="background:#e8b86d;"></span>
+                                Female <span class="chart-legend-value" data-live="res_female"><?= $rescountf ?></span>
+                            </span>
+                        </div>
+                        <div class="click-hint"><i class="bi bi-hand-index-thumb me-1"></i> Click slice to view records</div>
+                    </div>
                 </div>
-                <div style="max-width: 200px; margin: 0 auto;">
-                    <canvas id="genderPieChart"></canvas>
-                </div>
-                <div class="d-flex justify-content-center gap-3 mt-3" style="font-size:0.78rem; font-weight:600;">
-                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#1a4480;margin-right:5px;"></span>Male (<span data-live="res_male"><?= $rescountm ?></span>)</span>
-                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#e8b86d;margin-right:5px;"></span>Female (<span data-live="res_female"><?= $rescountf ?></span>)</span>
+            </div>
+        </div>
+
+        <!-- Horizontal Bar Chart: Resident Demographics Overview -->
+        <div class="col-md-8 mb-3">
+            <div class="card shadow" style="border-top: 3px solid var(--navy-light) !important;">
+                <div class="card-body card-body-flex">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-3">
+                        <i class="fas fa-chart-bar me-1"></i> Resident Demographics Overview
+                    </div>
+                    <div class="chart-section">
+                        <div class="bar-chart-container">
+                            <canvas id="residentBarChart"></canvas>
+                        </div>
+                        <div class="bar-legend-grid">
+                            <span class="bar-legend-item">
+                                <span class="bar-legend-color" style="background:#0d9488;"></span>
+                                Households
+                            </span>
+                            <span class="bar-legend-item">
+                                <span class="bar-legend-color" style="background:#c9943a;"></span>
+                                Voters
+                            </span>
+                            <span class="bar-legend-item">
+                                <span class="bar-legend-color" style="background:#dc2626;"></span>
+                                Seniors
+                            </span>
+                            <span class="bar-legend-item">
+                                <span class="bar-legend-color" style="background:#6f42c1;"></span>
+                                PWD
+                            </span>
+                        </div>
+                        <div class="click-hint"><i class="bi bi-hand-index-thumb me-1"></i> Click any bar to view records</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Bar Graph: Resident Overview -->
-   <!-- Doughnut Chart: Resident Overview -->
-<div class="col-md-8 mb-3">
-    <div class="card shadow" style="border-top: 3px solid var(--navy-light) !important;">
-        <div class="card-body">
-            <div class="text-xs font-weight-bold text-primary text-uppercase mb-3">
-                Resident Overview
-            </div>
-            <div style="max-width: 200px; margin: 0 auto;">
-                <canvas id="residentDoughnutChart"></canvas>
-            </div>
-            <!-- Legend -->
-            <div class="d-flex flex-wrap justify-content-center gap-3 mt-3" style="font-size:0.78rem; font-weight:600;">
-             
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#0d9488;margin-right:5px;"></span>Households (<span data-live="res_head"><?= $rescountfh ?></span>)</span>
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c9943a;margin-right:5px;"></span>Voters (<span data-live="res_voter"><?= $rescountvoter ?></span>)</span>
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#dc2626;margin-right:5px;"></span>Seniors (<span data-live="res_senior"><?= $rescountsenior ?></span>)</span>
-                <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#6f42c1;margin-right:5px;"></span>PWD (<span data-live="res_pwd"><?= $rescountpwd ?></span>)</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-</div>
 
     <br>
     <hr>
     <br>
 
+    <!-- Staff Data Section -->
     <div class="row"> 
-    <div class="col-md-4">
-        <h4> Barangay Staff Data </h4> 
-        <br>
-        <div class="card border-left-info shadow">
+        <div class="col-md-4">
+            <h4> Barangay Staff Data </h4> 
+            <br>
+            <div class="card border-left-info shadow">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
@@ -632,7 +779,6 @@ hr {
             </div>
         </div>
     </div>
-
 
     <!-- ══════════════════════════════════════ -->
     <!--  RESIDENT COMPLAINTS SECTION          -->
@@ -725,10 +871,8 @@ hr {
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <script src="https://kit.fontawesome.com/67a9b7069e.js" crossorigin="anonymous"></script>
 
-
-
-
 <script>
+// ─── GENDER PIE CHART ──────────────────────────────────────────
 (function() {
     var ctx = document.getElementById('genderPieChart').getContext('2d');
     var chart = new Chart(ctx, {
@@ -744,6 +888,7 @@ hr {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: true,
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -759,36 +904,31 @@ hr {
         }
     });
 
-    // ── Click a slice to navigate ──
     document.getElementById('genderPieChart').addEventListener('click', function(e) {
         var points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
         if (points.length === 0) return;
-
-        var index = points[0].index;
         var links = [
-            'admn_table_maleres.php',    // index 0 = Male
-            'admn_table_femaleres.php'   // index 1 = Female
+            'admn_table_maleres.php',
+            'admn_table_femaleres.php'
         ];
-
-        if (links[index]) {
-            window.location.href = links[index];
+        if (links[points[0].index]) {
+            window.location.href = links[points[0].index];
         }
     });
 
-    // ── Show pointer cursor on hover ──
     document.getElementById('genderPieChart').style.cursor = 'pointer';
-    // Expose for live-stats.js SSE updates
     window.genderChart = chart;
 })();
-</script>
-<script>
+
+// ─── HORIZONTAL BAR CHART ──────────────────────────────────────
 (function() {
-    var ctx = document.getElementById('residentDoughnutChart').getContext('2d');
+    var ctx = document.getElementById('residentBarChart').getContext('2d');
     var chart = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
-            labels: ['Households', 'Registered Voters', 'Senior Residents', 'PWD'],
+            labels: ['Households', 'Voters', 'Seniors', 'PWD'],
             datasets: [{
+                label: 'Resident Count',
                 data: [
                     <?= (int)$rescountfh ?>,
                     <?= (int)$rescountvoter ?>,
@@ -801,46 +941,71 @@ hr {
                     'rgba(220, 38, 38, 0.85)',
                     'rgba(111, 66, 193, 0.85)'
                 ],
-                borderColor: ['#fff', '#fff', '#fff', '#fff'],
-                borderWidth: 3,
-                hoverOffset: 8
+                borderColor: [
+                    '#0d9488', '#c9943a', '#dc2626', '#6f42c1'
+                ],
+                borderWidth: 2,
+                borderRadius: 6,
+                barThickness: 35
             }]
         },
         options: {
             responsive: true,
-            cutout: '65%',
+            maintainAspectRatio: false,
+            indexAxis: 'y',
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
                         label: function(ctx) {
-                            var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
-                            var pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
-                            return ' ' + ctx.label + ': ' + ctx.parsed.toLocaleString() + ' (' + pct + '%)';
+                            return ' ' + ctx.parsed.x.toLocaleString() + ' residents';
                         }
                     }
                 }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { 
+                        font: { size: 11 },
+                        stepSize: 1
+                    },
+                    beginAtZero: true
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { 
+                        font: { size: 12, weight: '600' }
+                    }
+                }
+            },
+            animation: {
+                duration: 800,
+                easing: 'easeInOutQuart'
             }
         }
     });
 
-    // ── Click a slice to navigate ──
-    document.getElementById('residentDoughnutChart').addEventListener('click', function(e) {
+    // ── Click handler for bar chart ──
+    document.getElementById('residentBarChart').addEventListener('click', function(e) {
         var points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
         if (points.length === 0) return;
+        
         var links = [
-            'admn_table_totalhouse.php',
-            'admn_table_voters.php',
-            'admn_table_senior.php',
-            'admn_table_pwd.php'
+            'admn_table_totalhouse.php',   // Households
+            'admn_table_voters.php',        // Voters
+            'admn_table_senior.php',        // Seniors
+            'admn_table_pwd.php'           // PWD
         ];
+        
         var index = points[0].index;
-        if (links[index]) window.location.href = links[index];
+        if (links[index]) {
+            window.location.href = links[index];
+        }
     });
 
-    document.getElementById('residentDoughnutChart').style.cursor = 'pointer';
-    // Expose for live-stats.js SSE updates
-    window.residentChart = chart;
+    document.getElementById('residentBarChart').style.cursor = 'pointer';
+    window.residentBarChart = chart;
 })();
 </script>
 <script src="js/live-stats.js"></script>

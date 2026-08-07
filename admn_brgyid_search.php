@@ -33,14 +33,21 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
                         <a class="btn btn-success" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="barangayid_form.php?id_brgyid=<?= $view['id_brgyid'];?>">Generate</a> 
                         <input type="hidden" name="id_brgyid" value="<?= $view['id']; ?>">
                         <button class="btn btn-danger" style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_brgyid"> Delete </button>
-                        <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                        <?php if ((int)$view['id_resident'] === 0): ?>
+                        <button type="button" class="btn btn-secondary btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;opacity:0.65;cursor:not-allowed;" disabled title="Not available for walk-in / manual entries">
                             <i class="fas fa-comment-alt"></i> Message
                         </button>
+                        <?php else: ?>
+<button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $view['id_resident'];?>">
+                            <i class="fas fa-comment-alt"></i> Message
+                        </button>
+                        <?php endif; ?>
                     </form>
                 </td>
                 <td> <?= $view['id_resident'];?> </td> 
                 <td> <?= $view['lname'];?>, <?= $view['fname'];?> <?= $view['mi'];?></td>
                 <td> <?= $view['houseno'];?>, <?= $view['street'];?>, <?= $view['brgy'];?>, <?= $view['municipal'];?> </td>
+
 
                 <!-- Message Modal -->
                 <div class="modal fade" id="messageModal<?= $view['id_resident'];?>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -90,6 +97,7 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
             <th> Resident ID </th>
             <th> Full Name </th>
             <th> Address </th>
+
         </tr>
     </thead>
     
@@ -102,9 +110,15 @@ if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'staff'); req
                             <a class="btn btn-success" style="width: 90px; font-size: 17px; border-radius:30px; margin-bottom: 2px;" href="barangayid_form.php?id_brgyid=<?= $row['id_brgyid'];?>">Generate</a> 
                             <input type="hidden" name="id_brgyid" value="<?= $row['id_brgyid']; ?>">
                             <button class="btn btn-danger" style="width: 90px; font-size: 17px; border-radius:30px;" type="submit" name="delete_brgyid"> Delete </button>
-                            <button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $row['id_resident'];?>">
+                            <?php if ((int)$row['id_resident'] === 0): ?>
+                            <button type="button" class="btn btn-secondary btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;opacity:0.65;cursor:not-allowed;" disabled title="Not available for walk-in / manual entries">
                                 <i class="fas fa-comment-alt"></i> Message
                             </button>
+                            <?php else: ?>
+<button type="button" class="btn btn-info btn-sm text-white" style="width:110px;font-size:17px;border-radius:30px;margin-bottom:2px;" data-toggle="modal" data-target="#messageModal<?= $row['id_resident'];?>">
+                                <i class="fas fa-comment-alt"></i> Message
+                            </button>
+                            <?php endif; ?>
                         </form>
                     </td>
                                     <td> <?= $row['id_resident'];?> </td> 

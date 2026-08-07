@@ -391,23 +391,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_security_q'])) {
 </head>
 <body>
 
-<!-- BACK TO TOP BUTTON -->
-<a class="top-link hide" id="js-top" href="#">
-    <svg viewBox="0 0 12 6"><path d="M12 6H0l6-6z"/></svg>
-    <span class="visually-hidden">Back to top</span>
-</a>
 
 <!-- NAVBAR -->
 <?php include __DIR__ . '/resident_navbar.php'; ?>
 
-<div class="page-wrapper">
-
-    <!-- HERO -->
+        <!-- HERO -->
     <div class="security-hero">
         <i class="bi bi-shield-check"></i>
         <h1>Security Question</h1>
         <p>Set up a security question to help recover your account if you forget your password</p>
     </div>
+<div class="page-wrapper">
+
 
     <!-- FORM CARD -->
     <div class="form-card">

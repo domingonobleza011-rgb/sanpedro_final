@@ -1,4 +1,7 @@
 <?php
+if (!defined('BMIS_ROLE_REQUIRED')) { define('BMIS_ROLE_REQUIRED', 'admin_dashboard'); }
+require_once __DIR__ . '/secure_header.php';
+
 require 'classes/conn.php';
 require_once 'pagination_helper.php';
 
@@ -20,21 +23,16 @@ if (isset($_POST['search_voters'])) {
     $paged = ['rows' => $rows, 'total' => $total, 'page' => $page, 'per_page' => $perPage, 'last_page' => (int)ceil($total / $perPage)];
 ?>
 <table class="table table-hover text-center table-bordered" style="min-width:1000px;">
-    <thead class="alert-info"><tr><th>Surname</th><th>First name</th><th>Middle name</th><th>Age</th><th>Sex</th><th>Status</th><th>House No.</th><th>Street</th><th>Barangay</th><th>Municipality</th><th>Contact</th><th>Birth date</th></tr></thead>
+    <thead class="alert-info"><tr><th>#</th><<th>Fullname</th><th>Sex</th><th>Status</th><th>Address</th><th>Birth date</th></tr></thead>
     <tbody>
         <?php foreach ($rows as $row): ?>
         <tr>
-            <td><?= htmlspecialchars($row['lname']) ?></td>
-            <td><?= htmlspecialchars($row['fname']) ?></td>
-            <td><?= htmlspecialchars($row['mi']) ?></td>
-            <td><?= htmlspecialchars($row['age']) ?></td>
+            <td><?= $i++ ?></td>
+            <td><?= htmlspecialchars($row['lname']) ?>, <?= htmlspecialchars($row['fname']) ?> <?= htmlspecialchars($row['mi']) ?></td>
+          
             <td><?= htmlspecialchars($row['sex']) ?></td>
             <td><?= htmlspecialchars($row['status']) ?></td>
-            <td><?= htmlspecialchars($row['houseno']) ?></td>
-            <td><?= htmlspecialchars($row['street']) ?></td>
-            <td><?= htmlspecialchars($row['brgy']) ?></td>
-            <td><?= htmlspecialchars($row['municipal']) ?></td>
-            <td><?= htmlspecialchars($row['contact']) ?></td>
+            <td><?= htmlspecialchars($row['houseno']) ?>, <?= htmlspecialchars($row['street']) ?> <?= htmlspecialchars($row['brgy']) ?> <?= htmlspecialchars($row['municipal']) ?></td>
             <td><?= htmlspecialchars($row['bdate']) ?></td>
         </tr>
         <?php endforeach; ?>
@@ -48,21 +46,16 @@ if (isset($_POST['search_voters'])) {
     $paged = $view;
 ?>
 <table class="table table-hover text-center table-bordered" style="min-width:1000px;">
-    <thead class="alert-info"><tr><th>Surname</th><th>First name</th><th>Middle name</th><th>Age</th><th>Sex</th><th>Status</th><th>House No.</th><th>Street</th><th>Barangay</th><th>Municipality</th><th>Contact</th><th>Birth date</th></tr></thead>
+     <thead class="alert-info"><tr><th>#</th><th>Fullname</th><th>Sex</th><th>Status</th><th>Address</th><th>Birth date</th></tr></thead>
     <tbody>
         <?php foreach ($rows as $row): ?>
         <tr>
-            <td><?= htmlspecialchars($row['lname']) ?></td>
-            <td><?= htmlspecialchars($row['fname']) ?></td>
-            <td><?= htmlspecialchars($row['mi']) ?></td>
-            <td><?= htmlspecialchars($row['age']) ?></td>
+             <td><?= $i++ ?></td>
+<td><?= htmlspecialchars($row['lname']) ?>, <?= htmlspecialchars($row['fname']) ?> <?= htmlspecialchars($row['mi']) ?></td>
+          
             <td><?= htmlspecialchars($row['sex']) ?></td>
             <td><?= htmlspecialchars($row['status']) ?></td>
-            <td><?= htmlspecialchars($row['houseno']) ?></td>
-            <td><?= htmlspecialchars($row['street']) ?></td>
-            <td><?= htmlspecialchars($row['brgy']) ?></td>
-            <td><?= htmlspecialchars($row['municipal']) ?></td>
-            <td><?= htmlspecialchars($row['contact']) ?></td>
+            <td><?= htmlspecialchars($row['houseno']) ?>, <?= htmlspecialchars($row['street']) ?> <?= htmlspecialchars($row['brgy']) ?> <?= htmlspecialchars($row['municipal']) ?></td>
             <td><?= htmlspecialchars($row['bdate']) ?></td>
         </tr>
         <?php endforeach; ?>
